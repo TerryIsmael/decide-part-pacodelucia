@@ -1,0 +1,22 @@
+tipo: asunto #id
+
+cuerpo
+
+### tipo
+# feat (nueva funcionalidad)
+# fix (corrección de bugs)
+# research (incorporación de código experimental, puede ser no funcional)
+# refactor (refactorización de código)
+# docs (actualización de documentación)
+# test (incorporación o modificación de tests)
+# conf (modificación de archivos de configuración)
+
+### asunto
+# Consiste en una breve descripción del problema que se ha tratado y que debe de comenzar con un verbo en participio. 
+# Se referenciará la issue correspondiente (en caso de existir) tal que: `#<ID_issue>`
+
+### cuerpo (opcional)
+# Se utilizará en caso de que el asunto no sea suficientemente descriptivo.
+
+### Ejemplo
+# conf : Actualizado docker-compose.yml #1
