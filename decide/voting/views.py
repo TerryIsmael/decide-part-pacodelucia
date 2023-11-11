@@ -101,3 +101,6 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
+
+class VotingByPreferenceView(generics.ListCreateAPIView):
+    pass
