@@ -25,10 +25,6 @@ class QuestionYesNo(models.Model):
         self.optionNo = "No"
         super().save(*args, **kwargs)
 
-    def clean(self):
-        if self.options.exists():
-            raise ValidationError("Cannot add options to a Yes/No question")
-
     def __str__(self):
         return self.desc
 
@@ -232,7 +228,27 @@ class VotingYesNo(models.Model):
         self.do_postproc()
     
     def do_postproc(self):
-        pass
+        tally = self.tally
+        options = []
+        options.append(self.question.optionYes)
+        options.append(self.question.optionNo)
+
+        opts = []
+        for opt in options:
+            if isinstance(tally, list):
+                votes = tally.count(opt)
+            else:
+                votes = 0
+            opts.append({
+                'option': opt,
+                'votes': votes
+            })
+
+        data = { 'type': 'IDENTITY', 'options': opts }
+        postp = mods.post('postproc', json=data)
+
+        self.postproc = postp
+        self.save()
     
     def __str__(self):
         return self.name
