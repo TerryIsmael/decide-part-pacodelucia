@@ -13,3 +13,16 @@ class Vote(models.Model):
 
     def __str__(self):
         return '{}: {}'.format(self.voting_id, self.voter_id)
+
+
+class VoteByPreference(models.Model):
+    voting_by_preference_id = models.PositiveIntegerField()
+    voter_by_preference_id = models.PositiveIntegerField()
+
+    a = BigBigField()
+    b = BigBigField()
+
+    voted = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return '{}: {}'.format(self.voting_by_preference_id, self.voter_by_preference_id)
