@@ -37,9 +37,12 @@ class QuestionOption(models.Model):
 class QuestionOptionByPreference(models.Model):
     question = models.ForeignKey(QuestionByPreference, related_name='options', on_delete=models.CASCADE)
     number = models.PositiveIntegerField(blank=True, null=True)
+    preference = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
     def save(self):
+        
+        self.preference = 0
         if not self.number:
             self.number = self.question.options.count() + 2
         return super().save()
@@ -233,7 +236,32 @@ class VotingByPreference(models.Model):
         self.do_postproc()
 
     def do_postproc(self):
-        pass
+        tally = self.tally
+        options = self.question.options.all()
+
+        opts = []
+        dicpreferences={}
+        for opt in options:
+            if isinstance(tally, list):
+                key=opt.number
+                if key in dicpreferences:
+                    dicpreferences[key]+=(len(options) - opt.preference)
+                else:
+                    dicpreferences[key]=(len(options) - opt.preference)
+        for key in dicpreferences:
+            votes = dicpreferences[key]
+            option=options.get(number=key)
+            opts.append({
+                'option': option.option,
+                'number': key,
+                'votes': votes
+            })
+
+        data = { 'type': 'IDENTITY', 'options': opts }
+        postp = mods.post('postproc', json=data)
+
+        self.postproc = postp
+        self.save()
 
     def __str__(self):
         return self.name
