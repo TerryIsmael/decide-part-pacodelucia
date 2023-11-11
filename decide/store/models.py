@@ -13,3 +13,16 @@ class Vote(models.Model):
 
     def __str__(self):
         return '{}: {}'.format(self.voting_id, self.voter_id)
+    
+
+class VoteYesNo(models.Model):
+    voting_yesno_id = models.PositiveIntegerField()
+    voter_yesno_id = models.PositiveIntegerField()
+
+    a = BigBigField()
+    b = BigBigField()
+
+    voted = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return '{}: {}'.format(self.voting_yesno_id, self.voter_yesno_id) 

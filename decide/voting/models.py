@@ -161,10 +161,78 @@ class VotingYesNo(models.Model):
     end_date = models.DateTimeField(blank=True, null=True)
 
     pub_key = models.OneToOneField(Key, related_name='votingyesno', blank=True, null=True, on_delete=models.SET_NULL)
-    auths = models.ManyToManyField(Auth, related_name='votingsyesno')
+    auths_yesno = models.ManyToManyField(Auth, related_name='votingsyesno')
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    def create_pubkey(self):
+        if self.pub_key or not self.auths.count():
+            return
+
+        auth = self.auths.first()
+        data = {
+            "voting_yesno": self.id,
+            "auths_yesno": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+        }
+        key = mods.post('mixnet', baseurl=auth.url, json=data)
+        pk = Key(p=key["p"], g=key["g"], y=key["y"])
+        pk.save()
+        self.pub_key = pk
+        self.save()
+
+    def get_votes(self, token=''):
+        # gettings votes from store
+        votes = mods.get('storeYesNo', params={'voting_yesno_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        # anon votes
+        votes_format = []
+        vote_list = []
+        for vote in votes:
+            for info in vote:
+                if info == 'a':
+                    votes_format.append(vote[info])
+                if info == 'b':
+                    votes_format.append(vote[info])
+            vote_list.append(votes_format)
+            votes_format = []
+        return vote_list
+
+    def tally_votes(self, token=''):
+        '''
+        The tally is a shuffle and then a decrypt
+        '''
+
+        votes = self.get_votes(token)
+
+        auth = self.auths.first()
+        shuffle_url = "/shuffle/{}/".format(self.id)
+        decrypt_url = "/decrypt/{}/".format(self.id)
+        auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
+
+        # first, we do the shuffle
+        data = { "msgs": votes }
+        response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
+                response=True)
+        if response.status_code != 200:
+            # TODO: manage error
+            pass
+
+        # then, we can decrypt that
+        data = {"msgs": response.json()}
+        response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
+                response=True)
+
+        if response.status_code != 200:
+            # TODO: manage error
+            pass
+
+        self.tally = response.json()
+        self.save()
+
+        self.do_postproc()
+    
+    def do_postproc(self):
+        pass
+    
     def __str__(self):
         return self.name
