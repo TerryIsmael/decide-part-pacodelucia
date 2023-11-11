@@ -13,9 +13,29 @@ class Question(models.Model):
     def __str__(self):
         return self.desc
 
+#Class QuestionByPreference:
+class QuestionByPreference(models.Model):
+    desc = models.TextField()
+
+    def __str__(self):
+        return self.desc
 
 class QuestionOption(models.Model):
     question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
+    number = models.PositiveIntegerField(blank=True, null=True)
+    option = models.TextField()
+
+    def save(self):
+        if not self.number:
+            self.number = self.question.options.count() + 2
+        return super().save()
+
+    def __str__(self):
+        return '{} ({})'.format(self.option, self.number)
+
+#Class QuestionOptionByPreference:
+class QuestionOptionByPreference(models.Model):
+    question = models.ForeignKey(QuestionByPreference, related_name='options', on_delete=models.CASCADE)
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
@@ -131,3 +151,18 @@ class Voting(models.Model):
 
     def __str__(self):
         return self.name
+
+#Class VotingByPreference:
+class VotingByPreference(models.Model):
+    name = models.CharField(max_length=200)
+    desc = models.TextField(blank=True, null=True)
+    question = models.ForeignKey(QuestionByPreference, related_name='votingbypreference', on_delete=models.CASCADE)
+
+    start_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
+
+    pub_key = models.OneToOneField(Key, related_name='votingbypreference', blank=True, null=True, on_delete=models.SET_NULL)
+    auths = models.ManyToManyField(Auth, related_name='votingsbypreference')
+
+    tally = JSONField(blank=True, null=True)
+    postproc = JSONField(blank=True, null=True)
