@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HelloWorld from './components/HelloWorld.vue';
-import ListVoting from './components/ListVoting.vue';
+import Booth from './components/Booth.vue';
 
 const routes = [
-  { path: '/admin/voting', component: ListVoting },
+  { path: '/booth/:id', component: Booth },
   { path: '/', component: HelloWorld }
 ];
 
