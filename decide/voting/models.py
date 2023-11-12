@@ -163,13 +163,13 @@ class VotingYesNo(models.Model):
     postproc = JSONField(blank=True, null=True)
 
     def create_pubkey(self):
-        if self.pub_key or not self.auths.count():
+        if self.pub_key or not self.auths_yesno.count():
             return
 
-        auth = self.auths.first()
+        auth = self.auths_yesno.first()
         data = {
-            "voting_yesno": self.id,
-            "auths_yesno": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+            "voting": self.id,
+            "auths": [ {"name": a.name, "url": a.url} for a in self.auths_yesno.all() ],
         }
         key = mods.post('mixnet', baseurl=auth.url, json=data)
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
@@ -200,10 +200,10 @@ class VotingYesNo(models.Model):
 
         votes = self.get_votes(token)
 
-        auth = self.auths.first()
+        auth = self.auths_yesno.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
         decrypt_url = "/decrypt/{}/".format(self.id)
-        auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
+        auths = [{"name": a.name, "url": a.url} for a in self.auths_yesno.all()]
 
         # first, we do the shuffle
         data = { "msgs": votes }
