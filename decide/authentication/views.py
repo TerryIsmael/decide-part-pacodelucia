@@ -51,9 +51,12 @@ def enviar_correo(email_destino):
     return HttpResponse('Correo enviado exitosamente.')
 
 class RegisterView(APIView):
+<<<<<<< HEAD
     def get(self, request):
         return render(request, 'register.html')
     
+=======
+>>>>>>> 4f14f4f3dedea4f20d8d0e4e699fa2713b018967
     def post(self, request):
         username = request.data.get('username', '')
         pwd = request.data.get('password', '')

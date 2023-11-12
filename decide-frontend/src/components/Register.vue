@@ -11,13 +11,13 @@
                     <!-- Username -->
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input v-model="username" type="text"   class="form-control" required>
+                        <input v-model="username" type="text" class="form-control" required>
                     </div>
 
                     <!-- Email -->
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input v-model="email" type="email"  class="form-control" placeholder="example@gmail.com" required>
+                        <input v-model="email" type="email" class="form-control" placeholder="example@gmail.com" required>
                     </div>
 
                     <!-- Password -->
