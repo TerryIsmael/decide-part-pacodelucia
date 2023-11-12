@@ -10,11 +10,11 @@
         
         <div class="col-lg-5 rounded mx-auto border pt-4">
             <div class="text-center col">
-            <!-- <hr> -->
-            <hr>
+                <!-- <hr> -->
+                <hr>
             </div>
             <h3 class="alert alert-success rounded-pill" style="text-align:center">Create an Account</h3>
-            <form action="/register" method="POST">
+            <form action="/authentication/register/" method="POST">
                 
                 {% csrf_token %}
 
@@ -24,7 +24,6 @@
                 </div>
                 {% endif %}
 
-                </div>
                 <!-- username -->
                 <div class="form-group">
                     <label for="">Username</label>
@@ -33,7 +32,6 @@
                     class=" form-control-sm form-control">
                 </div>
 
-                </div>
                 <!-- email -->
                 <div class="form-group">
                     <label for="">Email</label>

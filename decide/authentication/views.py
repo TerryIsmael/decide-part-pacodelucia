@@ -37,10 +37,10 @@ class RegisterView(APIView):
     def get(self, request):
         return render(request, 'register.html')
     def post(self, request):
-        key = request.data.get('token', '')
-        tk = get_object_or_404(Token, key=key)
-        if not tk.user.is_superuser:
-            return Response({}, status=HTTP_401_UNAUTHORIZED)
+        #key = request.data.get('token', '')
+        #tk = get_object_or_404(Token, key=key)
+        #if not tk.user.is_superuser:
+        #    return Response({}, status=HTTP_401_UNAUTHORIZED)
 
         username = request.data.get('username', '')
         pwd = request.data.get('password', '')
@@ -49,9 +49,8 @@ class RegisterView(APIView):
             return Response({}, status=HTTP_400_BAD_REQUEST)
 
         try:
-            user = User(username=username)
+            user = User(username=username, email=email)
             user.set_password(pwd)
-            user.set_email(email)
             user.save()
             token, _ = Token.objects.get_or_create(user=user)
         except IntegrityError:
