@@ -1,60 +1,47 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
 
-<div class="container mt-4">
-    
-    <div class="p-3 m-3">
-
-        
-        <div class="col-lg-5 rounded mx-auto border pt-4">
-            <div class="text-center col">
-            <!-- <hr> -->
-            <hr>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 rounded border p-4">
+            <div class="text-center mb-4">
+                <h2 class="text-success">Sign Up</h2>
+                <hr class="my-4">
             </div>
-            <h3 class="alert alert-success rounded-pill" style="text-align:center">Create an Account</h3>
-            <form action="/register" method="POST">
-                
+
+            <form action="/authentication/register/" method="POST">
                 {% csrf_token %}
 
-                {% if error%}
-                <div class="alert alert-danger" role="alert">
-                    {{error}}
-                </div>
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
                 {% endif %}
 
-                </div>
-                <!-- username -->
+                <!-- Username -->
                 <div class="form-group">
-                    <label for="">Username</label>
-                    <input required type="username" name="username" id=""
-                    value="{{values.username}}" 
-                    class=" form-control-sm form-control">
+                    <label for="username">Username</label>
+                    <input required type="text" name="username" id="username"
+                        value="{{ values.username }}" class="form-control">
                 </div>
 
-                </div>
-                <!-- email -->
+                <!-- Email -->
                 <div class="form-group">
-                    <label for="">Email</label>
-                    <input required type="email" name="email" id=""
-                    value="{{values.email}}" 
-                    class=" form-control-sm form-control" placeholder="abc@gmail.com">
+                    <label for="email">Email</label>
+                    <input required type="email" name="email" id="email"
+                        value="{{ values.email }}" class="form-control" placeholder="example@gmail.com">
                 </div>
 
-
-                <!-- password -->
+                <!-- Password -->
                 <div class="form-group">
-                    <label for="">Password</label>
-                    <input type="password" 
-                    name="password" 
-                    id=""
-                     class="form-control form-control-sm">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" class="form-control">
                 </div>
-                
-                <hr>
-                <button type="submit" class="btn btn-sm btn-success col-lg-12">Create an account</button>
 
+                <hr class="my-4">
+
+                <button type="submit" class="btn btn-success btn-block">Create Account</button>
             </form>
         </div>
     </div>
