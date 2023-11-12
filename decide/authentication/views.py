@@ -35,7 +35,7 @@ class LogoutView(APIView):
 
 class RegisterView(APIView):
     def get(self, request):
-        return render(request, 'booth.html')
+        return render(request, 'register.html')
     def post(self, request):
         key = request.data.get('token', '')
         tk = get_object_or_404(Token, key=key)
