@@ -7,25 +7,23 @@
                     <hr class="my-4">
                 </div>
 
-                <form action="/authentication/register/" method="POST">
+                <form @submit.prevent="register">
                     <!-- Username -->
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input required type="text" name="username" id="username"
-                            value="" class="form-control">
+                        <input v-model="username" type="text"   class="form-control" required>
                     </div>
 
                     <!-- Email -->
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input required type="email" name="email" id="email"
-                            value="" class="form-control" placeholder="example@gmail.com">
+                        <input v-model="email" type="email"  class="form-control" placeholder="example@gmail.com" required>
                     </div>
 
                     <!-- Password -->
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" name="password" id="password" class="form-control">
+                        <input v-model="password" type="password" class="form-control" required>
                     </div>
 
                     <hr class="my-4">
@@ -38,20 +36,57 @@
 </template>
 
 <script>
+
 export default {
+
     name: 'Register',
     data() {
         return {
-            voting: null,
-            selectedOption: null,
+            username: '',
+            email: '',
+            password: '',
         };
     },
 
     methods: {
-        register() {
-            console.log("TEST");
+    async register() {
+        try {
+            const response = await fetch('http://localhost:8000/authentication/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: this.username,
+                    email: this.email,
+                    password: this.password,
+                }),
+            });
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    // Manejar los errores de validación y presentar mensajes al usuario
+                    console.error('Error 400:', errorData);
+                } else {
+                    // Manejar otros errores HTTP
+                    console.error('Error:', response.status, response.statusText);
+                }
+                return;
+            }
+
+            const data = await response.json();
+
+            // Manejar la respuesta como sea necesario
+            console.log(data);
+        } catch (error) {
+            // Manejar errores de red u otros errores
+            console.error('Error:', error);
         }
     },
+},
+
+    
 };
 </script>
 
