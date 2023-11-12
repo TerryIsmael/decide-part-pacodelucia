@@ -35,7 +35,7 @@ class LogoutView(APIView):
 
 class RegisterView(APIView):
     def get(self, request):
-        return render(request, 'booth.html')
+        return render(request, 'register.html')
     def post(self, request):
         key = request.data.get('token', '')
         tk = get_object_or_404(Token, key=key)
@@ -44,14 +44,17 @@ class RegisterView(APIView):
 
         username = request.data.get('username', '')
         pwd = request.data.get('password', '')
-        if not username or not pwd:
+        email = request.data.get('email', '')
+        if not username or not pwd or not email:
             return Response({}, status=HTTP_400_BAD_REQUEST)
 
         try:
             user = User(username=username)
             user.set_password(pwd)
+            user.set_email(email)
             user.save()
             token, _ = Token.objects.get_or_create(user=user)
         except IntegrityError:
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+
