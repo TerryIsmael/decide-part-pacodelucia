@@ -2,7 +2,6 @@
 
 {% block content %}
 
-<<<<<<< HEAD
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-6 rounded border p-4">
@@ -12,21 +11,6 @@
             </div>
 
             <form action="/authentication/register/" method="POST">
-=======
-<div class="container mt-4">
-    
-    <div class="p-3 m-3">
-
-        
-        <div class="col-lg-5 rounded mx-auto border pt-4">
-            <div class="text-center col">
-                <!-- <hr> -->
-                <hr>
-            </div>
-            <h3 class="alert alert-success rounded-pill" style="text-align:center">Create an Account</h3>
-            <form action="/authentication/register/" method="POST">
-                
->>>>>>> 86cc4d57e695933a2a54a7121adf45cfe68bd49a
                 {% csrf_token %}
 
                 {% if error %}
@@ -35,22 +19,14 @@
                     </div>
                 {% endif %}
 
-<<<<<<< HEAD
                 <!-- Username -->
-=======
-                <!-- username -->
->>>>>>> 86cc4d57e695933a2a54a7121adf45cfe68bd49a
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input required type="text" name="username" id="username"
                         value="{{ values.username }}" class="form-control">
                 </div>
 
-<<<<<<< HEAD
                 <!-- Email -->
-=======
-                <!-- email -->
->>>>>>> 86cc4d57e695933a2a54a7121adf45cfe68bd49a
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input required type="email" name="email" id="email"
