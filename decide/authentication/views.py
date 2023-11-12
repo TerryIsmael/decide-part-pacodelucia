@@ -8,6 +8,12 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -32,28 +38,39 @@ class LogoutView(APIView):
 
         return Response({})
 
+def enviar_correo(email_destino):
+    # Configurar los detalles del correo
+    asunto = 'Asunto del Correo'
+    mensaje = 'Hola, este es un mensaje de prueba.'
+    remitente = 'decide.pacodelucia@gmail.com'
+    destinatarios = [email_destino]
+
+    # Enviar el correo
+    send_mail(asunto, mensaje, remitente, destinatarios)
+
+    return HttpResponse('Correo enviado exitosamente.')
 
 class RegisterView(APIView):
     def get(self, request):
         return render(request, 'register.html')
+    
     def post(self, request):
-        #key = request.data.get('token', '')
-        #tk = get_object_or_404(Token, key=key)
-        #if not tk.user.is_superuser:
-        #    return Response({}, status=HTTP_401_UNAUTHORIZED)
-
         username = request.data.get('username', '')
         pwd = request.data.get('password', '')
         email = request.data.get('email', '')
+        
         if not username or not pwd or not email:
-            return Response({}, status=HTTP_400_BAD_REQUEST)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User(username=username, email=email)
             user.set_password(pwd)
             user.save()
             token, _ = Token.objects.get_or_create(user=user)
+            enviar_correo(email)
         except IntegrityError:
-            return Response({}, status=HTTP_400_BAD_REQUEST)
-        return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'user_pk': user.pk, 'token': token.key}, status=status.HTTP_201_CREATED)
+
 
