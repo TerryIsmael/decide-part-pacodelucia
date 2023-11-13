@@ -24,7 +24,7 @@
                 </tr>
             </tbody>
         </table>
-        <p> {{ tokens.length }} tokens</p>
+        <p> {{ tokens.filter(u => u.token != '').length }} tokens</p>
     </div>
 </template>
 
