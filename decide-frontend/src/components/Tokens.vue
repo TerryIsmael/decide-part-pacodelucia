@@ -56,7 +56,7 @@ export default {
         },
         async getTokens() {
             try {
-                const response = await fetch('http://localhost:3000/authentication/get-auth/', {
+                const response = await fetch('http://localhost:8000/authentication/get-auth/', {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -71,7 +71,7 @@ export default {
         },
         async deleteToken(userId) {
             try {
-                const response = await fetch(`http://localhost:3000/authentication/del-auth/${userId}`, {
+                const response = await fetch(`http://localhost:8000/authentication/del-auth/${userId}`, {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -86,7 +86,7 @@ export default {
         },
         async addToken(userId) {
             try {
-                const response = await fetch(`http://localhost:3000/authentication/add-auth/${userId}`, {
+                const response = await fetch(`http://localhost:8000/authentication/add-auth/${userId}`, {
                     credentials: 'include',
                 });
                 if (response.ok) {
