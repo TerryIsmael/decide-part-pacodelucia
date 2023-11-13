@@ -31,7 +31,6 @@
             token: '',
             error: '',
             success: '',
-            isButtonDisabled: true,
             };
         },
         computed: {
