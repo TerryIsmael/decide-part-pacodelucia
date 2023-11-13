@@ -58,7 +58,7 @@
                 if (this.token) {
                     headers['Authorization'] = `Bearer ${this.token}`;
                 }
-                fetch('http://localhost:3000/gateway/authentication/login/', {
+                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/login/', {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify({
@@ -84,7 +84,7 @@
                 });
             },
             getUser() {
-                const user = fetch('http://localhost:3000/gateway/authentication/getuser/', {
+                const user = fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -119,6 +119,7 @@
     form {
         display: flex;
         flex-direction: column;
+        align-self: center;
     }
     label {
         display: block;
@@ -136,6 +137,7 @@
         height: 35px;
         box-sizing: border-box;
         text-align: left;
+        padding-left: 10px;
         float: left;
         
     }
