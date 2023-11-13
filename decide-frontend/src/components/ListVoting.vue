@@ -1,6 +1,8 @@
 <script>
 import { ref, onMounted } from 'vue';
-import CreateOrEditVoting from './CreateOrEditVoting.vue';
+import Voting from '../../models/Voting.js';
+
+//TODO: Cambiar estado de votacion, cambiar preguntas y auths (redireccionar) y conseguir el post
 
 export default {
 
@@ -8,7 +10,10 @@ export default {
     const votaciones = ref({});
     const votacionSeleccionada = ref(null);
     const New = ref("New");
-
+    const editing = ref(false);
+    const questions = ref([]);
+    const auths = ref([]);
+    const newVoting = ref(new Voting());
     const fetchVotaciones = async () => {
       try {
         const response = await fetch('http://localhost:8000/voting/');
@@ -19,7 +24,40 @@ export default {
       }
     };
 
-    onMounted(fetchVotaciones);
+    const changeEditing = async (newValue) => {
+      if (newValue == true) {
+        try {
+          const questionResponse = await fetch('http://localhost:8000/voting/all-questions/', {
+            method: 'GET',
+            credentials: 'include'
+          });
+
+          const questionData = await questionResponse.json();
+          questions.value = questionData;
+          const authResponse = await fetch('http://localhost:8000/voting/all-auths/', {
+            method: 'GET',
+            credentials: 'include'
+          });
+
+          const authData = await authResponse.json();
+          auths.value = authData;
+
+          if (questionResponse.ok && authResponse.ok) {
+            editing.value = newValue;
+          } else {
+            alert("Se produjo un error al cargar los datos");
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      } else {
+        editing.value = newValue;
+      }
+    };
+
+    const guardarVotacion = (votacion) => {
+      pass
+    };
 
     const isNumberInTally = (votacion, number) => {
       return votacion.tally.includes(number);
@@ -66,8 +104,10 @@ export default {
       const fechaFormateada = `${diaFormateado}/${mesFormateado}/${anio} ${horasFormateadas}:${minutosFormateados}`;
 
       return fechaFormateada;
-    }
+    };
 
+    onMounted(fetchVotaciones);
+    
     return {
       votaciones,
       votacionSeleccionada,
@@ -77,10 +117,12 @@ export default {
       formatearFecha,
       isNumberInTally,
       New,
+      editing,
+      questions,
+      auths,
+      changeEditing,
+      newVoting,
     };
-  },
-  components: {
-    CreateOrEditVoting,
   },
 };
 </script>
@@ -92,15 +134,17 @@ export default {
       <li v-for="votacion in votaciones" :key="votacion.id">
 
         <h3>
-          <button @click="cambiarSeleccionada(votacion.id)">{{ votacion.name }} - {{ formatearFecha(votacion.start_date)
-          }} {{ formatearFecha(votacion.end_date) }}</button>
+          <button @click="cambiarSeleccionada(votacion.id); changeEditing(false)">
+          {{ votacion.name }} <span v-if="votacion.start_date!=null"> - </span> {{ formatearFecha(votacion.start_date)}} <span v-if="votacion.end_date!=null"> - </span> {{ formatearFecha(votacion.end_date) }}</button>
         </h3>
 
         <div v-if="votacionSeleccionada === votacion.id">
-          <p> Id: {{ votacion.id }} </p>
-            <p> Descripción: {{ votacion.desc }} </p>
-            <p> Pregunta: {{ votacion.question.desc }} </p>
-
+          <p> <span class="bold">Id:</span> {{ votacion.id }} </p>
+          <div v-if="!editing">
+            <p> <span class="bold">Descripción: </span>{{ votacion.desc }} </p>
+            <p> <span class="bold">Pregunta: </span> {{ votacion.question.desc }} </p>
+            <p> <span class="bold">Opción ganadora: </span> {{ votacion.tally ? votacion.tally.toString() : 'No hay recuento' }}</p>
+            
             <table v-if="votacion.postproc == null">
               <tr>
                 <th> Número opción </th>
@@ -129,10 +173,9 @@ export default {
               </tbody>
             </table>
 
-            <h4>- AUTHS -</h4>
             <table>
               <tr>
-                <th> Nombre </th>
+                <th> Nombre de la auth </th>
                 <th> URL </th>
                 <th> Yo </th>
               </tr>
@@ -142,126 +185,106 @@ export default {
                 <td> {{ auth.me }} </td>
               </tr>
             </table>
+          </div>
 
-          <p> Fecha inicio: {{ formatearFecha(votacion.start_date) }} </p>
-          <p v-if="votacion.end_date != null"> Fecha fin: {{ formatearFecha(votacion.end_date) }} </p>
-          <h4 v-if="votacion.postproc == null">No finalizada - no hay postprocesado</h4>
+          <div v-else>
+            <div>
+              <label for="name">Nombre: </label>
+              <input type="text" id="name" v-model="votacion.name" />
+            </div>
+            <div>
+              <label for="desc">Descripción: </label>
+              <textarea id="desc" rows=10 columns="90" v-model="votacion.desc"></textarea>
+            </div>
+            <div>
+              <label for="question">Pregunta: </label>
+              <select id="question" v-model="votacion.question">
+                <option v-for="question in questions" :key="question.id" :value="question">
+                  {{ question.desc }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label for="auths">Auths: </label>
+              <select id="auths" v-model="votacion.auths" multiple>
+                <option v-for="auth in auths" :key="auth.id" :value="auth">
+                  {{ auth.name }}
+                </option>
+              </select>
+            </div>
+          </div>
 
-          <h4>- PUB_KEY -</h4>
-          <p> P: {{ BigInt(votacion.pub_key.p) }} </p>
-          <p> G: {{ BigInt(votacion.pub_key.g) }} </p>
-          <p> Y: {{ BigInt(votacion.pub_key.y) }} </p>
+          <p v-if="votacion.start_date != null"><span class="bold">Fecha de inicio: </span> {{ formatearFecha(votacion.start_date) }} </p>
+          <p v-if="votacion.end_date != null"><span class="bold">Fecha de fin: </span> {{ formatearFecha(votacion.end_date) }} </p>
+          <h4 v-if="votacion.postproc == null">No finalizada</h4>
+          <div v-if="votacion.start_date != null">
+            <h4>- PUB_KEY -</h4>
+            <p> <span class="bold">P:</span> {{ BigInt(votacion.pub_key.p) }} </p>
+            <p> <span class="bold">G:</span> {{ BigInt(votacion.pub_key.g) }} </p>
+            <p> <span class="bold">Y:</span> {{ BigInt(votacion.pub_key.y) }} </p>
+          </div>
 
-          <p>Opción ganadora: {{ votacion.tally ? votacion.tally.toString() : 'No hay recuento' }}</p>
+          <div v-if="!editing">
+            <button class="little-button" @click="changeEditing(true)">Comenzar a editar</button>
+          </div>
+          <div v-else>
+            <button class="little-button" @click="changeEditing(false)">Cancelar</button>
+            <button class="little-button" @click="guardarVotacion(votacion)">Guardar</button>
+          </div>
         </div>
       </li>
     </ul>
 
-    <button class="little-button" @click="mostrarFormulario(New)">Crear Nueva Votación</button>
+    <button class="little-button" @click="cambiarSeleccionada(New), changeEditing(true)">Crear Nueva Votación</button>
+
+    <br><br>
+    <div v-if="votacionSeleccionada == 'New' && editing == true">
+      <div>
+        <label for="name">Nombre: </label>
+        <input type="text" id="name" v-model="newVoting.name" />
+      </div>
+      <div>
+        <label for="desc">Descripción: </label>
+        <textarea id="desc" rows=10 columns="90" v-model="newVoting.desc"></textarea>
+      </div>
+      <div>
+        <label for="question">Pregunta: </label>
+        <select id="question" v-model="newVoting.question">
+          <option v-for="question in questions" :key="question.id" :value="question">
+            {{ question.desc }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label for="auths">Auths: </label>
+        <select id="auths" v-model="newVoting.auths" multiple>
+          <option v-for="auth in auths" :key="auth.id" :value="auth">
+            {{ auth.name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <button class="little-button" @click="changeEditing(false)">Cancelar</button>
+        <button class="little-button" @click="guardarVotacion(newVoting)">Guardar</button>
+      </div>  
+    </div>
   </div>
 </template>
 
 <style scoped>
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.bold{
+  font-weight: bold;
+  color: #ffffff;
 }
 
-table {
-  width: 60%;
-  border-collapse: collapse;
-  margin: auto;
-  margin-bottom: 20px;
-}
-
-th,td,tr {
-  border: 1px solid black;
-  background-color: #008b8b;
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  width: 33%;
-  text-align: center;
-}
-
-th {
-  background-color: #024a4a;
-}
-
-.remarkable td {
-  background-color: rgba(178, 117, 87, 0.868);
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  text-align: center;
-  color: white; 
-}
-
-#auths, input, textarea, select  {
+#auths {
   background-color: #3b3b3b;
-  height: 30px;
+  height: 60px;
   margin-bottom: 20px;
   padding: 5px;
   border-radius: 5px;
   border: 2px solid grey;
   width: 67%;
 }
-
-input {
-  height: 25px;
-  width: 65%;
-}
-
-textarea {
-  height: 60px;
-  width: 65%;
-}
-
-select option:checked{
-  background-color: #027d7d;
-}
-
-#auths {
-  height: 60px;
-  width: 67%;
-}
-.form-div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
-}
-.form-div > form {
-  width: 400px;
-  padding: 40px;
-  border-radius: 5px;
-  background-color: rgb(255, 255, 255);
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.little-button {
-  background-color: rgb(0, 139, 86);
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  width: 30%;
-  margin-bottom: 10px;
-}
-
-button {
-  background-color: rgb(0, 139, 139);
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom: 10px;
-}  
-
 </style>
