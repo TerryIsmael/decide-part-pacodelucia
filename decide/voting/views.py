@@ -34,7 +34,7 @@ class VotingYesNoView(generics.ListCreateAPIView):
             if not data in request.data:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
-        question = QuestionYesNo(desc=request.data.get('question'),optionYes="Yes",optionNo="No")
+        question = QuestionYesNo(desc=request.data.get('question'),optionYes=1,optionNo=2)
         question.save()
         voting = VotingYesNo(name=request.data.get('name'), desc=request.data.get('desc'),
                 question=question)

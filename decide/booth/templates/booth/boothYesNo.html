@@ -120,12 +120,12 @@
             <h2>[[ voting.question.desc ]]</h2>
             <form>
                 <div class="form-group">
-                    <input type="radio" v-model="selected" id="'q' + 1" name="question" :value="voting.question.optionYes">
-                    <label for="optionYes">[[ voting.question.optionYes ]]</label>
+                    <input type="radio" v-model="selected" id="'q' + voting.question.optionYes" name="question" :value="voting.question.optionYes">
+                    <label for="optionYes">Si</label>
                 </div>
                 <div class="form-group">
-                    <input type="radio" v-model="selected" id="'q' + 2" name="question" :value="voting.question.optionNo">
-                    <label for="optionNo">[[ voting.question.optionNo ]]</label>
+                    <input type="radio" v-model="selected" id="'q' + voting.question.optionNo" name="question" :value="voting.question.optionNo">
+                    <label for="optionNo">No</label>
                 </div>
             </form>
             <button class="btn btn-primary mt-3" v-on:click="decideSend">

@@ -119,8 +119,8 @@ class StoreYesNoView(generics.ListAPIView):
                 'y': voting_yesno.pub_key.y,
             },
             'auths': [{'name': a.name, 'url': a.url, 'me': a.me} for a in voting_yesno.auths_yesno.all()],
-            'tally': None,
-            'postproc': None
+            'tally': voting_yesno.tally,
+            'postproc': voting_yesno.postproc,
         }
         voting.append(voting_data)
 

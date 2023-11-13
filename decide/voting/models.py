@@ -18,12 +18,12 @@ class Question(models.Model):
 #Modelo para preguntas de tipo si o no    
 class QuestionYesNo(models.Model):
     desc = models.TextField()
-    optionYes = models.TextField(editable=False)
-    optionNo = models.TextField(editable=False)
+    optionYes = models.PositiveIntegerField(editable=False)
+    optionNo = models.PositiveIntegerField(editable=False)
 
     def save(self, *args, **kwargs):
-        self.optionYes = "Yes"
-        self.optionNo = "No"
+        self.optionYes = 1
+        self.optionNo = 2
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -95,7 +95,6 @@ class Voting(models.Model):
         '''
 
         votes = self.get_votes(token)
-
         auth = self.auths.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
         decrypt_url = "/decrypt/{}/".format(self.id)
@@ -192,7 +191,6 @@ class VotingYesNo(models.Model):
             }
             votes.append(vote_data)
 
-        # anon votes
         votes_format = []
         vote_list = []
         for vote in votes:
@@ -233,7 +231,6 @@ class VotingYesNo(models.Model):
         if response.status_code != 200:
             # TODO: manage error
             pass
-
         self.tally = response.json()
         self.save()
 
@@ -244,17 +241,23 @@ class VotingYesNo(models.Model):
         options = []
         options.append(self.question.optionYes)
         options.append(self.question.optionNo)
-
+        ls = []
         opts = []
         for opt in options:
             if isinstance(tally, list):
-                votes = tally.count(opt)
+                votes = tally.count(int(opt))
             else:
                 votes = 0
-            opts.append({
-                'option': opt,
-                'votes': votes
-            })
+            if int(opt) == 1:
+                opts.append({
+                    'option': 'Si',
+                    'votes': votes
+                })
+            else:
+                opts.append({
+                    'option': 'No',
+                    'votes': votes
+                })
 
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)

@@ -48,9 +48,11 @@ class VisualizerYesNoView(TemplateView):
                     'y': voting_yesno.pub_key.y,
                 },
                 'auths': [{'name': a.name, 'url': a.url, 'me': a.me} for a in voting_yesno.auths_yesno.all()],
-                'tally': None,
-                'postproc': None
+                'tally': voting_yesno.tally,
+                'postproc': voting_yesno.postproc,
             }
+            context['voting'] = json.dumps(voting_data)
+            print(context['voting'])
         except:
             raise Http404
 
