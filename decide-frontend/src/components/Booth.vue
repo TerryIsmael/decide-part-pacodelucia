@@ -5,7 +5,7 @@
         <p>Question: {{ voting.question.desc }}</p>
         <ul>
             <li v-for="option in voting.question.options" :key="option.number">
-                <input type="radio" :id="option.number" :value="option.number" v-model="selectedOption">
+                <input type="radio" :id="'q'+option.number" :value="option.number" v-model="selectedOption">
                 <label :for="option.id">{{ option.option }}</label>
             </li>
         </ul>
@@ -33,8 +33,17 @@ export default {
             user: null,
             errorMessage: '',
             goHomeButton: false,
+            bigpk: {
+                p: null,
+                g: null,
+                y: null,
+            },
+            successVote: false,
         };
     },
+    beforeMount() {
+        window.ElGamal.BITS = import.meta.env.VITE_KEYBITS;
+    },      
     created() {
         // check if user has a token
         var cookies = document.cookie.split(';');
@@ -51,7 +60,6 @@ export default {
             }, 2000); 
         } else {
             this.getUser();
-            this.getVoting();
         }
     },
     methods: {
@@ -73,7 +81,8 @@ export default {
                 }
             })
             .then((data) => {
-                this.user = data; 
+                this.user = data;
+                this.getVoting();
             })
             .catch((error) => {
                 this.errorMessage = error.message;
@@ -89,7 +98,11 @@ export default {
                 }
                 setTimeout(() => {
                     this.voting = data[0];
-                }, 500); 
+                    this.bigpk.p = window.BigInt.fromJSONObject(this.voting.pub_key.p.toString());
+                    this.bigpk.g = window.BigInt.fromJSONObject(this.voting.pub_key.g.toString());
+                    this.bigpk.y = window.BigInt.fromJSONObject(this.voting.pub_key.y.toString());
+                }, 500);
+                
             })
             .catch((e) => {
                 if (!this.errorMessage) {
@@ -100,8 +113,40 @@ export default {
                 }
             });
         },
+        encrypt() {
+            var bigmsg = window.BigInt.fromJSONObject(this.selectedOption.toString());
+            var cypher = window.ElGamal.encrypt(this.bigpk, bigmsg);
+            return cypher;
+        },
         vote() {
-            console.log(this.selectedOption);
+            var v = this.encrypt();
+            console.log(v);
+            fetch(import.meta.env.VITE_API_URL + 'gateway/store/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Token ' + this.token,
+                },
+                body: JSON.stringify({
+                    voting: this.voting.id,
+                    voter: this.user.id,
+                    token: this.token,
+                    vote: {
+                        a: v.alpha.toString(),
+                        b: v.beta.toString(),
+                    },
+                }),
+            })
+            .then((response) => {
+                this.successVote = true;
+                console.log(response);
+                console.log("Voto realizado correctamente")
+            })
+            .catch((e) => {
+                this.errorMessage = "Error al votar: "+e;
+                console.log(e);
+                console.log("Error al votar");
+            });
         }
     },
 };
