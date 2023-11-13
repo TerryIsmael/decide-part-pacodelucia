@@ -7,13 +7,20 @@
                 <th>Token</th>
                 <th>Usuario</th>
                 <th>Fecha</th>
+                <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="token in tokens" :key="token.id">
-                <td>{{ token.token }}</td>
-                <td>{{ token.user }}</td>
-                <td>{{ token.date }}</td>
+                    <td>{{ token.token }}</td>
+                    <td>{{ token.user }}</td>
+                    <td>{{ token.date }}</td>
+                    <td v-if="token.token != ''">
+                        <button class="button-delete" @click="deleteToken(token.id)">Eliminar</button>
+                    </td>
+                    <td v-else>
+                        <button class="button-add">Añadir</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -49,7 +56,7 @@ export default {
         },
         async getTokens() {
             try {
-                const response = await fetch('http://localhost:3000/authentication/api-auth/', {
+                const response = await fetch('http://localhost:3000/authentication/get-auth/', {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -58,16 +65,26 @@ export default {
                 } else {
                     throw new Error('Usuario o contraseña incorrectos');
                 }
-              
-            
             } catch (error) {
                 console.log(error);
+            }  
+        },
+        async deleteToken(userId) {
+            try {
+                const response = await fetch(`http://localhost:3000/authentication/del-auth/${userId}`, {
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    await this.getTokens();
+                } else {
+                    throw new Error('No se pudo eliminar el token');
+                }
+            } catch (error) {
+                console.log(error);
+                alert('No se pudo eliminar el token');
             }
-            
-            
-            
         }
-    },
+    }
 };
 </script>
 
@@ -80,8 +97,9 @@ export default {
     text-align: left;
 }
 
-table, th, td {
-  border: 1px solid;
+thead {
+    background-color: #F2F2F2;
+
 }
 
 table {
@@ -97,6 +115,16 @@ th, td {
 p {
     text-align: left;
     color: grey;
+}
+
+.button-delete {
+    background-color: rgb(211, 91, 91);
+    width: 100%;
+}
+
+.button-add {
+    background-color: rgb(91, 211, 91);
+    width: 100%;
 }
 
 </style>
