@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 from base import mods
 from base.models import Auth, Key
+from store.models import Vote, VoteYesNo
 
 
 class Question(models.Model):
@@ -179,7 +180,18 @@ class VotingYesNo(models.Model):
 
     def get_votes(self, token=''):
         # gettings votes from store
-        votes = mods.get('storeYesNo', params={'voting_yesno_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        votes = []
+        votes_yesno = VoteYesNo.objects.filter(voting_yesno_id=self.id)
+        for vote in votes_yesno:
+            vote_data = {
+                'id': vote.id,
+                'voting_yesno_id': vote.voting_yesno_id,
+                'voter_yesno_id': vote.voter_yesno_id,
+                'a': vote.a,
+                'b': vote.b,
+            }
+            votes.append(vote_data)
+
         # anon votes
         votes_format = []
         vote_list = []
