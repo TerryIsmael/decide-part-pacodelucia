@@ -1,0 +1,102 @@
+<template>
+    <div>
+        <h1 id="title">Tokens</h1>
+        <table>
+            <thead>
+                <tr>
+                <th>Token</th>
+                <th>Usuario</th>
+                <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="token in tokens" :key="token.id">
+                <td>{{ token.token }}</td>
+                <td>{{ token.user }}</td>
+                <td>{{ token.date }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p> {{ tokens.length }} tokens</p>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'Tokens',
+    data() {
+        return {
+            // Tus datos van aquí
+            token: '',
+            tokens: []
+        };
+    },
+    mounted() {
+        this.getTokens();
+    },
+    methods: {
+        // Tus métodos van aquí
+        init() {
+            var cookies = document.cookie.split(';');
+            cookies.forEach(cookie => {
+                var cookiePair = cookie.split('=');
+                if (cookiePair[0].trim() === 'sessionid' && cookiePair[1]) {
+                    this.token = pair[1];
+                    this.getTokens();
+                }
+            });
+
+        },
+        async getTokens() {
+            try {
+                const response = await fetch('http://localhost:3000/authentication/api-auth/', {
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    this.tokens = data.tokens;
+                } else {
+                    throw new Error('Usuario o contraseña incorrectos');
+                }
+              
+            
+            } catch (error) {
+                console.log(error);
+            }
+            
+            
+            
+        }
+    },
+};
+</script>
+
+<style scoped>
+/* Tus estilos van aquí */
+#title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    text-align: left;
+}
+
+table, th, td {
+  border: 1px solid;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+p {
+    text-align: left;
+    color: grey;
+}
+
+</style>
