@@ -1,20 +1,28 @@
 <template>
-    <div v-if="voting && user">
-        <h1>{{ voting.name }}</h1>
-        <p>{{ voting.desc }}</p>
-        <p>Question: {{ voting.question.desc }}</p>
-        <ul>
-            <li v-for="option in voting.question.options" :key="option.number">
-                <input type="radio" :id="'q'+option.number" :value="option.number" v-model="selectedOption">
-                <label :for="option.id">{{ option.option }}</label>
-            </li>
-        </ul>
-        <button @click="vote">Vote</button>
+    <div v-if="successVote">
+        <h1 style="color:lightgreen">¡Voto realizado con éxito!</h1>
+        <h2>Usted ha votado: {{ selectedDescription }}</h2>
+        <button @click="$router.push('/')">Página Principal</button>
     </div>
-    <div v-if="errorMessage" class="error-message">
-        {{ errorMessage }}
+    <div class="voting-container" v-if="voting && user && !errorMessage && !successVote">
+        <h1 class="voting-name">{{ voting.name }}</h1>
+        <p class="voting-desc">{{ voting.desc }}</p>
+        <h2 class="question">{{ voting.question.desc }}</h2>
+        <ul>
+            <li v-for="option in voting.question.options" :key="option.number" 
+                :class="{ 'selected': selectedOption === option.number }" 
+                @click="selectedOption = option.number; selectedDescription = option.option">
+            <label :for="option.id">{{ option.option }}</label>
+    </li>
+        </ul>
+        <button class="vote-button" @click="vote">VOTAR</button>
+    </div>
+    <div class="error-screen" v-if="errorMessage">
+        <div class="error-message">
+            {{ errorMessage }}
+        </div>
         <div v-if="goHomeButton">
-            <button @click="$router.push('/')">Go home</button>
+            <button @click="$router.push('/')">Página Principal</button>
         </div>
     </div>
     <div v-if="(!voting || !user) && !errorMessage">
@@ -29,6 +37,7 @@ export default {
         return {
             voting: null,
             selectedOption: null,
+            selectedDescription: null,
             token: '',
             user: null,
             errorMessage: '',
@@ -96,6 +105,13 @@ export default {
                 if (data.length === 0) {
                     throw new Error('Votación no encontrada');
                 }
+                if (!data[0].start_date) {
+                    throw new Error('Votación no iniciada');
+                }
+                if (data[0].end_date) {
+                    throw new Error('Votación finalizada');
+                }
+                console.log(data[0])
                 setTimeout(() => {
                     this.voting = data[0];
                     this.bigpk.p = window.BigInt.fromJSONObject(this.voting.pub_key.p.toString());
@@ -114,6 +130,7 @@ export default {
             });
         },
         encrypt() {
+            console.log(this.selectedOption);
             var bigmsg = window.BigInt.fromJSONObject(this.selectedOption.toString());
             var cypher = window.ElGamal.encrypt(this.bigpk, bigmsg);
             return cypher;
@@ -138,12 +155,15 @@ export default {
                 }),
             })
             .then((response) => {
-                this.successVote = true;
-                console.log(response);
-                console.log("Voto realizado correctamente")
+                if (response.ok) {
+                    return this.successVote = true;
+                } else {
+                    throw new Error('Error al votar');
+                }
+                
             })
             .catch((e) => {
-                this.errorMessage = "Error al votar: "+e;
+                this.errorMessage = e.message;
                 console.log(e);
                 console.log("Error al votar");
             });
@@ -153,8 +173,71 @@ export default {
 </script>
 
 <style scoped>
+    .error-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
     .error-message {
-        color: red;
+        color: lightcoral;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        text-align: center;
+        font-size: 2em;
     }
 
+    ul {
+        list-style-type: none;
+        padding: 0;
+        text-align: left;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    li {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: grey;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        width: 50%;
+        box-sizing: border-box;
+    }
+
+    li:hover {
+        cursor: pointer;
+        background-color: #dee2e6;
+    }
+
+    li.selected {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .voting-container {
+        min-width: 1000px;
+        align-items: flex-start;
+        justify-content: top center;
+    }
+
+    .question {
+        text-align: center;
+        padding-top: 40px;
+    }
+    .vote-button {
+        background-color: lightgreen;
+        color: rgb(0, 0, 0);
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Añade una sombra al botón */
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 30%;
+        align-self: center;
+        margin-top: 30px;
+    }
 </style>
