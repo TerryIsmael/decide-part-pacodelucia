@@ -19,7 +19,7 @@
                         <button class="button-delete" @click="deleteToken(token.id)">Eliminar</button>
                     </td>
                     <td v-else>
-                        <button class="button-add">Añadir</button>
+                        <button class="button-add" @click="addToken(token.id)">Añadir</button>
                     </td>
                 </tr>
             </tbody>
@@ -83,6 +83,21 @@ export default {
                 console.log(error);
                 alert('No se pudo eliminar el token');
             }
+        },
+        async addToken(userId) {
+            try {
+                const response = await fetch(`http://localhost:3000/authentication/add-auth/${userId}`, {
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    await this.getTokens();
+                } else {
+                    throw new Error('No se pudo eliminar el token');
+                }
+            } catch (error) {
+                console.log(error);
+                alert('No se pudo eliminar el token');
+            }
         }
     }
 };
@@ -98,7 +113,7 @@ export default {
 }
 
 thead {
-    background-color: #F2F2F2;
+    background-color: #f2f2f24d;
 
 }
 
@@ -114,11 +129,12 @@ th, td {
 
 p {
     text-align: left;
-    color: grey;
+    color: rgb(196, 195, 195);
 }
 
 .button-delete {
     background-color: rgb(211, 91, 91);
+    
     width: 100%;
 }
 
