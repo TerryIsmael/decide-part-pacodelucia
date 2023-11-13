@@ -118,19 +118,23 @@
         <div v-if="!signup">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
             <h2>[[ voting.question.desc ]]</h2>
-            <form v-for="opt in voting.question.options" :key="opt.number">
-                <div class="form-group">
-                    <label :for="'q' + opt.number">
-                        [[ opt.option ]]
-                    </label>
-                    <input type="number" :id="'q' + opt.number + '_preference'" v-model="opt.preference" min="1">
+            <form>
+                <div class="form-group"  v-for="opt in voting.question.options" :key="opt.number">
+
+                        <label :for="'q' + opt.number">[[ opt.option ]]</label>
+                        <input type="number" v-model="selected[opt.number-2]"
+                                :id="'q' + opt.number"
+                                name="question"
+                                min="1"
+                                :max="voting.question.options.length"
+                                required>
+                                
                 </div>
+                <button class="btn btn-primary mt-3" v-on:click="decideSend">
+                    {% trans "Vote" %}
+                </button>
             </form>
-            <button class="btn btn-primary mt-3" v-on:click="decideSend">
-                {% trans "Vote" %}
-            </button>
         </div>
-        
 
     </div>
 
@@ -160,10 +164,11 @@
         var voting = {{voting|safe}};
         createApp({
             delimiters: ['[[', ']]'],
+             
             data() {
                 return {
                     voting: voting,
-                    selected: "",
+                    selected:[],
                     signup: true,
                     successVote: false,
                     alertShow: false,
@@ -270,7 +275,7 @@
                         voter: this.user.id,
                         token: this.token
                     }
-                    this.postData("{% url "gateway" "store" "/" %}", data)
+                    this.postData("{% url "gateway" "store" "/bp/" %}", data)
                         .then(data => {
                             this.successVote = true;
                             this.alertShow = false;

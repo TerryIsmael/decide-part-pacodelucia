@@ -2,9 +2,11 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+import json
+from django.core import serializers
 from base import mods
 from base.models import Auth, Key
+from store.models import VoteByPreference
 
 
 class Question(models.Model):
@@ -83,6 +85,7 @@ class Voting(models.Model):
     def get_votes(self, token=''):
         # gettings votes from store
         votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        
         # anon votes
         votes_format = []
         vote_list = []
@@ -185,9 +188,21 @@ class VotingByPreference(models.Model):
         self.pub_key = pk
         self.save()
 
+    
+
     def get_votes(self, token=''):
-        # gettings votes from store
-        votes = mods.get('storebypreference', params={'voting_by_preference_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        # getting votes from store
+        auxvoting = VoteByPreference.objects.filter(voting_by_preference_id=self.id)
+        votes = []
+        for vote in auxvoting:
+            voting_data = {
+                "id": vote.id,
+                "voting_by_preference_id": vote.voting_by_preference_id,
+                "voter_by_preference_id": vote.voter_by_preference_id,
+                "a": vote.a,
+                "b": vote.b,
+            }
+            votes.append(voting_data)
         # anon votes
         votes_format = []
         vote_list = []
