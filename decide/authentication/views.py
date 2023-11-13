@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from rest_framework.status import (
         HTTP_201_CREATED,
         HTTP_400_BAD_REQUEST,
-        HTTP_401_UNAUTHORIZED
+        HTTP_401_UNAUTHORIZED,
+        HTTP_404_NOT_FOUND
 )
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -11,7 +12,6 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from django.contrib.auth.decorators import user_passes_test
 
 from .serializers import UserSerializer
 
@@ -60,13 +60,43 @@ class RegisterView(APIView):
 def getTokens(request):
     sessionid = request.COOKIES.get('sessionid', '')
     if sessionid == '':
-        return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
-    tokens = Token.objects.all()
+        response = JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
     tokensList = []
-    for token in tokens:
-        user = User.objects.get(id=token.user_id)
-        tokensList.append({'user': user.username, 'token': token.key, 'date': token.created.strftime("%b. %d, %Y, %I:%M %p")})
+    users = User.objects.all()
+    for user in users:
+        try:
+            token = Token.objects.get(user=user)
+            tokensList.append({'user': user.username, 'token': token.key, 'date': token.created.strftime("%b. %d, %Y, %I:%M %p"), 'id': user.id})
+        except (ObjectDoesNotExist):
+            tokensList.append({'user': user.username, 'token': '', 'date': '', 'id': user.id})        
     response = JsonResponse({'tokens': tokensList})
     response['Access-Control-Allow-Credentials'] = 'true'
     return response
+
+def deleteToken(request, **kwargs):
+    sessionid = request.COOKIES.get('sessionid', '')
+    if sessionid == '':
+        response = JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    userId = kwargs.get('userId', '')
+    if userId == '':
+        response = JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    try:
+        user = User.objects.get(id=userId)
+        
+        token = Token.objects.get(user=user)
+        token.delete()
+        response = JsonResponse({})
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    except (ObjectDoesNotExist):
+        response = JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+
 
