@@ -33,7 +33,6 @@ export default {
     name: 'Tokens',
     data() {
         return {
-            // Tus datos van aquí
             token: '',
             tokens: []
         };
@@ -42,7 +41,6 @@ export default {
         this.getTokens();
     },
     methods: {
-        // Tus métodos van aquí
         init() {
             var cookies = document.cookie.split(';');
             cookies.forEach(cookie => {
@@ -104,7 +102,6 @@ export default {
 </script>
 
 <style scoped>
-/* Tus estilos van aquí */
 #title {
     font-family: 'Roboto', sans-serif;
     font-size: 40px;
@@ -117,9 +114,12 @@ thead {
 
 }
 
+table, th, td {
+  border: none;
+}
+
 table {
-  border-collapse: collapse;
-  width: 100%;
+    width: 100%;
 }
 
 th, td {
