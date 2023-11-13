@@ -99,4 +99,24 @@ def deleteToken(request, **kwargs):
         response['Access-Control-Allow-Credentials'] = 'true'
         return response
 
-
+def addToken(request, **kwargs):
+    sessionid = request.COOKIES.get('sessionid', '')
+    if sessionid == '':
+        response = JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    userId = kwargs.get('userId', '')
+    if userId == '':
+        response = JsonResponse({}, status=HTTP_400_BAD_REQUEST)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    try:
+        user = User.objects.get(id=userId)
+        token, _ = Token.objects.get_or_create(user=user)
+        response = JsonResponse({'user': user.username, 'token': token.key, 'date': token.created.strftime("%b. %d, %Y, %I:%M %p"), 'id': user.id})
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    except (ObjectDoesNotExist):
+        response = JsonResponse({}, status=HTTP_404_NOT_FOUND)
+        response['Access-Control-Allow-Credentials'] = 'true'
+        return response
