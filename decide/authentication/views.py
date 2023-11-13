@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
+from django.contrib.auth.decorators import user_passes_test
 
 from .serializers import UserSerializer
 
@@ -53,3 +55,18 @@ class RegisterView(APIView):
         except IntegrityError:
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+    
+
+def getTokens(request):
+    sessionid = request.COOKIES.get('sessionid', '')
+    if sessionid == '':
+        return JsonResponse({}, status=HTTP_401_UNAUTHORIZED)
+    tokens = Token.objects.all()
+    tokensList = []
+    for token in tokens:
+        user = User.objects.get(id=token.user_id)
+        tokensList.append({'user': user.username, 'token': token.key, 'date': token.created.strftime("%b. %d, %Y, %I:%M %p")})
+    response = JsonResponse({'tokens': tokensList})
+    response['Access-Control-Allow-Credentials'] = 'true'
+    return response
+
