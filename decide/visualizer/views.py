@@ -22,7 +22,7 @@ class VisualizerView(TemplateView):
         return context
 
 class VisualizerBPView(TemplateView):
-    template_name = 'visualizer/visualizer.html'
+    template_name = 'visualizer/visualizerBP.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -48,8 +48,8 @@ class VisualizerBPView(TemplateView):
                     'y': voting.pub_key.y,
                 },
                 'auths': [{'name': a.name, 'url': a.url, 'me': a.me} for a in voting.auths.all()],
-                'tally': None,
-                'postproc': None
+                'tally': voting.tally,
+                'postproc': voting.postproc,
             }
             context['voting'] = json.dumps(voting_data)
         except:
