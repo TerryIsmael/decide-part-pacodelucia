@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -82,6 +83,21 @@ class CensusTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
 
+class CensusImportTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_import_census(self):
+        with open("census/test_files/import_test_data.xlsx", 'rb') as file:
+            file_content = file.read()
+        test_file = SimpleUploadedFile("file.xlsx", file_content)
+        response = self.client.post('/census/import/', {'file': test_file}, format='multipart')
+        self.assertEqual(response.status_code, 201)
+        
 
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
