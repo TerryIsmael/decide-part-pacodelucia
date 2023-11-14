@@ -42,9 +42,7 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -92,6 +90,7 @@ input, textarea, select {
   border-radius: 5px;
   border: 2px solid grey;
   width: 67%;
+  resize: none;
 }
 
 input {
@@ -164,4 +163,9 @@ button {
   cursor: pointer;
   width: 100%;
   margin-bottom: 10px;
+}
+
+.bold {
+  font-weight: bold;
+  color: #ffffff;
 }

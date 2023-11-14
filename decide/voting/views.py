@@ -8,8 +8,10 @@ from rest_framework.response import Response
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer
 from base.serializers import AuthSerializer
-from base.perms import UserIsStaff
+from base.perms import UserIsStaffOrAdmin, UserIsStaff
 from base.models import Auth
+
+import json
 
 
 class VotingView(generics.ListCreateAPIView):
@@ -113,3 +115,38 @@ class AllAuthsAPIView(generics.ListAPIView):
     serializer_class = AuthSerializer
     permission_classes = [permissions.IsAdminUser]
 
+class VotingFrontView(generics.ListCreateAPIView):
+    queryset = Voting.objects.all()
+    serializer_class = VotingSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filterset_fields = ('id', )
+
+    def get(self, request, *args, **kwargs):
+        idpath = kwargs.get('voting_id')
+        self.queryset = Voting.objects.all()
+        version = request.version
+        if version not in settings.ALLOWED_VERSIONS:
+            version = settings.DEFAULT_VERSION
+        if version == 'v2':
+            self.serializer_class = SimpleVotingSerializer
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.permission_classes = (UserIsStaffOrAdmin,)
+        self.check_permissions(request)
+        for data in ['name', 'desc', 'question', 'auths']:
+            if not data in request.data:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            
+        question = Question.objects.get(id=request.data.get('question'))
+        voting = Voting(name=request.data.get('name'), desc=request.data.get('desc'),
+                question=question)
+        
+        voting.save()
+        authsIds = request.data.get('auths')
+        auths = Auth.objects.filter(id__in=authsIds)
+
+        voting.auths.set(auths)
+
+        return Response({}, status=status.HTTP_201_CREATED)
