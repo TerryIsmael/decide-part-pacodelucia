@@ -159,19 +159,17 @@
     .error-message {
         color: rgb(0, 0, 0);
         background-color: rgb(255, 196, 196);
+        padding: 15px;
         border-radius: 10px;
-        padding: 20px;
         margin-bottom: 20px;
-        border: 2px solid #000000;
     }
 
     .success-message {
         color: green;
         background-color: rgb(199, 255, 199);
+        padding: 15px;
         border-radius: 10px;
-        padding: 20px;
         margin-bottom: 20px;
-        border: 2px solid #000000;
     }
 
     .login-button {
