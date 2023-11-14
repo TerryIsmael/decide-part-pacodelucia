@@ -127,6 +127,7 @@
                                 name="question"
                                 min="1"
                                 :max="voting.question.options.length"
+                                
                                 required>
                                 
                 </div>
@@ -262,7 +263,13 @@
                     this.successVote = false;
                 },
                 decideEncrypt() {
-                    var bigmsg = BigInt.fromJSONObject(this.selected.toString());
+                   
+                    var selectedArray = this.selected.toString();
+                    while(selectedArray.includes(",")){
+                        selectedArray=selectedArray.replace(",","10000");
+                    }
+                  
+                    var bigmsg = BigInt.fromJSONObject(selectedArray.toString());
                     var cipher = ElGamal.encrypt(this.bigpk, bigmsg);
                     return cipher;
                 },
