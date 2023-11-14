@@ -158,6 +158,8 @@ export default {
             .then((response) => {
                 if (response.ok) {
                     return this.successVote = true;
+                } else if (response.status == 401) {
+                    throw new Error('No tiene permisos para participar en esta votación');
                 } else {
                     throw new Error('Error al votar');
                 }
@@ -165,6 +167,7 @@ export default {
             })
             .catch((e) => {
                 this.errorMessage = e.message;
+                this.goHomeButton = true;
             });
         }
     },
