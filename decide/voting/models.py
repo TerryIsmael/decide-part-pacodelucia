@@ -250,17 +250,14 @@ class VotingByPreference(models.Model):
         self.do_postproc()
 
     def do_postproc(self):
-        tally = self.tally
-        print("Tally: ",tally)  
+        tally = self.tally 
         opts = []
         dicpreferences={}
         options = self.question.options.all()
         for t in range(len(tally)):
             tally_str = str(tally[t])
             tally_str_with_commas = tally_str.replace("10000", ",")
-            print("Tally str with commas: ",tally_str_with_commas)
             tally_list = [int(num) for num in tally_str_with_commas.split(',') if num]
-            print("Tally list: ",tally_list) 
             for opt in options:
                 if isinstance(tally, list):
                     key=opt.number
@@ -268,7 +265,7 @@ class VotingByPreference(models.Model):
                         dicpreferences[key]+=(len(options) - tally_list[opt.number-2])
                     else:
                         dicpreferences[key]=(len(options) - tally_list[opt.number-2])
-        print("Diccionario de preferencias: ",dicpreferences)
+                        
         for key in dicpreferences:
             votes = dicpreferences[key]
             option=options.get(number=key)
