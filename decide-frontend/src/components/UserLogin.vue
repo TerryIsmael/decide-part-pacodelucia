@@ -16,7 +16,7 @@
           <label for="password">Contraseña:</label>
           <input type="password" id="password" v-model="password" required>
         </div>
-        <button type="submit">Iniciar sesión</button>
+        <button class="login-button" :disabled="isButtonDisabled" type="submit">INICIAR SESIÓN</button>
       </form>
     </div>
 </template>
@@ -32,6 +32,11 @@
             error: '',
             success: '',
             };
+        },
+        computed: {
+            isButtonDisabled() {
+                return this.username === '' || this.password === '';
+            },
         },
         methods: {
             init() {
@@ -53,7 +58,7 @@
                 if (this.token) {
                     headers['Authorization'] = `Bearer ${this.token}`;
                 }
-                fetch('http://localhost:3000/gateway/authentication/login/', {
+                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/login/', {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify({
@@ -79,7 +84,7 @@
                 });
             },
             getUser() {
-                const user = fetch('http://localhost:3000/gateway/authentication/getuser/', {
+                const user = fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -114,26 +119,31 @@
     form {
         display: flex;
         flex-direction: column;
+        align-self: center;
     }
     label {
         display: block;
         margin-bottom: 5px;
         text-align: left;
         color: #000000; /* Cambia esto al color que prefieras */
+        font-family: Arial, Helvetica, sans-serif;
     }
     input {
         height: 25px;
         margin-bottom: 20px;
-        padding: 5px;
         border-radius: 5px;
         border: 2px solid rgb(0, 0, 0); /* Cambia esto al color que prefieras */
-        width: 60%;
+        width: 100%;
+        height: 35px;
+        box-sizing: border-box;
+        text-align: left;
+        padding-left: 10px;
+        float: left;
+        
     }
     .form-div {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
         height: 100vh;
         overflow: hidden;
     }
@@ -149,19 +159,43 @@
     .error-message {
         color: rgb(0, 0, 0);
         background-color: rgb(255, 196, 196);
+        padding: 15px;
         border-radius: 10px;
-        padding: 20px;
         margin-bottom: 20px;
-        border: 2px solid #000000;
     }
 
     .success-message {
         color: green;
         background-color: rgb(199, 255, 199);
+        padding: 15px;
         border-radius: 10px;
-        padding: 20px;
         margin-bottom: 20px;
-        border: 2px solid #000000;
     }
 
+    .login-button {
+        background-color: #2196F3;
+        color: rgb(255, 255, 255);
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Añade una sombra al botón */
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 50%;
+        align-self: center;
+        margin-top: 30px;
+    }
+    .login-button:active {
+        background-color: #0a7bd0; /* Cambia esto a tu color preferido */
+        color: #ffffff;
+    }
+
+    .login-button:hover {
+        background-color: #0a8be6; /* Cambia esto a tu color preferido */
+        color: #ffffff;
+    }
+
+    .login-button:disabled {
+        background-color: #cccccc; /* Cambia esto a tu color preferido */
+        color: #888888;
+    }
 </style>

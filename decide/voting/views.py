@@ -9,7 +9,9 @@ from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
-
+from django.http import JsonResponse
+import json
+from base import mods
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -101,3 +103,21 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
+
+def getVoteStringKeys(req, **kwargs):
+    context = {}
+    vid = kwargs.get('voting_id', 0)
+
+    try:
+        r = mods.get('voting', params={'id': vid})
+        # Casting numbers to string to manage in javascript with BigInt
+        # and avoid problems with js and big number conversion
+        if r[0]['pub_key']:    
+            for k, v in r[0]['pub_key'].items():
+                r[0]['pub_key'][k] = str(v)
+
+        context['voting'] = json.dumps(r[0])
+        context['KEYBITS'] = settings.KEYBITS
+        return JsonResponse(context)
+    except:
+        return JsonResponse({}, status=404)
