@@ -91,7 +91,7 @@ class CensusImportTestCase(BaseTestCase):
     def tearDown(self):
         super().tearDown()
 
-    def test_import_census(self):
+    def test_import_census_excel(self):
         with open("census/test_files/import_test_data.xlsx", 'rb') as file:
             file_content = file.read()
         test_file = SimpleUploadedFile("file.xlsx", file_content)

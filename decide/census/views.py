@@ -16,9 +16,13 @@ from .models import Census
 
 from io import BytesIO
 from pandas import read_excel
+from ldap3 import Connection, Server, ALL_ATTRIBUTES, SUBTREE
+from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BIND_PASSWORD
+from .serializers import StringListSerializer
 
 class CensusCreate(generics.ListCreateAPIView):
-    permission_classes = (UserIsStaff,)
+    # permission_classes = (UserIsStaff,)
+    serializer_class = StringListSerializer
 
     def create(self, request, *args, **kwargs):
         voting_id = request.data.get('voting_id')
@@ -76,4 +80,53 @@ class CensusImport(generics.ListCreateAPIView):
                 return Response('Error trying to create census', status=ST_409)
         except Exception as e:
             return Response('Error processing Excel file', status=ST_500)
+        return Response('Census created', status=ST_201)
+
+class CensusImportLDAP(generics.ListCreateAPIView):
+    serializer_class = StringListSerializer
+
+    def list(self, request, *args, **kwargs):
+        try:
+            server = Server(AUTH_LDAP_SERVER_URI)
+
+            ldap_response = []
+            with Connection(server, 
+                            user=AUTH_LDAP_BIND_DN, 
+                            password=AUTH_LDAP_BIND_PASSWORD, 
+                            auto_bind=True) as conn:
+                users = conn.search(search_base='dc=decide,dc=org',
+                                    search_filter='(&(objectClass=inetOrgPerson)(!(cn=decidesuperuser)))',
+                                    search_scope=SUBTREE,
+                                    attributes=ALL_ATTRIBUTES)
+                ldap_response = conn.response
+            
+            voters = []
+            for user in ldap_response:
+                voters.append(user["attributes"]["cn"][0])
+
+        except Exception:
+            return Response('Error listing LDAP all users\' cn', status=ST_500)
+        return Response({"LDAP voters": voters})
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            voting_id = request.data.get("voting_id")
+            voters = request.data.get("voters")
+            server = Server(AUTH_LDAP_SERVER_URI)
+
+            with Connection(server, user=AUTH_LDAP_BIND_DN, password=AUTH_LDAP_BIND_PASSWORD, auto_bind=True) as conn:
+                for cn in voters:
+                    result = conn.search(search_base='dc=decide,dc=org',
+                                        search_filter=f'(&(objectClass=inetOrgPerson)(cn={cn})(!(cn=decidesuperuser)))',
+                                        search_scope=SUBTREE,
+                                        attributes=ALL_ATTRIBUTES)
+                    voter_id = conn.response[0]["attributes"]["uid"][0]
+                    census = Census(voting_id = voting_id, voter_id = voter_id)
+                    census.save()
+               
+        except IntegrityError as e:
+            if not 'unique constraint' in str(e).lower():
+                return Response('Error trying to create census', status=ST_409)
+        except Exception as e:
+            return Response('Error processing request', status=ST_500)
         return Response('Census created', status=ST_201)
