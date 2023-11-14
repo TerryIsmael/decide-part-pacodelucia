@@ -13,6 +13,7 @@ export default {
     const questions = ref([]);
     const auths = ref([]);
     const newVoting = ref(new Voting());
+    const loading = ref(false);
 
     const fetchvotings = async () => {
       try {
@@ -62,6 +63,7 @@ export default {
     };
 
     const applyAction = async (votingId, action) => {
+      loading.value = true;
       const votingAccion = {
         id: votingId,
         action: action,
@@ -81,6 +83,7 @@ export default {
         console.error("Error:", response.status, error.json());
       }
       fetchvotings();
+      loading.value = false;
     };
     
     const deleteVoting = async (id) =>{
@@ -182,6 +185,7 @@ export default {
       saveVoting,
       applyAction,
       deleteVoting,
+      loading,
     };
   },
 };
@@ -235,11 +239,11 @@ export default {
         </h3>
 
         <div v-if="selectedVoting === voting.id">
-
-          <button v-if="voting.start_date == null " class="little-button" @click="applyAction(voting.id, 'start')"> Empezar </button>
-          <button v-if="voting.start_date != null && voting.end_date == null" class="little-button" @click="applyAction(voting.id, 'stop')"> Parar </button>
-          <button v-if="voting.end_date != null && voting.postproc == null" class="little-button" @click="applyAction(voting.id, 'tally')"> Recuento </button>
-
+          <button :disabled="loading" v-if="voting.start_date == null " class="little-button" @click="applyAction(voting.id, 'start')"> Empezar </button>
+          <button :disabled="loading" v-if="voting.start_date != null && voting.end_date == null" class="little-button" @click="applyAction(voting.id, 'stop')"> Parar </button>
+          <button :disabled="loading" v-if="voting.end_date != null && voting.postproc == null" class="little-button" @click="applyAction(voting.id, 'tally')"> Recuento </button>
+          <p class="bold" v-if="loading">Cargando...</p>
+          
           <p><span class="bold">Id:</span> {{ voting.id }}</p>
           <div v-if="!editing">
             <p><span class="bold">Descripción: </span>{{ voting.desc }}</p>
@@ -363,6 +367,10 @@ export default {
 
 .deleteButton {
   background-color: rgb(211, 91, 91);
+}
+
+button:disabled {
+  background-color: grey;
 }
 
 </style>
