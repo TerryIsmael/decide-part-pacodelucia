@@ -4,6 +4,7 @@ import django_filters.rest_framework
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
+from voting.models import VotingByPreference
 
 from .models import Vote, VoteByPreference
 from .serializers import VoteSerializer, VoteByPreferenceSerializer
@@ -99,8 +100,29 @@ class StoreByPreferenceView(generics.ListAPIView):
          * vote: { "a": int, "b": int }
         """
 
-        vid = request.data.get('votingbypreference')
-        voting = mods.get('votingbypreference', params={'id': vid})
+        vid = request.data.get('voting')
+        auxvoting = VotingByPreference.objects.get(id=vid)
+        voting = []
+        voting_data = {
+                'id': auxvoting.id,
+                'name': auxvoting.name,
+                'desc': auxvoting.desc,
+                'question': {
+                    'desc': auxvoting.question.desc,
+                    'options': [{'number': o.number, 'option': o.option, 'preference': o.preference} for o in auxvoting.question.options.all()]
+                },
+                'start_date': auxvoting.start_date.isoformat(),
+                'end_date': auxvoting.end_date.isoformat() if auxvoting.end_date else None,
+                'pub_key': {
+                    'p': auxvoting.pub_key.p,
+                    'g': auxvoting.pub_key.g,
+                    'y': auxvoting.pub_key.y,
+                },
+                'auths': [{'name': a.name, 'url': a.url, 'me': a.me} for a in auxvoting.auths.all()],
+                'tally': None,
+                'postproc': None
+            }
+        voting.append(voting_data)
         if not voting or not isinstance(voting, list):
             # print("por aqui 35")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
@@ -115,8 +137,8 @@ class StoreByPreferenceView(generics.ListAPIView):
             #print("por aqui 42")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
-        uid = request.data.get('voter_by_preference')
-        vote = request.data.get('vote_by_preference')
+        uid = request.data.get('voter')
+        vote = request.data.get('vote')
 
         if not vid or not uid or not vote:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
