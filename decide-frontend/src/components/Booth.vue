@@ -25,7 +25,7 @@
             <button @click="$router.push('/')">Página Principal</button>
         </div>
     </div>
-    <div v-if="(!voting || !user) && !errorMessage">
+    <div style="padding-top: 50%;" v-if="(!voting || !user) && !errorMessage">
         Cargando...
     </div>
 </template>
@@ -49,10 +49,7 @@ export default {
             },
             successVote: false,
         };
-    },
-    beforeMount() {
-        window.ElGamal.BITS = import.meta.env.VITE_KEYBITS;
-    },      
+    },    
     created() {
         // check if user has a token
         var cookies = document.cookie.split(';');
@@ -99,24 +96,30 @@ export default {
             });
         },
         getVoting() {
-            fetch(import.meta.env.VITE_API_URL + 'voting/?id=' + this.$route.params.id)
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.length === 0) {
+            fetch(import.meta.env.VITE_API_URL + 'voting/' + this.$route.params.id + '/stringkeys')
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
                     throw new Error('Votación no encontrada');
                 }
-                if (!data[0].start_date) {
+            })
+            .then((data) => {
+                var voting_data = JSON.parse(data.voting);
+                if (!voting_data.start_date) {
                     throw new Error('Votación no iniciada');
                 }
-                if (data[0].end_date) {
+                if (voting_data.end_date) {
                     throw new Error('Votación finalizada');
                 }
-                console.log(data[0])
+
+                window.ElGamal.BITS = data.KEYBITS;
+                this.bigpk.p = window.BigInt.fromJSONObject(voting_data.pub_key.p.toString());
+                this.bigpk.g = window.BigInt.fromJSONObject(voting_data.pub_key.g.toString());
+                this.bigpk.y = window.BigInt.fromJSONObject(voting_data.pub_key.y.toString());
+
                 setTimeout(() => {
-                    this.voting = data[0];
-                    this.bigpk.p = window.BigInt.fromJSONObject(this.voting.pub_key.p.toString());
-                    this.bigpk.g = window.BigInt.fromJSONObject(this.voting.pub_key.g.toString());
-                    this.bigpk.y = window.BigInt.fromJSONObject(this.voting.pub_key.y.toString());
+                    this.voting = voting_data;
                 }, 500);
                 
             })
@@ -130,14 +133,12 @@ export default {
             });
         },
         encrypt() {
-            console.log(this.selectedOption);
             var bigmsg = window.BigInt.fromJSONObject(this.selectedOption.toString());
             var cypher = window.ElGamal.encrypt(this.bigpk, bigmsg);
             return cypher;
         },
         vote() {
             var v = this.encrypt();
-            console.log(v);
             fetch(import.meta.env.VITE_API_URL + 'gateway/store/', {
                 method: 'POST',
                 headers: {
@@ -164,8 +165,6 @@ export default {
             })
             .catch((e) => {
                 this.errorMessage = e.message;
-                console.log(e);
-                console.log("Error al votar");
             });
         }
     },
