@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 from base import mods
 from base.models import Auth, Key
+from store.models import Vote, VoteYesNo
 
 
 class Question(models.Model):
@@ -17,12 +18,12 @@ class Question(models.Model):
 #Modelo para preguntas de tipo si o no    
 class QuestionYesNo(models.Model):
     desc = models.TextField()
-    optionYes = models.TextField(editable=False)
-    optionNo = models.TextField(editable=False)
+    optionYes = models.PositiveIntegerField(editable=False)
+    optionNo = models.PositiveIntegerField(editable=False)
 
     def save(self, *args, **kwargs):
-        self.optionYes = "Yes"
-        self.optionNo = "No"
+        self.optionYes = 1
+        self.optionNo = 2
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -94,7 +95,6 @@ class Voting(models.Model):
         '''
 
         votes = self.get_votes(token)
-
         auth = self.auths.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
         decrypt_url = "/decrypt/{}/".format(self.id)
@@ -163,13 +163,13 @@ class VotingYesNo(models.Model):
     postproc = JSONField(blank=True, null=True)
 
     def create_pubkey(self):
-        if self.pub_key or not self.auths.count():
+        if self.pub_key or not self.auths_yesno.count():
             return
 
-        auth = self.auths.first()
+        auth = self.auths_yesno.first()
         data = {
-            "voting_yesno": self.id,
-            "auths_yesno": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+            "voting": self.id,
+            "auths": [ {"name": a.name, "url": a.url} for a in self.auths_yesno.all() ],
         }
         key = mods.post('mixnet', baseurl=auth.url, json=data)
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
@@ -179,8 +179,18 @@ class VotingYesNo(models.Model):
 
     def get_votes(self, token=''):
         # gettings votes from store
-        votes = mods.get('storeYesNo', params={'voting_yesno_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
-        # anon votes
+        votes = []
+        votes_yesno = VoteYesNo.objects.filter(voting_yesno_id=self.id)
+        for vote in votes_yesno:
+            vote_data = {
+                'id': vote.id,
+                'voting_yesno_id': vote.voting_yesno_id,
+                'voter_yesno_id': vote.voter_yesno_id,
+                'a': vote.a,
+                'b': vote.b,
+            }
+            votes.append(vote_data)
+
         votes_format = []
         vote_list = []
         for vote in votes:
@@ -200,10 +210,10 @@ class VotingYesNo(models.Model):
 
         votes = self.get_votes(token)
 
-        auth = self.auths.first()
+        auth = self.auths_yesno.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
         decrypt_url = "/decrypt/{}/".format(self.id)
-        auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
+        auths = [{"name": a.name, "url": a.url} for a in self.auths_yesno.all()]
 
         # first, we do the shuffle
         data = { "msgs": votes }
@@ -221,7 +231,6 @@ class VotingYesNo(models.Model):
         if response.status_code != 200:
             # TODO: manage error
             pass
-
         self.tally = response.json()
         self.save()
 
@@ -232,17 +241,23 @@ class VotingYesNo(models.Model):
         options = []
         options.append(self.question.optionYes)
         options.append(self.question.optionNo)
-
+        ls = []
         opts = []
         for opt in options:
             if isinstance(tally, list):
-                votes = tally.count(opt)
+                votes = tally.count(int(opt))
             else:
                 votes = 0
-            opts.append({
-                'option': opt,
-                'votes': votes
-            })
+            if int(opt) == 1:
+                opts.append({
+                    'option': 'Si',
+                    'votes': votes
+                })
+            else:
+                opts.append({
+                    'option': 'No',
+                    'votes': votes
+                })
 
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)
