@@ -20,6 +20,20 @@
                 <input v-model="password" type="password" class="form-control" required>
             </div>
 
+            <!-- Password2-->
+            <div class="form-group">
+                <label for="password2">Confirmar Contraseña</label>
+                <input v-model="password2" type="password" class="form-control" required>
+            </div>
+
+            <div v-if="success" class="success-message">
+                {{ success }}
+            </div>
+
+            <div v-if="error" class="error-message">
+                {{ error }}
+            </div>
+
             <hr class="my-4">
 
             <button type="submit" class="register-button">CREAR CUENTA</button>
@@ -37,11 +51,21 @@ export default {
             username: '',
             email: '',
             password: '',
+            password2: '',
+            success: '',
+            error: '',
         };
     },
 
     methods: {
     async register() {
+        this.success, this.error = '';
+
+        if (this.password != this.password2) {
+            this.error = 'Las dos contraseñas no son la misma!'
+            throw new Error('Password should be the same in both fields')
+        }
+
         try {
             const response = await fetch('http://localhost:8000/authentication/register/', {
                 method: 'POST',
@@ -70,10 +94,12 @@ export default {
             const data = await response.json();
 
             // Manejar la respuesta como sea necesario
+            this.success = 'Cuenta creada!';
             console.log(data);
         } catch (error) {
             // Manejar errores de red u otros errores
-            console.error('Error:', error);
+            this.error = `Error: ${error.message}`;
+            console.error('Error:', error.message);
         }
     },
 },
@@ -147,5 +173,21 @@ export default {
     .register-button:hover {
         background-color: #0a8be6; /* Cambia esto a tu color preferido */
         color: #ffffff;
+    }
+
+    .success-message {
+        color: green;
+        background-color: rgb(199, 255, 199);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .error-message {
+        color: rgb(0, 0, 0);
+        background-color: rgb(255, 196, 196);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
     }
 </style>
