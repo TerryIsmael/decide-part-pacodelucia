@@ -26,12 +26,13 @@ SECRET_KEY = '^##ydkswfu0+=ofw0l#$kv^8n)0$i(qd&d&ol#p9!b$8*5%j1+'
 DEBUG = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Imprime el correo por consola en vez de enviarse
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' 
-EMAIL_HOST = '127.0.0.1'  # Puedes intentar usar 'localhost' o la dirección IP del servidor de correo de ProtonMail
-EMAIL_PORT = 1025 
-EMAIL_USE_TLS = False
-EMAIL_HOST_USER = 'decide.pacodelucia@proton.me'
-EMAIL_HOST_PASSWORD = 'decide123'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'  # Cambiado a la dirección del servidor SMTP de Outlook
+EMAIL_PORT = 587  # Puerto típicamente usado por Outlook para TLS
+EMAIL_USE_TLS = True  # Usar TLS para una conexión segura
+EMAIL_HOST_USER = 'decide.pacodelucia@outlook.es'
+EMAIL_HOST_PASSWORD = 'decidepacodelucia123'
+
 
 ALLOWED_HOSTS = []
 
