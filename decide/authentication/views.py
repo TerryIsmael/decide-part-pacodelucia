@@ -4,6 +4,8 @@ from rest_framework.status import (
         HTTP_400_BAD_REQUEST,
         HTTP_401_UNAUTHORIZED
 )
+from cryptography.fernet import Fernet
+from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -11,7 +13,6 @@ from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from rest_framework import status
-from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
@@ -20,7 +21,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from .serializers import UserSerializer
 import secrets
 import string
-
 
 class GetUserView(APIView):
     def post(self, request):
@@ -39,34 +39,27 @@ class LogoutView(APIView):
             pass
 
         return Response({})
-def generar_clave():
-    # define the alphabet
-    letters = string.ascii_letters
-    digits = string.digits
-    special_chars = string.punctuation
 
-    alphabet = letters + digits + special_chars
+def encriptar(cadena):
+    # Cambia el orden de los caracteres en la cadena
+    cadena_encriptada = cadena.translate(str.maketrans("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA"))
+    return cadena_encriptada
 
-    # fix password length
-    pwd_length = 8
+def desencriptar(cadena_encriptada):
+    # Invierte la operación para obtener la cadena original
+    cadena_original = cadena_encriptada.translate(str.maketrans("zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+    return cadena_original
 
-    # generate a password string
-    pwd = ''
-    for i in range(pwd_length):
-        pwd += ''.join(secrets.choice(alphabet))
-
-    return print(pwd)
-
-def enviar_correo(email_destino, username):
+def enviar_correo(email_destino, username,password):
     # Configurar los detalles del correo
     asunto = 'Autenticación de Registro en Decide.pacodelucia'
-    mensaje = '¡Hola' + username +'! Gracias por registrarte en Decide.pacodelucia. Para completar el proceso de registro y asegurarnos de que tu dirección de correo electrónico sea válida, necesitamos que verifiques tu cuenta. Por favor, haz clic en el siguiente enlace para activar tu cuenta: ' +'http://localhost:5173/authentication/'+username+ ' Si no has solicitado este registro o crees que esto es un error, puedes ignorar este correo. Tu cuenta no se activará hasta que hayas hecho clic en el enlace de activación. ¡Gracias por unirte a nosotros en Decide.pacodelucia! Estamos emocionados de tenerte como parte de nuestra comunidad. Atentamente, El Equipo de Decide.pacodelucia'
+    clave= str(encriptar(password))
+    mensaje = '¡Hola ' + username +'! Gracias por registrarte en Decide.pacodelucia. Para completar el proceso de registro y asegurarnos de que tu dirección de correo electrónico sea válida, necesitamos que verifiques tu cuenta. Por favor, introduzca el siguiente codigo: '+clave+ ' Si no has solicitado este registro o crees que esto es un error, puedes ignorar este correo. Tu cuenta no se activará hasta que hayas introducido la clave de activación. ¡Gracias por unirte a nosotros en Decide.pacodelucia! Estamos emocionados de tenerte como parte de nuestra comunidad. Atentamente, El Equipo de Decide.pacodelucia'
     remitente = 'decide.pacodelucia@outlook.es'
     destinatarios = [email_destino]
 
     # Enviar el correo
     send_mail(asunto, mensaje, remitente, destinatarios)
-    generar_clave()
     return HttpResponse('Correo enviado exitosamente.')
 
 class RegisterView(APIView):
@@ -81,12 +74,30 @@ class RegisterView(APIView):
         try:
             user = User(username=username, email=email)
             user.set_password(pwd)
+            user.is_active=False
             user.save()
             token, _ = Token.objects.get_or_create(user=user)
-            enviar_correo(email,username)
+            enviar_correo(email,username,pwd)
+        except IntegrityError:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'user_pk': user.pk, 'token': token.key}, status=status.HTTP_201_CREATED)
+class AuthView(APIView):
+    def post(self, request):
+        name = request.data.get('username', '')
+        clave = request.data.get('clave', '')        
+        if not name or not clave :
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = get_object_or_404(User, username=name)
+            if user.check_password(desencriptar(clave)):
+                user.is_active = True
+                user.save()
+            
         except IntegrityError:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({'user_pk': user.pk, 'token': token.key}, status=status.HTTP_201_CREATED)
+        return Response({'user_pk': user.pk}, status=status.HTTP_201_CREATED)
 
 

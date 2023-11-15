@@ -8,21 +8,15 @@
                 <input v-model="username" type="text" class="form-control" required>
             </div>
 
-            <!-- Email -->
+            <!-- Clave -->
             <div class="form-group">
-                <label for="email">Email</label>
-                <input v-model="email" type="email" class="form-control" placeholder="example@gmail.com" required>
-            </div>
-
-            <!-- Password -->
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input v-model="password" type="password" class="form-control" required>
+                <label for="clave">Clave</label>
+                <input v-model="clave" type="clave" class="form-control" required>
             </div>
 
             <hr class="my-4">
 
-            <button type="submit" class="register-button">CREAR CUENTA</button>
+            <button type="submit" class="register-button">Authenticate account</button>
         </form>
     </div>
 </template>
@@ -35,23 +29,21 @@ export default {
     data() {
         return {
             username: '',
-            email: '',
-            password: '',
+            clave: '',
         };
     },
 
     methods: {
     async register() {
         try {
-            const response = await fetch('http://localhost:8000/authentication/register/', {
+            const response = await fetch('http://localhost:8000/authentication/authEmail/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     username: this.username,
-                    email: this.email,
-                    password: this.password,
+                    clave: this.clave,
                 }),
             });
 
@@ -68,6 +60,7 @@ export default {
             }
 
             const data = await response.json();
+
             // Manejar la respuesta como sea necesario
             console.log(data);
         } catch (error) {
