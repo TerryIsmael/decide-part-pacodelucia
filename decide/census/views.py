@@ -1,8 +1,10 @@
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.status import (
+        HTTP_200_OK as ST_200,
         HTTP_201_CREATED as ST_201,
         HTTP_204_NO_CONTENT as ST_204,
         HTTP_400_BAD_REQUEST as ST_400,
@@ -15,10 +17,10 @@ from base.perms import UserIsStaff
 from .models import Census
 
 from io import BytesIO
-from pandas import read_excel
+from pandas import read_excel, DataFrame
 from ldap3 import Connection, Server, ALL_ATTRIBUTES, SUBTREE
 from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BIND_PASSWORD
-from .serializers import StringListSerializer
+from .serializers import StringListSerializer, CensusSerializer
 
 class CensusCreate(generics.ListCreateAPIView):
     # permission_classes = (UserIsStaff,)
@@ -81,6 +83,28 @@ class CensusImport(generics.ListCreateAPIView):
         except Exception as e:
             return Response('Error processing Excel file', status=ST_500)
         return Response('Census created', status=ST_201)
+
+class CensusExport(generics.RetrieveAPIView):
+    def retrieve(self, request, voting_id = None, *args, **kwargs):
+        try:
+            if voting_id:
+                censuses = Census.objects.filter(voting_id=voting_id)
+            else:
+                censuses = Census.objects.all()
+
+            censuses_list = [(c.voting_id, c.voter_id) for c in censuses]
+
+            df = DataFrame(censuses_list, columns=['voting_id', 'voter_id'])
+            excel_stream = BytesIO()
+            df.to_excel(excel_stream, index=False)
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=output.xlsx'
+            excel_stream.seek(0)
+            response.write(excel_stream.read())
+               
+        except Exception as e:
+            return Response('Error processing request', status=ST_500)
+        return response
 
 class CensusImportLDAP(generics.ListCreateAPIView):
     serializer_class = StringListSerializer
