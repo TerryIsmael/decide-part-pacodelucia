@@ -1,37 +1,29 @@
 <template>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 rounded border p-4">
-                <div class="text-center mb-4">
-                    <h2 class="text-success">Sign Up</h2>
-                    <hr class="my-4">
-                </div>
-
-                <form @submit.prevent="register">
-                    <!-- Username -->
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input v-model="username" type="text" class="form-control" required>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input v-model="email" type="email" class="form-control" placeholder="example@gmail.com" required>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input v-model="password" type="password" class="form-control" required>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <button type="submit" class="btn btn-success btn-block">Create Account</button>
-                </form>
+    <div class="form-div">
+        <h1>Decide Registro</h1>
+        <form @submit.prevent="register">
+            <!-- Username -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input v-model="username" type="text" class="form-control" required>
             </div>
-        </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input v-model="email" type="email" class="form-control" placeholder="example@gmail.com" required>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input v-model="password" type="password" class="form-control" required>
+            </div>
+
+            <hr class="my-4">
+
+            <button type="submit" class="register-button">CREAR CUENTA</button>
+        </form>
     </div>
 </template>
 
@@ -91,5 +83,69 @@ export default {
 </script>
 
 <style scoped>
-/* Tus estilos van aquí */
+    h1{
+        align-self: center;
+        font-family:'Courier New', Courier, monospace;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        align-self: center;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        text-align: left;
+        color: #000000; /* Cambia esto al color que prefieras */
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    input {
+        height: 25px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 2px solid rgb(0, 0, 0); /* Cambia esto al color que prefieras */
+        width: 100%;
+        height: 35px;
+        box-sizing: border-box;
+        text-align: left;
+        padding-left: 10px;
+        float: left;
+        
+    }
+    .form-div {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .form-div > form {
+        width: 400px;
+        padding: 40px;
+        border-radius: 5px;
+        background-color: rgb(255, 255, 255);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .register-button {
+        background-color: #2196F3;
+        color: rgb(255, 255, 255);
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Añade una sombra al botón */
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 50%;
+        align-self: center;
+        margin-top: 30px;
+    }
+    .register-button:active {
+        background-color: #0a7bd0; /* Cambia esto a tu color preferido */
+        color: #ffffff;
+    }
+
+    .register-button:hover {
+        background-color: #0a8be6; /* Cambia esto a tu color preferido */
+        color: #ffffff;
+    }
 </style>
