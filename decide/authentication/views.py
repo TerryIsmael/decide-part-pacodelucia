@@ -4,7 +4,6 @@ from rest_framework.status import (
         HTTP_400_BAD_REQUEST,
         HTTP_401_UNAUTHORIZED
 )
-from cryptography.fernet import Fernet
 from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
