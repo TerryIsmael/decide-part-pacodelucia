@@ -128,3 +128,50 @@ class AuthTestCase(APITestCase):
             sorted(list(response.json().keys())),
             ['token', 'user_pk']
         )
+
+class RegisterViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        u = User(username='yaexiste')
+        u.set_password('yaexiste')
+        u.save()
+
+    def tearDown(self):
+        self.client = None
+
+    def test_registration_successful(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+
+    def test_registration_missing_data(self):
+        # Caso de test donde faltan datos requeridos
+        data = {
+            # Falta 'username'
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+
+    def test_registration_integrity_error(self):
+        # Caso de test donde ocurre un IntegrityError (e.g., username duplicado)
+        data = {
+            'username': 'yaexiste',
+            'password': 'testpassword',
+            'email': 'new@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)

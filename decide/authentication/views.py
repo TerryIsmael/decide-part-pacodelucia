@@ -81,6 +81,7 @@ class RegisterView(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'user_pk': user.pk, 'token': token.key}, status=status.HTTP_201_CREATED)
+
 class AuthView(APIView):
     def post(self, request):
         name = request.data.get('username', '')
