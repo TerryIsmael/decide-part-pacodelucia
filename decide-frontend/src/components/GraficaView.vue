@@ -7,13 +7,12 @@
 <script>
 import Chart from 'chart.js/auto';
 import axios from 'axios';
-
 export default {
     data() {
         return {
             labels: [],
             data: [],
-            colors: generateGreenScale(8), // Cambia el número según el nº de votaciones
+            colors: generateGreenScale(10), // Cambia el número según el nº de votaciones
         };
     },
     mounted() {
@@ -31,13 +30,12 @@ export default {
                 });
         },
         processData(data) {
-            this.labels = data.map((voting, index) => `${voting.name}: ${voting.votes || 0} votes`);
-            this.data = data.map(voting => voting.votes || 0);
+            this.labels = data.map((voting, index) => `${voting.name}: ${voting.tally.length || 0} votes`);
+            this.data = data.map(voting => voting.tally.length || 0);
+            
         },
-
         createChart() {
             const ctx = this.$refs.myChart.getContext('2d');
-
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -60,7 +58,6 @@ export default {
         },
     },
 };
-
 function generateGreenScale(numColors) {
     const colors = [];
     for (let i = 1; i < numColors; i++) {
