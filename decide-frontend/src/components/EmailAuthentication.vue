@@ -14,9 +14,17 @@
                 <input v-model="clave" type="clave" class="form-control" required>
             </div>
 
+            <div v-if="success" class="success-message">
+                {{ success }}
+            </div>
+
+            <div v-if="error" class="error-message">
+                {{ error }}
+            </div>
+
             <hr class="my-4">
 
-            <button type="submit" class="register-button">Authenticate account</button>
+            <button type="submit" class="register-button">Autenticar Cuenta</button>
         </form>
     </div>
 </template>
@@ -30,6 +38,8 @@ export default {
         return {
             username: '',
             clave: '',
+            success: '',
+            error: '',
         };
     },
 
@@ -62,9 +72,11 @@ export default {
             const data = await response.json();
 
             // Manejar la respuesta como sea necesario
+            this.success = "Creación de Cuenta Confirmada!";
             console.log(data);
         } catch (error) {
             // Manejar errores de red u otros errores
+            this.error = `Error: ${error.message}`;
             console.error('Error:', error);
         }
     },
@@ -139,5 +151,21 @@ export default {
     .register-button:hover {
         background-color: #0a8be6; /* Cambia esto a tu color preferido */
         color: #ffffff;
+    }
+
+    .success-message {
+        color: green;
+        background-color: rgb(199, 255, 199);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .error-message {
+        color: rgb(0, 0, 0);
+        background-color: rgb(255, 196, 196);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
     }
 </style>
