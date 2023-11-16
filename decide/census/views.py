@@ -117,13 +117,6 @@ class filterCivilState(self, request,*args, **kwargsView):
     census = Census.objects.filter(=civil_state)
     return Response ({'census': census})
 
-class filterCivilState(self, request,*args, **kwargsView):
-    model = Census
-    template_name = 'filterCensus.html'
-    context_object_name = 'census'
 
-    civil_state = request.GET.get('civil_state')
-    census = Census.objects.filter(=civil_state)
-    return Response ({'census': census})
 
     
