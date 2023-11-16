@@ -95,6 +95,7 @@ export default {
             // Manejar la respuesta como sea necesario
             this.success = 'Cuenta creada!';
             console.log(data);
+            this.$router.push('/authEmail');
         } catch (error) {
             // Manejar errores de red u otros errores
             this.error = `Error: ${error.message}`;
