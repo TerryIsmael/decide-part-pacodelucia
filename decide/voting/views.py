@@ -111,6 +111,36 @@ class AllQuestionsView(generics.ListAPIView):
     serializer_class = QuestionSerializer 
     permission_classes = [permissions.IsAdminUser]
 
+    def get(self, request, *args, **kwargs):
+        self.queryset = Question.objects.all()
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        self.permission_classes = (UserIsStaffOrAdmin,)
+        self.check_permissions(request)
+        for data in ['desc', 'options']:
+            if not data in request.data:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('id'):
+            question = Question(desc=request.data.get('desc'))
+        else:
+            question = Question.objects.filter(id=request.data.get('id')).first()
+        question.desc = request.data.get('desc')
+        question.save()
+        newOpts=[]
+        for opt in request.data.get('options'):
+            if not 'id' in opt:
+                option = QuestionOption(question=question, option=opt['option'], number=opt['number'])   
+            else:
+                option = QuestionOption.objects.filter(id=opt['id']).first()
+                option.option = opt['option']
+                option.number = opt['number']
+            option.save()  
+            newOpts.append(option)
+        QuestionOption.objects.filter(question=question).exclude(id__in=[o.id for o in newOpts]).delete()
+        
+        return Response({}, status=status.HTTP_201_CREATED)
+
 class AllAuthsAPIView(generics.ListAPIView):
     queryset = Auth.objects.all()
     serializer_class = AuthSerializer
@@ -228,4 +258,3 @@ class VotingFrontView(generics.ListCreateAPIView):
         voting = get_object_or_404(Voting, pk=request.data.get('id'))
         voting.delete()
         return Response({}, status=status.HTTP_200_OK)
-    
