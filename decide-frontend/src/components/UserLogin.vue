@@ -1,5 +1,5 @@
 <template>
-    <div class="form-div">
+    <div class="form-div" v-if="form">
         <h1>Decide Login</h1>
       <form @submit.prevent="login">
         <div v-if="error" class="error-message">
@@ -19,6 +19,9 @@
         <button class="login-button" :disabled="isButtonDisabled" type="submit">INICIAR SESIÓN</button>
       </form>
     </div>
+    <div v-else>
+        <h1>Iniciando sesión...</h1>
+    </div>
 </template>
 
 <script>
@@ -31,7 +34,11 @@
             token: '',
             error: '',
             success: '',
+            form: false,
             };
+        },
+        mounted() {
+            this.init();
         },
         computed: {
             isButtonDisabled() {
@@ -45,9 +52,13 @@
                     var pair = cookie.split('=');
                     if (pair[0].trim() === 'decide' && pair[1]) {
                         this.token = pair[1];
-                        this.getUser();
+                        console.log(this.token);
+                        this.isLogged();
                     }
                 });
+                if (!this.token) {
+                    this.form = true;
+                }
             },
             login() {
                 this.error = '';
@@ -84,7 +95,7 @@
                 });
             },
             getUser() {
-                const user = fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
+                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -104,11 +115,40 @@
                     this.success = `Bienvenido ${data.username}`;
                     setTimeout(() => {
                         this.$router.push('/');
-                    }, 2000);    
+                    }, 1000);    
                 })
                 .catch((error) => {
                     this.error = error.message;
                     console.log(error.message);
+                });
+            },
+            isLogged() {
+                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    token: this.token,
+                }),
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Error obteniendo el usuario');
+                    }
+                })
+                .then(() => {
+                    setTimeout(() => {
+                        this.$router.push('/');
+                    }, 1000);    
+                })
+                .catch((error) => {
+                    setTimeout(() => {
+                        this.form = true;
+                        this.error = error.message
+                    }, 1000);
                 });
             }
         },

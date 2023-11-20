@@ -92,7 +92,9 @@ export default {
             })
             .catch((error) => {
                 this.errorMessage = error.message;
-                
+                setTimeout(() => {
+                    this.$router.push('/login');
+                }, 2000);  
             });
         },
         getVoting() {
