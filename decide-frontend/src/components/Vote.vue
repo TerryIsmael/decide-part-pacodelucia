@@ -4,37 +4,67 @@ import Vote from "../../models/Vote.js";
 
 export default {
     setup() {
-        const votes = ref({});
+        const votes = ref([]);
         const selectedVote = ref(null);
-        const New = ref("New");
+        const selectedVoting = ref(null);
         const editing = ref(false);
         const votings = ref([]);
         const users = ref([]);
         const newVote = ref(new Vote());
-        const loading = ref(false);
+        const votingVotes = ref([]);
+        const votesSubList = ref([]);
 
         const fetchvotes = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/store/", {
-                method: "GET",
-                credentials: "include",
+            try {
+                const response = await fetch("http://localhost:8000/store/", {
+                    method: "GET",
+                    credentials: "include",
+                }
+                    );
+                const data = await response.json();
+                await data.map((vote) => {
+                    vote.a = BigInt(vote.a);
+                    vote.b = BigInt(vote.b);
+                });
+                votes.value = data;
+                const set =new Set();
+                votes.value.forEach((vote) => set.add(vote.voting_id));
+                votingVotes.value = [...set].sort( (a,b) => a-b);
+                if (selectedVoting.value != null){
+                    votesSubList.value = votes.value.filter((vote) => vote.voting_id == selectedVoting.value);
+                }
+            } catch (error) {
+                console.error("Error:", error);
             }
-                );
-            const data = await response.json();
-            data.map((vote) => {
-                vote.a = BigInt(vote.a);
-                vote.b = BigInt(vote.b);
-            });
-            votes.value = data;
-        } catch (error) {
-            console.error("Error:", error);
-        }
         };
 
-        const changeSelected = (id) => {
+        const changeSelectedVote = (id) => {
             selectedVote.value = selectedVote.value === id ? null : id;
         };
 
+        const changeSelectedVoting = (id) => {
+            selectedVoting.value = selectedVoting.value === id ? null : id;
+            if(selectedVoting.value != null){
+                votesSubList.value = votes.value.filter((vote) => vote.voting_id == selectedVoting.value);
+            }else{
+                selectedVote.value = null;
+            }
+        };
+
+        const deleteVote = async (id)=> {
+            const json={
+                "id": id
+            }
+            await fetch("http://localhost:8000/store/", {
+                method: "DELETE",
+                credentials: "include",
+                body: JSON.stringify(json),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            await fetchvotes();
+        };
 
         onMounted(()=>{
             fetchvotes();
@@ -44,14 +74,17 @@ export default {
         return {
             votes,
             selectedVote,
-            New,
+            selectedVoting,
             editing,
             votings,
             users,
             newVote,
-            loading,
             fetchvotes,
-            changeSelected,
+            changeSelectedVote,
+            changeSelectedVoting,
+            deleteVote,
+            votingVotes,
+            votesSubList,
         };
     },
 };
@@ -62,22 +95,32 @@ export default {
   <div>
     <h2>Listado de votos</h2>
     <ul>
-        <li v-for="vote in votes" :key="vote.id">
+        <li class="big-container" v-for="votingVote in votingVotes" :key="votingVote">
             <h3>
-                <button @click="changeSelected(vote.id);">
-                    {{ vote.voting_id }}:{{  vote.voter_id }}
+                <button @click="changeSelectedVoting(votingVote)">
+                    Voting: {{ votingVote }} 
                 </button>
-
-                <div v-if="selectedVote == vote.id">
-                    <div>
-                        <p><span class="bold">Id:</span> {{ vote.id }}</p>
-                        <p><span class="bold">Voting id:</span> {{ vote.voting_id }}</p>
-                        <p><span class="bold">Voter id:</span> {{ vote.voter_id }}</p>
-                        <p><span class="bold">A:</span> {{ vote.a }}</p>
-                        <p><span class="bold">B:</span> {{ vote.b }}</p>
-                    </div>
-                </div>
             </h3>
+            <ul>
+                <li v-if="votingVote == selectedVoting" v-for="vote in votesSubList" :key="vote.id">
+                    <h3>
+                        <button @click="changeSelectedVote(vote.id)">
+                            User: {{  vote.voter_id }}
+                        </button>
+
+                        <div v-if="selectedVote == vote.id">
+                            <div>
+                                <p><span class="bold">Id:</span> {{ vote.id }}</p>
+                                <p><span class="bold">Voting id:</span> {{ vote.voting_id }}</p>
+                                <p><span class="bold">Voter id:</span> {{ vote.voter_id }}</p>
+                                <p><span class="bold">A:</span> {{ vote.a }}</p>
+                                <p><span class="bold">B:</span> {{ vote.b }}</p>
+                                <button class ="little-button" @click="deleteVote(vote.id)">Eliminar</button>
+                            </div>
+                        </div>
+                    </h3>
+                </li>
+            </ul>
         </li>
     </ul>
 </div>
@@ -101,4 +144,20 @@ export default {
     border: 2px solid grey;
     width: 300%;
 }
+
+.big-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.little-button{
+    width: auto;
+}
+
+ul ul li h3 > button {
+  margin-left: 20px;
+  list-style-type: square;
+  background-color: rgb(1, 88, 88);
+}
+
 </style>

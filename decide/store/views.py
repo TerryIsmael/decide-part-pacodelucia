@@ -83,8 +83,8 @@ class StoreView(generics.ListAPIView):
         return  Response({})
 
     def delete(self, request):
-        vid = request.data.get('id')
-        vote = get_object_or_404(Vote, pk=vid) 
+        voteId = request.data.get('id')
+        vote = get_object_or_404(Vote, pk=voteId) 
         vote.delete()
         return Response({"Eliminado correctamente"})
 
