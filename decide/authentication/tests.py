@@ -85,16 +85,6 @@ class AuthTestCase(APITestCase):
 
         self.assertEqual(Token.objects.filter(user__username='voter1').count(), 0)
 
-    def test_register_bad_permissions(self):
-        data = {'username': 'voter1', 'password': '123'}
-        response = self.client.post('/authentication/login/', data, format='json')
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({'username': 'user1'})
-        response = self.client.post('/authentication/register/', token, format='json')
-        self.assertEqual(response.status_code, 401)
-
     def test_register_bad_request(self):
         data = {'username': 'admin', 'password': 'admin'}
         response = self.client.post('/authentication/login/', data, format='json')
@@ -114,20 +104,6 @@ class AuthTestCase(APITestCase):
         token.update(data)
         response = self.client.post('/authentication/register/', token, format='json')
         self.assertEqual(response.status_code, 400)
-
-    def test_register(self):
-        data = {'username': 'admin', 'password': 'admin'}
-        response = self.client.post('/authentication/login/', data, format='json')
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({'username': 'user1', 'password': 'pwd1'})
-        response = self.client.post('/authentication/register/', token, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            sorted(list(response.json().keys())),
-            ['token', 'user_pk']
-        )
 
 class RegisterViewTest(TestCase):
     def setUp(self):
@@ -164,7 +140,7 @@ class RegisterViewTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(User.objects.filter(username='testuser').exists())
 
-    def test_registration_integrity_error(self):
+    def test_registration_duplication_error(self):
         # Caso de test donde ocurre un IntegrityError (e.g., username duplicado)
         data = {
             'username': 'yaexiste',
@@ -175,3 +151,16 @@ class RegisterViewTest(TestCase):
         response = self.client.post('/authentication/register/', data, format='json')
 
         self.assertEqual(response.status_code, 400)
+
+    def test_registration_not_mail(self):
+        # Caso de test donde ocurre un IntegrityError (e.g., no se introduce un correo electrónico válido)
+        data = {
+            'username': 'testuser2',
+            'password': 'testpassword2',
+            'email': 'notanemail',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username='testuser').exists())

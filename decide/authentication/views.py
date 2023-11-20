@@ -4,18 +4,18 @@ from rest_framework.status import (
         HTTP_400_BAD_REQUEST,
         HTTP_401_UNAUTHORIZED
 )
-from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.core.mail import send_mail
+from django.core.validators import validate_email
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .serializers import UserSerializer
 import secrets
@@ -38,6 +38,13 @@ class LogoutView(APIView):
             pass
 
         return Response({})
+    
+def es_correo_valido(email):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
 
 def encriptar(cadena):
     # Cambia el orden de los caracteres en la cadena
@@ -68,6 +75,9 @@ class RegisterView(APIView):
         email = request.data.get('email', '')
         
         if not username or not pwd or not email:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not es_correo_valido(email):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
