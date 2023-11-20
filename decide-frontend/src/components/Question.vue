@@ -1,6 +1,6 @@
 <script>
-import { ref, reactive, onMounted } from "vue";
-import { Question, Option } from "../../models/Question.js";
+import { ref, onMounted } from "vue";
+import { Option } from "../../models/Question.js";
 
 export default {
   setup() {
@@ -8,12 +8,13 @@ export default {
     const selectedQuestion = ref(null);
     const New = ref("New");
     const editing = ref(false);
-    const newQuestion = ref(new Question("", []));
     const newOption = ref(new Option());
     const newOptions = ref([]);
-    const dataError = ref(null);
+    const newOptionError = ref(null);
+    const optionError = ref(null);
+    const newDesc = ref("");
 
-    const fetchquestions = async () => {
+    const fetchQuestions = async () => {
       try {
         const response = await fetch("http://localhost:8000/voting/all-questions/", {
           method: "GET",
@@ -27,13 +28,29 @@ export default {
       }
     };
 
-    const saveQuestion = async (question) => {
+    const saveQuestion = async () => {
+
+      if (newDesc.value === undefined || newDesc.value.trim() === "" || newOptions.value.length === 0) {
+        optionError.value = ("No se puede guardar una pregunta vacía o sin opciones");
+        return;
+      }
+      else
+        optionError.value = null;
+
+      newOptionError.value = null;
+      newOptions.value.forEach((option) => {
+        if (option.number <= 0)
+          optionError.value = ("No se puede añadir una opción con id menor que 1");
+      });
+
+      if (optionError.value != null || newOptionError.value != null)
+        return;
       editing.value = false;
-      question.options = [].concat(newOptions.value);
-      const questionJson = {
-        id: question.id,
-        desc: question.desc,
-        options: question.options,
+
+      const newQuestion = {
+        id: selectedQuestion.value == "New" ? null : selectedQuestion.value,
+        desc: newDesc.value,
+        options: newOptions.value,
       };
 
       try {
@@ -43,14 +60,14 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(question),
+          body: JSON.stringify(newQuestion),
         });
       } catch (error) {
         console.error("Error:", error);
       }
+      newDesc.value = "";
       newOptions.value = new Option();
-      await fetchquestions();
-
+      await fetchQuestions();
     };
 
     const changeSelected = (questionId) => {
@@ -58,23 +75,26 @@ export default {
     };
 
     const changeEditing = (newValue) => {
-      if (newValue === false || selectedQuestion.value === "New")
+      if (newValue === false || selectedQuestion.value === "New" || selectedQuestion.value === null) {
+        newDesc.value = "";
         newOptions.value = [];
-      else
-        newOptions.value = [].concat(questions.value.filter(x => x.id == selectedQuestion.value)[0].options);
-      
-      dataError.value = null;
+      }
+      else {
+        newDesc.value = questions.value.find(x => x.id == selectedQuestion.value).desc;
+        newOptions.value = [].concat(questions.value.find(x => x.id == selectedQuestion.value).options);
+      }
+      newOptionError.value = null;
+      optionError.value = null;
       editing.value = newValue;
     };
 
     const addOption = () => {
-      console.log(newOption.value.number);
-      if ( newOption.value.number === undefined || newOption.value.option === undefined)
-        dataError.value = ("No se puede añadir una opción vacía");
-      else{
+      if (newOption.value.number === undefined || newOption.value.number.toString().trim() === "" || newOption.value.number <= 0 || newOption.value.option === undefined || newOption.value.option.trim() === "")
+        newOptionError.value = ("No se puede añadir una opción vacía o con id menor que 1");
+      else {
         newOptions.value.push(newOption.value);
         newOption.value = new Option();
-        dataError.value = null;
+        newOptionError.value = null;
       }
     };
 
@@ -85,7 +105,28 @@ export default {
       }
     };
 
-    onMounted(fetchquestions);
+    const deleteQuestion = async (id) => {
+      const questionDelete = {
+        id: id,
+      };
+      try {
+        const response = await fetch("http://localhost:8000/voting/all-questions/",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(questionDelete),
+          }
+        );
+      } catch (error) {
+        console.error("Error:", response.status, error.json());
+      }
+      fetchQuestions();
+    }
+
+    onMounted(fetchQuestions);
 
     return {
       questions,
@@ -98,9 +139,11 @@ export default {
       addOption,
       newOption,
       newOptions,
-      newQuestion,
       removeOption,
-      dataError,
+      newOptionError,
+      deleteQuestion,
+      optionError,
+      newDesc,
     };
   },
 };
@@ -117,20 +160,22 @@ export default {
 
         <div v-if="selectedQuestion == New && editing == true">
           <div>
-            <form @submit.prevent="saveQuestion(newQuestion)">
+            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
-              <textarea id="desc" rows="10" columns="90" v-model="newQuestion.desc"></textarea>
+              <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
 
               <div v-for="option in newOptions">
                 <label for="optionNumber">Id: </label>
                 <input type="number" id="optionNumber" v-model="option.number" required />
                 <label for="option">Opción: </label>
                 <input type="text" id="option" v-model="option.option" required />
-                <button type="button" class="button-inline little-button delete-button" @click="removeOption(option)">Eliminar</button>
+                <button type="button" class="button-inline little-button delete-button"
+                  @click="removeOption(option)">Eliminar</button>
               </div>
-              
+
               <p>Nueva opción</p>
-              <p v-if="dataError != null" class="error">{{ dataError }}</p>
+              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
               <label for="newOptionNumber">Id: </label>
               <input type="number" id="newOptionNumber" min="1" v-model="newOption.number" />
               <label for="newOption">Opción: </label>
@@ -170,34 +215,40 @@ export default {
             <button class="little-button" @click="changeEditing(true)">
               Editar
             </button>
+            <button class="little-button delete-button" @click="deleteQuestion(question.id)">
+              Eliminar
+            </button>
           </div>
 
           <div v-else>
-            <form @submit.prevent="saveQuestion(question)">
+
+            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
-              <textarea id="desc" rows="10" columns="90" v-model="question.desc"></textarea>
+              <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
               <div v-for="option in newOptions">
                 <label for="optionNumber">Id: </label>
                 <input type="number" id="optionNumber" v-model="option.number" required />
                 <label for="option">Opción: </label>
                 <input type="text" id="option" v-model="option.option" required />
-                <button type="button" class="button-inline little-button delete-button" @click="removeOption(option)">Eliminar</button>
+                <button type="button" class="button-inline little-button delete-button"
+                  @click="removeOption(option)">Eliminar</button>
               </div>
 
               <p>Nueva opción</p>
-              <p v-if="dataError != null" class="error">{{ dataError }}</p>
-                <label for="optionNumber">Id: </label>
-                <input type="number" id="optionNumber" min="1" v-model="newOption.number"/>
-                <label for="newOption">Opción: </label>
-                <input type="text" id="newOption" v-model="newOption.option"/>
-                <button type="button" class="little-button button-inline" @click="addOption">
-                  Añadir
-                </button>
+              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
+              <label for="optionNumber">Id: </label>
+              <input type="number" id="optionNumber" min="1" v-model="newOption.number" />
+              <label for="newOption">Opción: </label>
+              <input type="text" id="newOption" v-model="newOption.option" />
+              <button type="button" class="little-button button-inline" @click="addOption">
+                Añadir
+              </button>
 
               <button class="little-button" @click="changeEditing(false)">
                 Cancelar
               </button>
-              <button class="little-button" type="submit">
+              <button type="submit" class="little-button">
                 Guardar
               </button>
             </form>
@@ -209,6 +260,7 @@ export default {
 </template>
 
 <style scoped>
+
 label {
   display: inline-block;
   width: 100px;
@@ -247,7 +299,7 @@ input {
   background-color: rgb(211, 91, 91);
 }
 
-.error{
+.error {
   background-color: rgb(211, 91, 91);
   color: white;
   display: block;
@@ -256,5 +308,4 @@ input {
   margin-left: auto;
   margin-right: auto;
 }
-
 </style>

@@ -12,8 +12,6 @@ from base.serializers import AuthSerializer
 from base.perms import UserIsStaffOrAdmin, UserIsStaff
 from base.models import Auth
 
-import json
-
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -140,6 +138,11 @@ class AllQuestionsView(generics.ListAPIView):
         QuestionOption.objects.filter(question=question).exclude(id__in=[o.id for o in newOpts]).delete()
         
         return Response({}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        question = get_object_or_404(Question, pk=request.data.get('id'))
+        question.delete()
+        return Response({}, status=status.HTTP_200_OK)
 
 class AllAuthsAPIView(generics.ListAPIView):
     queryset = Auth.objects.all()
