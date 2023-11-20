@@ -11,7 +11,7 @@ from rest_framework.status import (
 )
 
 from base.perms import UserIsStaff
-from .models import Census
+from .models import Census, CensusYesNo
 
 
 class CensusCreate(generics.ListCreateAPIView):
@@ -49,3 +49,39 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+class CensusYesNoCreate(generics.ListCreateAPIView):
+    permission_classes = (UserIsStaff,)
+
+    def create(self, request, *args, **kwargs):
+        voting_yesno_id = request.data.get('voting_yesno_id')
+        voters = request.data.get('voters')
+        try:
+            for voter in voters:
+                censusyesno = CensusYesNo(voting_yesno_id=voting_yesno_id, voter_id=voter)
+                censusyesno.save()
+        except IntegrityError:
+            return Response('Error try to create census', status=ST_409)
+        return Response('Census created', status=ST_201)
+
+    def list(self, request, *args, **kwargs):
+        voting_yesno_id = request.GET.get('voting_yesno_id')
+        voters = CensusYesNo.objects.filter(voting_yesno_id=voting_yesno_id).values_list('voter_id', flat=True)
+        return Response({'voters': voters})
+
+
+class CensusYesNoDetail(generics.RetrieveDestroyAPIView):
+
+    def destroy(self, request, voting_id, *args, **kwargs):
+        voters = request.data.get('voters')
+        censusyesno = CensusYesNo.objects.filter(voting_yesno_id=voting_yesno_id, voter_id__in=voters)
+        censusyesno.delete()
+        return Response('Voters deleted from census', status=ST_204)
+
+    def retrieve(self, request, voting_id, *args, **kwargs):
+        voter = request.GET.get('voter_id')
+        try:
+            CensusYesNo.objects.get(voting_yesno_id=voting_yesno_id, voter_id=voter)
+        except ObjectDoesNotExist:
+            return Response('Invalid voter', status=ST_401)
+        return Response('Valid voter')
+
