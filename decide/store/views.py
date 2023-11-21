@@ -9,7 +9,7 @@ from rest_framework import generics
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
-from base.perms import UserIsStaff, UserIsStaffOrAdmin
+from base.perms import UserIsStaffOrAdmin
 
 
 class StoreView(generics.ListAPIView):
