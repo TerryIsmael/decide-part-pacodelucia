@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption,QuestionYesNo, VotingYesNo
 from datetime import datetime
 
 
@@ -411,3 +411,21 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+class VotingYesNoModelTestCase(BaseTestCase):
+    def setUp(self):
+        q = QuestionYesNo(desc='Descripcion')
+        q.save()
+
+        self.v = VotingYesNo(name='Votacion Yes/No', question=q)
+        self.v.save()
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+        self.v = None
+
+    def testExist(self):
+        v=VotingYesNo.objects.get(name='Votacion Yes/No')
+        self.assertEquals(v.question.optionYes, 1)
+        self.assertEquals(v.question.optionNo, 2)
