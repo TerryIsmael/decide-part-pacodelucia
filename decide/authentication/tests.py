@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
@@ -164,3 +165,84 @@ class RegisterViewTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertFalse(User.objects.filter(username='testuser').exists())
+
+    def test_register_view(self):
+        # Realizar una solicitud POST a la vista de registro y comprubar si el usuario isActive
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data)
+
+        self.assertEqual(response.status_code, 201)
+
+        user = User.objects.get(username=data['username'])       
+        self.assertFalse(user.is_active)
+
+    def test_auth_view_successful(self):
+        # Realizar una solicitud POST a la vista de autenticación
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response_register = self.client.post('/authentication/register/', data_register)
+
+        data = {
+                'username': 'testuser', 
+                'clave': 'gvhgkzhhdliw'
+                }
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 201)
+
+        user = User.objects.get(username='testuser')
+
+        self.assertTrue(user.is_active)
+
+    def test_auth_view_invalid_data(self):
+        # Realizar una solicitud POST a la vista de autenticación con datos incompletos
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response_register = self.client.post('/authentication/register/', data_register)
+
+        data = {'username': 'testuser'}
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 400)
+
+        user = User.objects.get(username='testuser')
+        self.assertFalse(user.is_active)
+
+    def test_auth_view_invalid_credentials(self):
+        # Realizar una solicitud POST a la vista de autenticación con credenciales incorrectas
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data_register)
+        data = {'username': 'testuser', 'clave': 'incorrect_password'}
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 201)
+
+        user = User.objects.get(username='testuser')
+        self.assertFalse(user.is_active)

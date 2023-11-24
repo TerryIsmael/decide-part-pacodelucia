@@ -109,5 +109,3 @@ class AuthView(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({'user_pk': user.pk}, status=status.HTTP_201_CREATED)
-
-
