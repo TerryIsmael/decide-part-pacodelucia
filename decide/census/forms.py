@@ -26,10 +26,10 @@ class CreationCensusForm(forms.Form):
         ("UN", "Unemployed")
     ] 
 
-    born_date = forms.DateField()
-    gender = forms.CharField(max_length=2, choices=GENDER, null=true)
-    civil_state = forms.CharField(max_length=2, choices=CIVIL_STATE, null=true)
-    works = forms.CharField(max_length=2, choices=WORKS, null=true)
+    born_date = forms.DateField(required=False)
+    gender = forms.ChoiceField(choices=GENDER, required=False)
+    civil_state = forms.ChoiceField(choices=CIVIL_STATE, required=False)
+    works = forms.ChoiceField(choices=WORKS, required=False)
     
     class Meta:
 

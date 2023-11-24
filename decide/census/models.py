@@ -26,10 +26,10 @@ class Census(models.Model):
         ("UN", "Unemployed")
     ]
 
-    born_date = models.DateField()
-    gender = models.CharField(max_length=2, choices=GENDER, null=true)
-    civil_state = models.CharField(max_length=2, choices=CIVIL_STATE, null=true)
-    works = models.CharField(max_length=2, choices=WORKS, null=true)
+    born_date = models.DateField(null=True)
+    gender = models.CharField(max_length=2, choices=GENDER, null=True)
+    civil_state = models.CharField(max_length=2, choices=CIVIL_STATE, null=True)
+    works = models.CharField(max_length=2, choices=WORKS, null=True)
     
     class Meta:
         unique_together = (('voting_id','voter_id','born_date','gender','civil_state','works'),)
