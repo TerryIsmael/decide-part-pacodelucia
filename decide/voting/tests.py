@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption, QuestionByPreference, QuestionOptionByPreference,VotingByPreference
 from datetime import datetime
 
 
@@ -45,6 +45,28 @@ class VotingModelTestCase(BaseTestCase):
     def testExist(self):
         v=Voting.objects.get(name='Votacion')
         self.assertEquals(v.question.options.all()[0].option, "opcion 1")
+
+class VotingByPreferenceModelTestCase(BaseTestCase):
+    def setUp(self):
+        q=QuestionByPreference(desc='Descripcion')
+        q.save()
+
+        opt1 = QuestionOptionByPreference(question=q, option='Opción ejemplo 1')
+        opt1.save()
+        opt1 = QuestionOptionByPreference(question=q, option='Opción ejemplo 2')
+        opt1.save()
+
+        self.v = VotingByPreference(name='VotacionPorPreferencia', question=q)
+        self.v.save()
+        super().setUp()
+    
+    def tearDown(self):
+        super().tearDown()
+        self.v = None
+
+    def testExist(self):
+        v=VotingByPreference.objects.get(name='VotacionPorPreferencia')
+        self.assertEquals(v.question.options.all()[0].option, "Opción ejemplo 1")
 
 class VotingTestCase(BaseTestCase):
 
