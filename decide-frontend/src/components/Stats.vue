@@ -1,12 +1,20 @@
 <template>
-    <div>
-      <h1>Estadisticas de la votación</h1>
-      <h2>{{ stats.question }}</h2>
-      <p>Total de votos: {{stats.votes}}</p>
-      <p>Porcentaje de censo que ha votado: {{ stats.census }}%</p>
-      <!-- Mostrar otras estadísticas según sea necesario -->
-    </div>
-  </template>
+  <div>
+    <h1>Estadisticas de la votación: {{ stats.question }}</h1>
+    <table>
+      <tr>
+        <th>Total de votos</th>
+        <th>Porcentaje de censo que ha votado</th>
+        <th>Media del tiempo entre votos</th>
+      </tr>
+      <tr>
+        <td>{{stats.votes}}</td>
+        <td>{{ stats.census }}%</td>
+        <td>{{stats.avg_time_diff}} min</td>
+      </tr>
+    </table>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
@@ -40,5 +48,14 @@
   </script>
   
   <style scoped>
-  /* Estilos específicos del componente si es necesario */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
   </style>

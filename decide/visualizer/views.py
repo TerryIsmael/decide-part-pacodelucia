@@ -41,16 +41,12 @@ def stats(request,voting_id):
     avg_time_diff=avg_time_diff.total_seconds()/60 if avg_time_diff else None
     avg_time_diff=round(avg_time_diff,2)
 
-    # Calcular los votos por hora del día
-    votes_per_hour = votes.annotate(hour=ExtractHour('voted')).values('hour')
-
     data = {
         'voting': voting.id,
         'votes': votes_count,
         'census':percentage_voters,
         'question':question,
-        'avg_time_diff': avg_time_diff,
-        'votes_per_hour' : list(votes_per_hour),
+        'avg_time_diff': avg_time_diff
     }
 
     return JsonResponse(data)
