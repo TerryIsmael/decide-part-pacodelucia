@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import Voting from "../../models/Voting.js";
 
-// TODO: redirigir añadir questions y auths redirigiendo
+// TODO: redirigir y auths redirigiendo
 
 export default {
   setup() {
@@ -20,6 +20,19 @@ export default {
         const response = await fetch("http://localhost:8000/voting/");
         const data = await response.json();
         votings.value = data;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+    
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/voting/all-questions/", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        questions.value = data;
       } catch (error) {
         console.error("Error:", error);
       }
@@ -85,8 +98,8 @@ export default {
       fetchvotings();
       loading.value = false;
     };
-    
-    const deleteVoting = async (id) =>{
+
+    const deleteVoting = async (id) => {
       const votingDelete = {
         id: id,
       };
@@ -117,7 +130,7 @@ export default {
         question: voting.question.id,
         auths: voting.auths.map((auth) => auth.id),
       };
-      
+
       try {
         const response = await fetch("http://localhost:8000/voting/voting/", {
           method: "POST",
@@ -170,28 +183,30 @@ export default {
     onMounted(fetchvotings);
 
     return {
-      votings,
-      selectedVoting,
-      showForm,
-      changeSelected,
-      dateFormat,
-      isNumberInTally,
-      New,
-      editing,
-      questions,
-      auths,
-      changeEditing,
-      newVoting,
-      saveVoting,
-      applyAction,
-      deleteVoting,
-      loading,
-    };
-  },
+    votings,
+    selectedVoting,
+    showForm,
+    changeSelected,
+    dateFormat,
+    isNumberInTally,
+    New,
+    editing,
+    questions,
+    auths,
+    changeEditing,
+    newVoting,
+    saveVoting,
+    applyAction,
+    deleteVoting,
+    loading,
+    fetchQuestions,
+  };
+},
 };
 </script>
 
 <template>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="nueva-cadena-de-integridad" crossorigin="anonymous">
   <div>
     <h2>Listado de votaciones</h2>
     <ul>
@@ -212,6 +227,8 @@ export default {
             <select required id="question" v-model="newVoting.question">
               <option v-for="question in questions" :key="question.id" :value="question"> {{ question.desc }} </option>
             </select>
+            <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
+            <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
           </div>
           <div>
             <label for="auths">Auths: </label>
@@ -228,8 +245,7 @@ export default {
 
       <li v-for="voting in votings" :key="voting.id">
         <h3>
-          <button 
-          @click="changeSelected(voting.id);changeEditing(false);">
+          <button @click="changeSelected(voting.id); changeEditing(false);">
             {{ voting.name }}
             <span v-if="voting.start_date != null"> - </span>
             {{ dateFormat(voting.start_date) }}
@@ -239,11 +255,14 @@ export default {
         </h3>
 
         <div v-if="selectedVoting === voting.id">
-          <button :disabled="loading" v-if="voting.start_date == null " class="little-button" @click="applyAction(voting.id, 'start')"> Empezar </button>
-          <button :disabled="loading" v-if="voting.start_date != null && voting.end_date == null" class="little-button" @click="applyAction(voting.id, 'stop')"> Parar </button>
-          <button :disabled="loading" v-if="voting.end_date != null && voting.postproc == null" class="little-button" @click="applyAction(voting.id, 'tally')"> Recuento </button>
+          <button :disabled="loading" v-if="voting.start_date == null" class="little-button"
+            @click="applyAction(voting.id, 'start')"> Empezar </button>
+          <button :disabled="loading" v-if="voting.start_date != null && voting.end_date == null" class="little-button"
+            @click="applyAction(voting.id, 'stop')"> Parar </button>
+          <button :disabled="loading" v-if="voting.end_date != null && voting.postproc == null" class="little-button"
+            @click="applyAction(voting.id, 'tally')"> Recuento </button>
           <p class="bold" v-if="loading">Cargando...</p>
-          
+
           <p><span class="bold">Id:</span> {{ voting.id }}</p>
           <div v-if="!editing">
             <p><span class="bold">Descripción: </span>{{ voting.desc }}</p>
@@ -274,7 +293,8 @@ export default {
                 <th>Votos</th>
               </tr>
               <tbody>
-                <tr v-for="option in voting.postproc" :key="option.number" :class="{remarkable: isNumberInTally(voting, option.number),}">
+                <tr v-for="option in voting.postproc" :key="option.number"
+                  :class="{ remarkable: isNumberInTally(voting, option.number), }">
                   <td>{{ option.number }}</td>
                   <td>{{ option.option }}</td>
                   <td>{{ option.votes }}</td>
@@ -312,6 +332,8 @@ export default {
                   {{ question.desc }}
                 </option>
               </select>
+              <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
+              <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
             </div>
             <div>
               <label for="auths">Auths: </label>
@@ -354,7 +376,6 @@ export default {
 </template>
 
 <style scoped>
-
 #auths {
   background-color: #3b3b3b;
   height: 60px;
@@ -373,4 +394,7 @@ button:disabled {
   background-color: grey;
 }
 
+.adjusted{
+  width: auto;
+}
 </style>
