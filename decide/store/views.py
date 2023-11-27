@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 import django_filters.rest_framework
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
@@ -8,7 +9,7 @@ from rest_framework import generics
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
-from base.perms import UserIsStaff
+from base.perms import UserIsStaffOrAdmin
 
 
 class StoreView(generics.ListAPIView):
@@ -18,7 +19,7 @@ class StoreView(generics.ListAPIView):
     filterset_fields = ('voting_id', 'voter_id')
 
     def get(self, request):
-        self.permission_classes = (UserIsStaff,)
+        self.permission_classes = (UserIsStaffOrAdmin,)
         self.check_permissions(request)
         return super().get(request)
 
@@ -80,3 +81,10 @@ class StoreView(generics.ListAPIView):
         v.save()
 
         return  Response({})
+
+    def delete(self, request):
+        voteId = request.data.get('id')
+        vote = get_object_or_404(Vote, pk=voteId) 
+        vote.delete()
+        return Response({"Eliminado correctamente"})
+

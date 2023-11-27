@@ -90,6 +90,7 @@ input, textarea, select {
   border-radius: 5px;
   border: 2px solid grey;
   width: 67%;
+  resize: none;
 }
 
 input {
@@ -132,7 +133,6 @@ select option:checked {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-
   background-color: rgb(0, 139, 86);
   color: rgb(255, 255, 255);
   padding: 8px;
@@ -144,6 +144,7 @@ select option:checked {
   margin-bottom: 10px;
 }
 
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -153,7 +154,6 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-
   background-color: rgb(0, 139, 139);
   color: rgb(255, 255, 255);
   padding: 8px;
@@ -162,4 +162,9 @@ button {
   cursor: pointer;
   width: 100%;
   margin-bottom: 10px;
+}
+
+.bold {
+  font-weight: bold;
+  color: #ffffff;
 }
