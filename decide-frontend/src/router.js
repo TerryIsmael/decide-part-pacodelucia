@@ -4,12 +4,14 @@ import Voting from './components/Voting.vue';
 import Tokens from './components/Tokens.vue';
 import Vote from './components/Vote.vue';
 import Question from './components/Question.vue';
+import Mixnet from './components/Mixnet.vue';
 
 const routes = [
   { path: '/admin/voting', component: Voting },
   { path: '/admin/authtoken', component: Tokens },
   { path: '/admin/vote', component: Vote },
   { path: '/admin/question', component: Question },
+  { path: '/admin/mixnet', component: Mixnet },
   { path: '/', component: HelloWorld }
 ];
 
