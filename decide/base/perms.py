@@ -12,7 +12,7 @@ class UserIsStaff(permissions.BasePermission):
                 response=True)
         return response.json().get('is_staff', False)
 
-class UserIsStaffOrAdmin(permissions.BasePermission):
+class UserIsStaffOrAdmin(permissions.BasePermission): 
 
     def has_permission(self, request, view):
         if not request.auth:
