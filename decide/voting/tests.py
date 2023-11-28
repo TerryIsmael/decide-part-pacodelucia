@@ -429,3 +429,31 @@ class VotingYesNoModelTestCase(BaseTestCase):
         v=VotingYesNo.objects.get(name='Votacion Yes/No')
         self.assertEquals(v.question.optionYes, 1)
         self.assertEquals(v.question.optionNo, 2)
+
+class VotingYesNoTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_to_string(self):
+        v = self.create_voting()
+        self.assertEqual(str(v), "test votingYesNo")
+        self.assertEqual(str(v.question), "test question yesno")
+        self.assertEqual(str(v.question.optionYes), '1')
+        self.assertEqual(str(v.question.optionNo), '2')
+    
+    def create_voting(self):
+        q = QuestionYesNo(desc='test question yesno')
+        q.save()
+        v = VotingYesNo(name='test votingYesNo', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths_yesno.add(a)
+
+        return v
