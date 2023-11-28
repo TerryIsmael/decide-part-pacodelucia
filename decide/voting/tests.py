@@ -68,6 +68,36 @@ class VotingByPreferenceModelTestCase(BaseTestCase):
         v=VotingByPreference.objects.get(name='VotacionPorPreferencia')
         self.assertEquals(v.question.options.all()[0].option, "Opción ejemplo 1")
 
+class VotingByPreferenceTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_to_string(self):
+        v = self.create_voting_by_preference()
+        self.assertEqual(str(v), "test voting by preference")
+        self.assertEqual(str(v.question), "test by preference question")
+        self.assertEqual(str(v.question.options.all()[0]), "option 1 (2)")
+
+    def create_voting_by_preference(self):
+        q = QuestionByPreference(desc='test by preference question')
+        q.save()
+        for i in range(5):
+            opt = QuestionOptionByPreference(question=q, option='option {}'.format(i+1))
+            opt.save()
+        v = VotingByPreference(name='test voting by preference', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
