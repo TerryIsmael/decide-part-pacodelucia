@@ -96,6 +96,22 @@ class VotingByPreferenceTestCase(BaseTestCase):
         v.auths.add(a)
 
         return v
+    
+    def test_create_voting_by_preference_API(self):
+        self.login()
+        data = {
+            'name': 'Example',
+            'desc': 'Description example',
+            'question': 'Your preferences ',
+            'question_opt': ['cat', 'dog', 'horse']
+        }
+        response = self.client.post('/custom/votingbypreference', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        voting = VotingByPreference.objects.get(name='Example')
+        self.assertEqual(voting.desc, 'Description example')
+        
+
 
 
 class VotingTestCase(BaseTestCase):
