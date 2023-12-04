@@ -457,3 +457,17 @@ class VotingYesNoTestCase(BaseTestCase):
         v.auths_yesno.add(a)
 
         return v
+    
+    def test_create_voting_yesno_API(self):
+        self.login()
+        data = {
+            'name': 'Example Yes/No',
+            'desc': 'Description example Yes/No',
+            'question': 'Do you like cats?',
+            'question_opt': ['Yes', 'No']
+        }
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        voting = VotingYesNo.objects.get(name='Example Yes/No')
+        self.assertEqual(voting.desc, 'Description example Yes/No')
