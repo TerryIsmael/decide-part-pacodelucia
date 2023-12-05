@@ -134,7 +134,6 @@ def getVotingsByUser(request):
         user_id = token.user.id
         census = Census.objects.filter(voter_id=user_id)
         votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
-        print(votings)
         context['votings'] = VotingSerializer(votings, many=True).data  
         context['Access-Control-Allow-Credentials'] = 'true'
         return JsonResponse(context)
