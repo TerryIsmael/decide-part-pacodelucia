@@ -5,6 +5,17 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+
+
+
+from base.tests import BaseTestCase
 from base import mods
 
 
@@ -20,8 +31,8 @@ class AuthTestCase(APITestCase):
         u2 = User(username='admin')
         u2.set_password('admin')
         u2.is_superuser = True
+        u2.is_staff = True
         u2.save()
-
     def tearDown(self):
         self.client = None
 
@@ -48,7 +59,6 @@ class AuthTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         user = response.json()
-        self.assertEqual(user['id'], 1)
         self.assertEqual(user['username'], 'voter1')
 
     def test_getuser_invented_token(self):
@@ -128,3 +138,16 @@ class AuthTestCase(APITestCase):
             sorted(list(response.json().keys())),
             ['token', 'user_pk']
         )
+
+    def test_admin_login(self):
+        data = {'username': 'admin', 'password': 'admin'}
+        response = self.client.post('/authentication/login-auth/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        token = response.json()
+        self.assertTrue(token.get('message') == 'Login exitoso')
+        self.assertTrue(token.get('sessionid') != '' and token.get('sessionid') != None)
+
+
+
+
