@@ -7,12 +7,16 @@ from rest_framework.status import (
 )
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
+from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.contrib.auth import authenticate, login
+import json
+from django.middleware.csrf import get_token
 from .serializers import UserSerializer
 
 
@@ -120,3 +124,45 @@ def addToken(request, **kwargs):
         response = JsonResponse({}, status=HTTP_404_NOT_FOUND)
         response['Access-Control-Allow-Credentials'] = 'true'
         return response
+    
+@csrf_exempt
+def adminLogin(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            username = data.get('username')
+            password = data.get('password')
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and user.is_staff:
+                login(request, user)
+                csrf_token = get_token(request)
+                response = JsonResponse({'message': 'Login exitoso', 'sessionid': request.session.session_key})
+                response.set_cookie('csrftoken', csrf_token, samesite='Lax')
+                return response
+            else:
+                return JsonResponse({'message': 'Credenciales incorrectas'}, status=401)
+        except json.JSONDecodeError:
+            return JsonResponse({'message': 'Formato JSON incorrecto en la petición'}, status=400)
+    return JsonResponse({'message': 'Método no permitido'}, status=405)      
+
+@ensure_csrf_cookie
+def isAdmin(request):
+    sessionid = request.COOKIES.get('sessionid', '')
+    print(request)
+    try:
+        session = Session.objects.get(session_key=sessionid)
+        user_id = session.get_decoded().get('_auth_user_id')
+
+        user = User.objects.get(id=user_id)
+
+        user_data = {
+            'is_authenticated': user.is_authenticated,
+            'is_staff': user.is_staff if user.is_authenticated else False,
+            'username': user.username if user.is_authenticated else None,
+        }
+        return JsonResponse({'user_data': user_data})
+    except:
+        return JsonResponse({'user_data': {'is_authenticated': False, 'is_staff': False, 'username': None}})
+

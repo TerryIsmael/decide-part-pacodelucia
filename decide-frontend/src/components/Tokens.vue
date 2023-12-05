@@ -38,6 +38,7 @@ export default {
         };
     },
     mounted() {
+        this.isUserLogged();
         this.getTokens();
     },
     methods: {
@@ -54,7 +55,7 @@ export default {
         },
         async getTokens() {
             try {
-                const response = await fetch('http://localhost:8000/authentication/get-auth/', {
+                const response = await fetch(import.meta.env.VITE_API_URL + '/authentication/get-auth/', {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -69,7 +70,7 @@ export default {
         },
         async deleteToken(userId) {
             try {
-                const response = await fetch(`http://localhost:8000/authentication/del-auth/${userId}`, {
+                const response = await fetch(import.meta.env.VITE_API_URL + `/authentication/del-auth/${userId}`, {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -84,7 +85,7 @@ export default {
         },
         async addToken(userId) {
             try {
-                const response = await fetch(`http://localhost:8000/authentication/add-auth/${userId}`, {
+                const response = await fetch(import.meta.env.VITE_API_URL + `/authentication/add-auth/${userId}`, {
                     credentials: 'include',
                 });
                 if (response.ok) {
@@ -96,6 +97,29 @@ export default {
                 console.log(error);
                 alert('No se pudo eliminar el token');
             }
+        },
+        isUserLogged() {
+            fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
+                    method: 'GET',
+                    credentials: 'include',
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        this.$router.push('/admin/login');
+                    }
+                })
+                .then((data) => {
+                    if (data.user_data && data.user_data.is_staff) {
+                        
+                    } else {
+                        this.$router.push('/admin/login');
+                    }
+                })
+                .catch(() => {
+                    this.$router.push('/admin/login');
+                });
         }
     }
 };
