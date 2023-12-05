@@ -471,3 +471,89 @@ class VotingYesNoTestCase(BaseTestCase):
 
         voting = VotingYesNo.objects.get(name='Example Yes/No')
         self.assertEqual(voting.desc, 'Description example Yes/No')
+    
+    
+    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+
+
+
+    def create_voters(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+
+    def get_or_create_user(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        clear[v.question.optionYes] = 0
+        for i in range(random.randint(0, 5)):
+            a, b = self.encrypt_msg(v.question.optionYes, v)
+            data = {
+                'voting': v.id,
+                'voter': voter.voter_id,
+                'vote': { 'a': a, 'b': b },
+            }
+            clear[v.question.optionYes] += 1
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post('custom/store/yesno', json=data)
+        clear[v.question.optionNo] = 0
+        for i in range(random.randint(0, 5)):
+            a, b = self.encrypt_msg(v.question.optionNo, v)
+            data = {
+                'voting': v.id,
+                'voter': voter.voter_id,
+                'vote': { 'a': a, 'b': b },
+            }
+            clear[v.question.optionNo] += 1
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post('custom/store/yesno', json=data)
+        
+        return clear
+
+    def test_complete_voting(self):
+        v = self.create_voting()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+
+        self.assertEqual(tally.get(v.question.optionYes, 0), clear.get(v.question.optionYes, 0))
+        self.assertEqual(tally.get(v.question.optionNo, 0), clear.get(v.question.optionNo, 0))
+
+        for q in v.postproc:
+            if q["option"] == 'Si':
+                self.assertEqual(tally.get(v.question.optionYes, 0), q["votes"])
+            else:
+                self.assertEqual(tally.get(v.question.optionNo, 0), q["votes"])
