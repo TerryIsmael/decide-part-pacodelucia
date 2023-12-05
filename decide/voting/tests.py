@@ -97,6 +97,78 @@ class VotingByPreferenceTestCase(BaseTestCase):
 
         return v
     
+    def create_voters_by_preference(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+    
+    def encrypt_msg_by_preference(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+    
+    def get_or_create_user_by_preference(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+    
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for i in range(random.randint(0, 5)):
+                cont=0
+                for opt in v.question.options.all():
+                    if cont==0:
+                        clear[opt.number] = 0
+                    opt.number=opt.number+1
+                    cont=cont+1
+                
+                a, b = self.encrypt_msg_by_preference(opt.number, v)
+                data = {
+                        'votingbypreference': v.id,
+                        'voter': voter.voter_id,
+                        'vote': { 'a': a, 'b': b },
+                }
+                    
+                user = self.get_or_create_user_by_preference(voter.voter_id)
+                self.login(user=user.username)
+                voter = voters.pop()
+                mods.post('store', json=data)
+        return clear
+    
+    def test_complete_voting_by_preference(self):
+        v = self.create_voting_by_preference()
+        self.create_voters_by_preference(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        for q in v.postproc:
+            self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    
     def test_create_voting_by_preference_API(self):
         self.login()
         data = {
