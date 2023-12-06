@@ -557,3 +557,27 @@ class VotingYesNoTestCase(BaseTestCase):
                 self.assertEqual(tally.get(v.question.optionYes, 0), q["votes"])
             else:
                 self.assertEqual(tally.get(v.question.optionNo, 0), q["votes"])
+
+    def test_create_voting_yesno_from_api(self):
+        data = {'name': 'Example'}
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            'name': 'Example Yes/No',
+            'desc': 'Description example Yes/No',
+            'question': 'Do you like cats?',
+            'question_opt': ['Yes', 'No']
+        }
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 201)
