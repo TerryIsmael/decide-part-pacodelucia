@@ -150,7 +150,6 @@ def adminLogin(request):
 @ensure_csrf_cookie
 def isAdmin(request):
     sessionid = request.COOKIES.get('sessionid', '')
-    print(request)
     try:
         session = Session.objects.get(session_key=sessionid)
         user_id = session.get_decoded().get('_auth_user_id')

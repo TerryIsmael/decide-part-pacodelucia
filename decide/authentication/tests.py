@@ -174,6 +174,20 @@ class AuthTestCase(APITestCase):
         self.assertTrue(token.get('message') == 'Formato JSON incorrecto en la petición')
         self.assertTrue(token.get('sessionid') == '' or token.get('sessionid') == None)
 
+    def test_is_admin(self):
+        data = {'username': 'admin', 'password': 'admin'}
+        response = self.client.post('/authentication/login-auth/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        token = response.json()
+        self.assertTrue(token.get('message') == 'Login exitoso')
+        self.assertTrue(token.get('sessionid') != '' and token.get('sessionid') != None)
+
+        response = self.client.get('/authentication/admin-auth/', format='json')
+        credentials = response.json()
+        self.assertTrue(credentials.get('user_data').get('is_authenticated') == True)
+        self.assertTrue(credentials.get('user_data').get('is_staff') == True)
+        self.assertTrue(credentials.get('user_data').get('username') != '' and credentials.get('user_data').get('username') != None)
 
 
 
