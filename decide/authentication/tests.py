@@ -166,6 +166,14 @@ class AuthTestCase(APITestCase):
         self.assertTrue(token.get('message') == 'Método no permitido')
         self.assertTrue(token.get('sessionid') == '' or token.get('sessionid') == None)
 
+    def test_admin_login_bad_json(self):
+        response = self.client.post('/authentication/login-auth/', format='json')
+        self.assertEqual(response.status_code, 400)
+
+        token = response.json()
+        self.assertTrue(token.get('message') == 'Formato JSON incorrecto en la petición')
+        self.assertTrue(token.get('sessionid') == '' or token.get('sessionid') == None)
+
 
 
 
