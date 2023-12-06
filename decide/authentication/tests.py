@@ -196,3 +196,18 @@ class AuthTestCase(APITestCase):
         self.assertTrue(credentials.get('user_data').get('is_staff') == False)
         self.assertTrue(credentials.get('user_data').get('username') == '' or credentials.get('user_data').get('username') == None)
 
+    def test_get_tokens(self):
+        data = {'username': 'admin', 'password': 'admin'}
+        response = self.client.post('/authentication/login-auth/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        token = response.json()
+        self.assertTrue(token.get('message') == 'Login exitoso')
+        self.assertTrue(token.get('sessionid') != '' and token.get('sessionid') != None)
+
+        response = self.client.get('/authentication/get-auth/', format='json')
+        self.assertEqual(response.status_code, 200)
+
+        tokens = response.json()
+        self.assertTrue(len(tokens.get('tokens')) == 2)
+
