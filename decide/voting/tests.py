@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption, Auth
 from datetime import datetime
 
 
@@ -36,6 +36,10 @@ class VotingModelTestCase(BaseTestCase):
 
         self.v = Voting(name='Votacion', question=q)
         self.v.save()
+
+        a = Auth.objects.create(url=settings.BASEURL, me=True, name='test auth')
+        a.save()
+
         super().setUp()
 
     def tearDown(self):
@@ -49,6 +53,17 @@ class VotingModelTestCase(BaseTestCase):
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
+        self.q = Question(desc='Descripcion')
+        self.q.save()
+        
+        opt1 = QuestionOption(question=self.q, option='opcion 1')
+        opt1.save()
+        opt1 = QuestionOption(question=self.q, option='opcion 2')
+        opt1.save()
+
+        self.a = Auth.objects.create(url=settings.BASEURL, me=True, name='test auth')
+        self.a.save()
+
         super().setUp()
 
     def tearDown(self):
@@ -97,7 +112,7 @@ class VotingTestCase(BaseTestCase):
         v.auths.add(a)
 
         return v
-
+  
     def create_voters(self, v):
         for i in range(100):
             u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
@@ -266,6 +281,159 @@ class VotingTestCase(BaseTestCase):
         self.login()
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
         self.assertEquals(response.status_code, 405)
+
+    def test_update_voting_front(self):
+        voting = self.create_voting()
+
+        # login with user admin
+        self.login()
+        data = {'id': voting.pk,'action': 'bad'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+        # STATUS VOTING: not started
+        for action in ['stop', 'tally']:
+            data = {'id': voting.pk,'action': action}
+            response = self.client.put('/voting/voting/', data, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.json(), 'Voting is not started')
+
+        data = {'id': voting.pk,'action': 'start'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
+
+        # STATUS VOTING: started
+        data = {'id': voting.pk,'action': 'start'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'id': voting.pk,'action': 'tally'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is not stopped')
+
+        data = {'id': voting.pk,'action': 'stop'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting stopped')
+
+        # STATUS VOTING: stopped
+        data = {'id': voting.pk,'action': 'start'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'id': voting.pk,'action': 'stop'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'id': voting.pk,'action': 'tally'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'No votes to tally')
+
+        # STATUS VOTING: tallied
+        data = {'id': voting.pk,'action': 'start'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'id': voting.pk,'action': 'stop'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'id': voting.pk,'action': 'tally'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already tallied')
+        
+    def test_update_voting_front_with_votes(self):
+        voting = self.create_voting()
+        self.create_voters(voting)
+
+        voting.create_pubkey()
+        voting.start_date = timezone.now()
+        voting.save()
+
+        self.store_votes(voting)
+
+        self.login()
+
+        data = {'id': voting.pk,'action': 'stop'}
+        response = self.client.put('/voting/voting/', data, format='json')
+
+        data = {'id': voting.pk,'action': 'tally'}
+        response = self.client.put('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting tallied')
+
+    def test_create_voting_front(self):
+        
+        data = {
+            'name': 'example name',
+            'desc': 'example description',
+            'question': self.q.id,
+            'auths': [self.a.id],
+        }
+        
+        self.login()
+        response = self.client.post('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_voting_front_400(self):
+        data = {'name': 'Example'}
+        
+        data2 = {
+            'name': 'example name',
+            'desc': 'example description',
+            'question': self.q.id,
+            'auths': [self.a.id],
+        }
+        
+        response = self.client.post('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.post('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.post('/voting/voting/', data2, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = self.client.post('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_delete_voting_front(self):
+        
+        voting = self.create_voting()
+        data = {'id': voting.pk}
+        self.login()
+        response = self.client.delete('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_voting_front_400(self):
+        
+        voting = self.create_voting()
+        data = {'id': voting.pk}
+
+        response = self.client.delete('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+        
+        self.login(user='noadmin')
+        response = self.client.delete('/voting/voting/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        self.login()
+
+        response = self.client.delete('/voting/voting/')
+        self.assertEqual(response.status_code, 404)
         
 class LogInSuccessTests(StaticLiveServerTestCase):
 
