@@ -189,5 +189,10 @@ class AuthTestCase(APITestCase):
         self.assertTrue(credentials.get('user_data').get('is_staff') == True)
         self.assertTrue(credentials.get('user_data').get('username') != '' and credentials.get('user_data').get('username') != None)
 
-
+    def test_is_admin_not_logged(self):
+        response = self.client.get('/authentication/admin-auth/', format='json')
+        credentials = response.json()
+        self.assertTrue(credentials.get('user_data').get('is_authenticated') == False)
+        self.assertTrue(credentials.get('user_data').get('is_staff') == False)
+        self.assertTrue(credentials.get('user_data').get('username') == '' or credentials.get('user_data').get('username') == None)
 
