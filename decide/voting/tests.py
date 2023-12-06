@@ -286,6 +286,10 @@ class VotingTestCase(BaseTestCase):
         self.assertEquals(voting['pub_key']['g'], str(v.pub_key.g))
         self.assertEquals(voting['pub_key']['y'], str(v.pub_key.y))
     
+    def test_get_voting_string_keys_404(self):
+        response = self.client.get('/voting/12345/stringkeys')
+        self.assertEquals(response.status_code, 404)
+    
 class GetVotingsByUserTest(TestCase):
     def setUp(self):
         self.client = Client()
