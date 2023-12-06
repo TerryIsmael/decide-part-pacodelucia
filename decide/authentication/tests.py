@@ -211,3 +211,9 @@ class AuthTestCase(APITestCase):
         tokens = response.json()
         self.assertTrue(len(tokens.get('tokens')) == 2)
 
+    def test_get_tokens_not_logged(self):
+        response = self.client.get('/authentication/get-auth/', format='json')
+        self.assertEqual(response.status_code, 401)
+
+        tokens = response.json()
+        self.assertTrue(tokens.get('tokens') == None)
