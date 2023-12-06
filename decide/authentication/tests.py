@@ -148,6 +148,15 @@ class AuthTestCase(APITestCase):
         self.assertTrue(token.get('message') == 'Login exitoso')
         self.assertTrue(token.get('sessionid') != '' and token.get('sessionid') != None)
 
+    def test_admin_login_bad_credentials(self):
+        data = {'username': 'admin', 'password': '123'}
+        response = self.client.post('/authentication/login-auth/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        token = response.json()
+        self.assertTrue(token.get('message') == 'Credenciales incorrectas')
+        self.assertTrue(token.get('sessionid') == '' or token.get('sessionid') == None)
+
 
 
 
