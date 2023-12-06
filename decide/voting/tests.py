@@ -309,6 +309,14 @@ class GetVotingsByUserTest(TestCase):
 
         Census.objects.create(voter_id=user.pk, voting_id=self.voting1.pk)
         Census.objects.create(voter_id=user.pk, voting_id=self.voting2.pk)
+    
+    def tearDown(self):
+        self.client = None
+        self.token.delete()
+        self.token.delete()
+        self.voting1.delete()
+        self.voting2.delete()
+        super().tearDown()
 
     def test_get_votings_by_user(self):
         self.client.cookies['decide'] = self.token.key
@@ -316,6 +324,10 @@ class GetVotingsByUserTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['votings'][0]['name'], 'test voting 1')
         self.assertEqual(response.json()['votings'][1]['name'], 'test voting 2')
+    
+    def test_get_votings_by_user_401(self):
+        response = self.client.get('/voting/getbyuser')
+        self.assertEqual(response.status_code, 401)
         
         
 class LogInSuccessTests(StaticLiveServerTestCase):
