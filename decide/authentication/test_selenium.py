@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from django.conf import settings
 
 class AdminTestCase(StaticLiveServerTestCase):
 
@@ -55,7 +56,7 @@ class VoterTestCase(StaticLiveServerTestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.port = 8000
+        cls.port = settings.BACKEND_TEST_PORT
         super().setUpClass()
 
     def setUp(self):
