@@ -312,10 +312,6 @@ class GetVotingsByUserTest(TestCase):
     
     def tearDown(self):
         self.client = None
-        self.token.delete()
-        self.token.delete()
-        self.voting1.delete()
-        self.voting2.delete()
         super().tearDown()
 
     def test_get_votings_by_user(self):
