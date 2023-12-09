@@ -16,9 +16,11 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .models import Census
 from django.views.generic import ListView
+from django.views import View
 from django.http import HttpResponse
 from django.shortcuts import render
 from .forms import CreationCensusForm
+from rest_framework.views import APIView
 from django.views.generic.base import TemplateView
 
 class CensusCreate(generics.ListCreateAPIView):
@@ -61,74 +63,86 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
 
-def createCensus(request):
-    if request.method == 'GET':
-        return render (request, 'census_create.html',{'form': CreationCensusForm})
-    else:
-        if request.method == 'POST':
+class CreateCensus(View):
+    def get(self, request):
+        form = CreationCensusForm()
+        return render(request, 'census_create.html', {'form': form})
+
+    def post(self, request):
+        form = CreationCensusForm(request.POST)
+        if form.is_valid():
             try:
                 census = Census.objects.create(
-
-                    voting_id = request.POST['voting_id'],
-                    voter_id = request.POST['voter_id'],
-                    born_date = request.POST['born_date'],
-                    gender = request.POST['gender'],
-                    civil_state = request.POST['civil_state'],
-                    works = request.POST['works']
-
+                    voting_id=form.cleaned_data['voting_id'],
+                    voter_id=form.cleaned_data['voter_id'],
+                    born_year=form.cleaned_data['born_year'],
+                    gender=form.cleaned_data['gender'],
+                    civil_state=form.cleaned_data['civil_state'],
+                    works=form.cleaned_data['works'],
+                    country = form.cleaned_data['country'],
+                    religion = form.cleaned_data['religion']
                 )
                 census.save()
-                return render(request, 'census_suceed.html', {'census':census})
-
+                return render(request, 'census_suceed.html', {'census': census})
             except:
-                return render(request,'census_create.html',{'form': CreationCensusForm, "error": 'Census already exist'})
-        return render(request,'census_create.html',{'form':CreationCensusForm})
-
-def  voitingIdSet():
-    conjunto_voting=set()
-    for census in census.objects.all():
-        conjunto_voting.add(census.voting_id)
-    return conjunto_voting
+                return render(request, 'census_create.html', {'form': form, "error": 'Census already exist'})
+        return render(request, 'census_create.html', {'form': form})
 
 
-def filter(request):
-    censo =census.objects.all()
-    votingsIds = votingIdSet()
-    return  render(request, 'filterCensus.html', {'census': censo, 'votingsIds':votingsIds})
+class filterClass():
 
-def filterGender(self, request, *args, **kwargsView):
-    model = Census
-    template_name = 'filterCensus.html'
-    context_object_name = 'census'
-    gender = request.GET.get('gender')
-    census = Census.objects.filter(gender=gender)
-    return Response ({'census': census})
+    def filterGender(self, request, *args, **kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
 
-def filterWorks(self, request,*args, **kwargsView):
-    model = Census
-    template_name = 'filterCensus.html'
-    context_object_name = 'census'
+        gender = request.GET.get('gender')
+        census = Census.objects.filter(gender=gender)
+        return Response ({'census': census})
 
-    works = request.GET.get('works')
-    census = Census.objects.filter(works =works)
-    return Response ({'census': census})
+    def filterWorks(self, request,*args, **kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
 
-def filterCivilState(self, request,*args, **kwargsView):
-    model = Census
-    template_name = 'filterCensus.html'
-    context_object_name = 'census'
+        works = request.GET.get('works')
+        census = Census.objects.filter(works =works)
+        return Response ({'census': census})
 
-    civil_state = request.GET.get('civil_state')
-    census = Census.objects.filter(civil_state=civil_state)
-    return Response ({'census': census})
+    def filterCivilState(self, request,*args, **kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
 
-def filterBornYear(sef,request,*args,**kwargsView):
-    model = Census
-    template_name = 'filterCensus.html'
-    context_object_name = 'census'
+        civil_state = request.GET.get('civil_state')
+        census = Census.objects.filter(civil_state=civil_state)
+        return Response ({'census': census})
 
-    born_year = request.GET.get('born_year')
-    census = Census.objects.filter(born_date__year=born_year)
-    return Response ({'census': census})
+    def filterBornYear(sef,request,*args,**kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
 
-    
+        born_year = request.GET.get('born_year')
+        census = Census.objects.filter(born_year=born_year)
+        return Response ({'census': census})
+
+    def filterCountry(sef,request,*args,**kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
+
+        country = request.GET.get('country')
+        census = Census.objects.filter(country=country)
+        return Response ({'census': census})
+
+    def filterReligion(sef,request,*args,**kwargsView):
+        model = Census
+        template_name = 'filterCensus.html'
+        context_object_name = 'census'
+
+        religion = request.GET.get('religion')
+        census = Census.objects.filter(religion=religion)
+        return Response ({'census': census})
+
+            
