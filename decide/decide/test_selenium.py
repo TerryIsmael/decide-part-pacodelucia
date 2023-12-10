@@ -1,22 +1,20 @@
-from django.test import TestCase
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from base.tests import BaseTestCase
-import time
 from django.utils import timezone
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from django.conf import settings
-from voting.models import *
+from voting.models import Voting, Question, QuestionOption
 from census.models import Census
 from django.contrib.auth.models import User
 
 class FrontendTest(StaticLiveServerTestCase):
-    
+
     @classmethod
     def setUpClass(cls):
         cls.port = settings.BACKEND_TEST_PORT
@@ -61,9 +59,9 @@ class FrontendTest(StaticLiveServerTestCase):
         Census.objects.create(voter_id=user.pk, voting_id=self.voting2.pk)
         Census.objects.create(voter_id=user.pk, voting_id=self.voting3.pk)
 
-        super().setUp()            
-            
-    def tearDown(self):           
+        super().setUp()
+
+    def tearDown(self):
         super().tearDown()
         self.driver.quit()
 

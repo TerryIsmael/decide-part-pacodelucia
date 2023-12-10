@@ -280,7 +280,7 @@ class VotingTestCase(BaseTestCase):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(voting['name'], 'test voting')
         self.assertEquals(keybits, settings.KEYBITS)
-        for k, val in voting['pub_key'].items():
+        for _, val in voting['pub_key'].items():
             self.assertIsInstance(val, str)
         self.assertEquals(voting['pub_key']['p'], str(v.pub_key.p))
         self.assertEquals(voting['pub_key']['g'], str(v.pub_key.g))
