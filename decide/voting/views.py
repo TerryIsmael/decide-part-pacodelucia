@@ -130,14 +130,13 @@ def getVotingsByUser(request):
     decideid = request.COOKIES.get('decide')
     context = {}
     try:
-        token = get_object_or_404(Token, key=decideid)
+        token = Token.objects.get(key=decideid)
+        print(token)
         user_id = token.user.id
         census = Census.objects.filter(voter_id=user_id)
         votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
-        print(votings)
         context['votings'] = VotingSerializer(votings, many=True).data  
         context['Access-Control-Allow-Credentials'] = 'true'
         return JsonResponse(context)
     except:
-        context['Access-Control-Allow-Credentials'] = 'true'
-        return JsonResponse({}, status=404)
+        return JsonResponse({}, status=401)
