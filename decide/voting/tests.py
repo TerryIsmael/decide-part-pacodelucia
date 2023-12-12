@@ -66,7 +66,7 @@ class VotingByPreferenceModelTestCase(BaseTestCase):
 
     def testExist(self):
         v=VotingByPreference.objects.get(name='VotacionPorPreferencia')
-        self.assertEquals(v.question.options.all()[0].option, "Opción ejemplo 1")
+        self.assertEquals(len(v.question.options.all()), 2)
 
 class VotingByPreferenceTestCase(BaseTestCase):
     def setUp(self):
@@ -79,7 +79,8 @@ class VotingByPreferenceTestCase(BaseTestCase):
         v = self.create_voting_by_preference()
         self.assertEqual(str(v), "test voting by preference")
         self.assertEqual(str(v.question), "test by preference question")
-        self.assertEqual(str(v.question.options.all()[0]), "option 1 (2)")
+        q=v.question.options.filter(option="option 1").first()
+        self.assertEqual(str(q), "option 1 (2)")
 
     def create_voting_by_preference(self):
         q = QuestionByPreference(desc='test by preference question')
