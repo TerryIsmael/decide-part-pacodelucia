@@ -4,10 +4,15 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from .models import Question, QuestionOption, Voting, VotingByPreference, QuestionByPreference, QuestionOptionByPreference, QuestionYesNo,VotingYesNo
 from .serializers import SimpleVotingSerializer, VotingSerializer, VotingByPreferenceSerializer, SimpleVotingByPreferenceSerializer, VotingYesNoSerializer,SimpleVotingYesNoSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
+from django.http import JsonResponse
+import json
+from base import mods
+from census.models import Census
 
 class VotingYesNoView(generics.ListCreateAPIView):
     queryset = VotingYesNo.objects.all()
@@ -135,6 +140,39 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
+
+
+def getVoteStringKeys(req, **kwargs):
+    context = {}
+    vid = kwargs.get('voting_id', 0)
+
+    try:
+        r = mods.get('voting', params={'id': vid})
+        # Casting numbers to string to manage in javascript with BigInt
+        # and avoid problems with js and big number conversion
+        if r[0]['pub_key']:    
+            for k, v in r[0]['pub_key'].items():
+                r[0]['pub_key'][k] = str(v)
+
+        context['voting'] = json.dumps(r[0])
+        context['KEYBITS'] = settings.KEYBITS
+        return JsonResponse(context)
+    except Exception as _:
+        return JsonResponse({}, status=404)
+
+def getVotingsByUser(request):
+    decideid = request.COOKIES.get('decide')
+    context = {}
+    try:
+        token = Token.objects.get(key=decideid)
+        user_id = token.user.id
+        census = Census.objects.filter(voter_id=user_id)
+        votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
+        context['votings'] = VotingSerializer(votings, many=True).data
+        context['Access-Control-Allow-Credentials'] = 'true'
+        return JsonResponse(context)
+    except Exception as _:
+        return JsonResponse({}, status=401)
 
 class VotingByPreferenceView(generics.ListCreateAPIView):
     queryset = VotingByPreference.objects.all()
@@ -274,4 +312,3 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
-

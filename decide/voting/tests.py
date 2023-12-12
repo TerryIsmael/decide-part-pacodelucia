@@ -1,10 +1,11 @@
+import json
 import random
 import itertools
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import TestCase
+from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
@@ -22,6 +23,7 @@ from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption, QuestionByPreference, QuestionOptionByPreference,VotingByPreference, QuestionYesNo, VotingYesNo
 from datetime import datetime
+from rest_framework.authtoken.models import Token
 
 
 class VotingModelTestCase(BaseTestCase):
@@ -509,6 +511,63 @@ class VotingTestCase(BaseTestCase):
         self.login()
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
         self.assertEquals(response.status_code, 405)
+    
+    def test_get_voting_string_keys(self):
+        v = self.create_voting()
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+        response = self.client.get('/voting/{}/stringkeys'.format(v.pk))
+        voting = json.loads(response.json()['voting'])
+        keybits = response.json()['KEYBITS']
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(voting['name'], 'test voting')
+        self.assertEquals(keybits, settings.KEYBITS)
+        for _, val in voting['pub_key'].items():
+            self.assertIsInstance(val, str)
+        self.assertEquals(voting['pub_key']['p'], str(v.pub_key.p))
+        self.assertEquals(voting['pub_key']['g'], str(v.pub_key.g))
+        self.assertEquals(voting['pub_key']['y'], str(v.pub_key.y))
+    
+    def test_get_voting_string_keys_404(self):
+        response = self.client.get('/voting/12345/stringkeys')
+        self.assertEquals(response.status_code, 404)
+    
+class GetVotingsByUserTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        user = User.objects.create_user(username='testuser', password='12345')
+        self.token = Token.objects.create(user=user)
+
+        q = Question(desc='Descripcion')
+        q.save()
+        
+        opt1 = QuestionOption(question=q, option='opcion 1')
+        opt1.save()
+        opt1 = QuestionOption(question=q, option='opcion 2')
+        opt1.save()
+
+        self.voting1 = Voting.objects.create(name='test voting 1', question=q)
+        self.voting2 = Voting.objects.create(name='test voting 2', question=q)
+
+        Census.objects.create(voter_id=user.pk, voting_id=self.voting1.pk)
+        Census.objects.create(voter_id=user.pk, voting_id=self.voting2.pk)
+    
+    def tearDown(self):
+        self.client = None
+        super().tearDown()
+
+    def test_get_votings_by_user(self):
+        self.client.cookies['decide'] = self.token.key
+        response = self.client.get('/voting/getbyuser')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votings'][0]['name'], 'test voting 1')
+        self.assertEqual(response.json()['votings'][1]['name'], 'test voting 2')
+    
+    def test_get_votings_by_user_401(self):
+        response = self.client.get('/voting/getbyuser')
+        self.assertEqual(response.status_code, 401)
+        
         
 class LogInSuccessTests(StaticLiveServerTestCase):
 
