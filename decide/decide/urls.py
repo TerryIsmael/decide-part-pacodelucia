@@ -25,6 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('doc/', schema_view),
     path('gateway/', include('gateway.urls')),
+    path('custom/', include('voting.urls')),
+    path('custom/store/', include('store.urls')),
 ]
 
 for module in settings.MODULES:

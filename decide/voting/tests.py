@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption,QuestionYesNo, VotingYesNo
 from datetime import datetime
 
 
@@ -411,3 +411,249 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+class VotingYesNoModelTestCase(BaseTestCase):
+    def setUp(self):
+        q = QuestionYesNo(desc='Descripcion')
+        q.save()
+
+        self.v = VotingYesNo(name='Votacion Yes/No', question=q)
+        self.v.save()
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+        self.v = None
+
+    def testExist(self):
+        v=VotingYesNo.objects.get(name='Votacion Yes/No')
+        self.assertEquals(v.question.optionYes, 1)
+        self.assertEquals(v.question.optionNo, 2)
+
+class VotingYesNoTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_to_string(self):
+        v = self.create_voting()
+        self.assertEqual(str(v), "test votingYesNo")
+        self.assertEqual(str(v.question), "test question yesno")
+        self.assertEqual(str(v.question.optionYes), '1')
+        self.assertEqual(str(v.question.optionNo), '2')
+    
+    def create_voting(self):
+        q = QuestionYesNo(desc='test question yesno')
+        q.save()
+        v = VotingYesNo(name='test votingYesNo', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths_yesno.add(a)
+
+        return v
+    
+    def test_create_voting_yesno_API(self):
+        self.login()
+        data = {
+            'name': 'Example Yes/No',
+            'desc': 'Description example Yes/No',
+            'question': 'Do you like cats?',
+            'question_opt': ['Yes', 'No']
+        }
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        voting = VotingYesNo.objects.get(name='Example Yes/No')
+        self.assertEqual(voting.desc, 'Description example Yes/No')
+    
+    
+    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+
+
+
+    def create_voters(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+
+    def get_or_create_user(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        clear[v.question.optionYes] = 0
+        for i in range(random.randint(0, 5)):
+            a, b = self.encrypt_msg(v.question.optionYes, v)
+            data = {
+                'voting': v.id,
+                'voter': voter.voter_id,
+                'vote': { 'a': a, 'b': b },
+            }
+            clear[v.question.optionYes] += 1
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post('custom/store/yesno', json=data)
+        clear[v.question.optionNo] = 0
+        for i in range(random.randint(0, 5)):
+            a, b = self.encrypt_msg(v.question.optionNo, v)
+            data = {
+                'voting': v.id,
+                'voter': voter.voter_id,
+                'vote': { 'a': a, 'b': b },
+            }
+            clear[v.question.optionNo] += 1
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post('custom/store/yesno', json=data)
+        
+        return clear
+
+    def test_complete_voting(self):
+        v = self.create_voting()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+
+        self.assertEqual(tally.get(v.question.optionYes, 0), clear.get(v.question.optionYes, 0))
+        self.assertEqual(tally.get(v.question.optionNo, 0), clear.get(v.question.optionNo, 0))
+
+        for q in v.postproc:
+            if q["option"] == 'Si':
+                self.assertEqual(tally.get(v.question.optionYes, 0), q["votes"])
+            else:
+                self.assertEqual(tally.get(v.question.optionNo, 0), q["votes"])
+
+    def test_create_voting_yesno_from_api(self):
+        data = {'name': 'Example'}
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            'name': 'Example Yes/No',
+            'desc': 'Description example Yes/No',
+            'question': 'Do you like cats?',
+            'question_opt': ['Yes', 'No']
+        }
+        response = self.client.post('/custom/votingyesno/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_voting_yesno(self):
+        voting = self.create_voting()
+
+        data = {'action': 'start'}
+
+        self.login(user='noadmin')
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        self.login()
+        data = {'action': 'bad'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+        for action in ['stop', 'tally']:
+            data = {'action': action}
+            response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.json(), 'Voting is not started')
+
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
+
+        # STATUS VOTING: started
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is not stopped')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting stopped')
+
+        # STATUS VOTING: stopped
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting tallied')
+
+        # STATUS VOTING: tallied
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already tallied')
+
+
+
