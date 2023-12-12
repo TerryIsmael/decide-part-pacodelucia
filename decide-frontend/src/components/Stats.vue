@@ -1,16 +1,14 @@
 <template>
   <div>
-    <h1>Estadisticas de la votación: {{ stats.question }}</h1>
+    <h1>Estadísticas de la votación: {{ stats.question }}</h1>
     <table>
       <tr>
         <th>Total de votos</th>
         <th>Porcentaje de censo que ha votado</th>
-        <th>Media del tiempo entre votos</th>
       </tr>
       <tr>
         <td>{{stats.votes}}</td>
         <td>{{ stats.census }}%</td>
-        <td>{{stats.avg_time_diff}} min</td>
       </tr>
     </table>
   </div>
