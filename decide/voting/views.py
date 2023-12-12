@@ -13,8 +13,6 @@ from django.http import JsonResponse
 import json
 from base import mods
 from census.models import Census
-from base.perms import UserIsStaff
-from base.models import Auth
 
 class VotingYesNoView(generics.ListCreateAPIView):
     queryset = VotingYesNo.objects.all()
