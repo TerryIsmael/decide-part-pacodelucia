@@ -8,6 +8,7 @@ export default {
         const selectedVoting = ref(null);
         const censusSubList = ref([]);
         const votings = ref([]);
+        const allVotings = ref([]);
         const New = ref("New");
         const editing = ref(false);
         const newCensus = ref(new Census());
@@ -15,6 +16,7 @@ export default {
         const newVotingId = ref("");
         const newCensusError = ref(null);
         const users = ref([]);
+        const waiting = ref(null);
 
         const fetchCensuss = async () => {
             try {
@@ -24,7 +26,12 @@ export default {
                 });
 
                 const data = await response.json();
-                censuss.value = data;
+                censuss.value = data.sort((a, b) => {
+                    if (a.voting_id == b.voting_id) {
+                        return a.voter_id - b.voter_id;
+                    }else{
+                        return a.voting_id - b.voting_id;}
+                })
                 censuss.value.forEach((census) => {
                     votings.value = [...new Set([...votings.value, census.voting_id])];
                     votings.value = votings.value.sort((a, b) => {
@@ -36,7 +43,18 @@ export default {
                     credentials: "include",
                 });
                 const data2 = await response2.json();
-                users.value = data2;
+                users.value = data2.sort((a, b) => {
+                    return a.id - b.id;
+                })
+
+                const response3 = await fetch("http://localhost:8000/voting/voting/", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const data3 = await response3.json();
+                allVotings.value = data3.sort((a, b) => {
+                    return a.id - b.id;
+                })
 
             } catch (error) {
                 console.error("Error:", error);
@@ -53,16 +71,21 @@ export default {
         };
 
         const saveCensus = async () => {
-
-            if (newVoterId.value === undefined || newVoterId.value.trim() === "" || newVotingId.value === undefined || newVotingId.value.trim() === "") {
+            if (selectedVoting.value != "New") {
+                newVotingId.value = selectedVoting.value;
+            }
+            if (newVoterId.value === undefined || newVotingId.value === undefined) {
                 newCensusError.value = ("No se puede guardar un censo vacío");
                 return;
             }
+
+            if (censuss.value.filter(x => x.voting_id == newVotingId.value).some((census) => census.voter_id == newVoterId.value)) {
+                newCensusError.value = ("No se puede volver a añadir el mismo usuario al censo");
+                return;
+            }
+
             else
                 newCensusError.value = null;
-
-            if (newOptionError.value != null)
-                return;
 
             editing.value = false;
 
@@ -85,7 +108,36 @@ export default {
             }
             newVoterId.value = "";
             newVotingId.value = "";
+            newCensusError.value = null;
             await fetchCensuss();
+            censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
+        };
+
+        const changeEditing = (newValue) => {
+            newVotingId.value = "";
+            newVoterId.value = "";
+            newCensusError.value = null;
+            editing.value = newValue;
+        };
+
+        const deleteCensus = async (census) => {
+            waiting.value = census.voter_id;
+            const voters ={
+                voters: [census.voter_id],
+            }
+
+            fetch("http://localhost:8000/census/"+census.voting_id+"/", {
+                method: "DELETE",
+                credentials: "include",
+                headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(voters),  
+            });
+
+            await fetchCensuss();
+            censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
+            waiting.value = null;
         };
 
         onMounted(fetchCensuss);
@@ -93,6 +145,7 @@ export default {
         return {
             censuss,
             votings,
+            allVotings,
             censusSubList,
             New,
             editing,
@@ -102,19 +155,43 @@ export default {
             newVotingId,
             newCensusError,
             selectedVoting,
+            waiting,
             fetchCensuss,
             changeSelectedVoting,
             saveCensus,
+            changeEditing,
+            deleteCensus,
         };
     },
 };
 </script>
 
 <template>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <div>
         <h2>Listado de censos</h2>
+
+        <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">
+            Nuevo censo
+        </button>
+
+        <div v-if="selectedVoting == New && editing == true">
+            <p v-if="newCensusError != null" class="error">{{ newCensusError }}</p>
+            <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
+                <label for="newVotingId">Id de la votación</label>
+                <select required id="newVotingId" v-model="newVotingId">
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }} </option>
+                </select>
+                <label for="newVoterId">Añadir usuario</label>
+                <select required id="newVoterId" v-model="newVoterId">
+                    <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
+                </select>
+                <button class="little-button" type="submit">Añadir</button>
+            </form>
+        </div>
+
         <ul>
-            <li class="big-container" v-for="voting in votings" :key="voting">
+            <li v-for="voting in votings" :key="voting">
                 <h3>
                     <button @click="changeSelectedVoting(voting)">
                         Voting: {{ voting }}
@@ -122,17 +199,26 @@ export default {
                 </h3>
                 <ul>
                     <li v-if="voting == selectedVoting">
-                        <form @submit.prevent="saveCensus(voting.id, newVoterId)">
+                        {{ newCensusError }}
+                        <form @submit.prevent="saveCensus">
                             <label for="newVoterId">Añadir usuario</label>
                             <select required id="newVoterId" v-model="newVoterId">
-                                <option v-for="user in users" :key="user.id" :value="user"> {{ user.id }} </option>
+                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
                             </select>
                             <button class="little-button" type="submit">Añadir</button>
                         </form>
                         <div v-for="census in censusSubList" :key="census.id">
-                            <button>
+                            <div class="user_container">
+                            <button class="user_container_element no_pointer_button">
                                 Id: {{ census.id }} - User: {{ census.voter_id }}
                             </button>
+                            <button class="delete-census" @click="deleteCensus(census)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            </div>
+                            <div class="waiting_container" v-if="waiting==census.voter_id">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
                         </div>
                     </li>
                 </ul>
@@ -167,9 +253,48 @@ export default {
     width: auto;
 }
 
+.delete-census {
+    width: auto;
+    display:inline-block;
+    margin-left: 10px;
+    width: 20%;
+    background-color: rgb(211, 91, 91);
+}
+
 ul li div>button {
-    margin-left: 20px;
     list-style-type: square;
     background-color: rgb(1, 88, 88);
 }
+
+.no_pointer_button:hover {
+    cursor:default;
+}
+
+ul li form>select {
+    list-style-type: square;
+    margin-bottom: 5px;
+}
+
+ul li form>button {
+    list-style-type: square;
+    margin-bottom: 20px;
+}
+
+.user_container {
+    display:flex
+}
+
+.user_container_element {
+    display:inline-block
+}
+
+ul >li {
+    margin-bottom: 0px;
+}
+
+.waiting_container{
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
 </style>
