@@ -4,10 +4,9 @@ from django.utils import timezone
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
-from .models import QuestionByPreference
-from .models import VotingByPreference
+from .models import QuestionByPreference,QuestionYesNo
+from .models import VotingByPreference,VotingYesNo
 from .models import QuestionOptionByPreference
-
 from .filters import StartedFilter
 
 
@@ -37,6 +36,11 @@ class QuestionOptionInline(admin.TabularInline):
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [QuestionOptionInline]
 
+class QuestionYesNoAdmin(admin.ModelAdmin):
+    list_display = ('desc', 'optionYes', 'optionNo')
+    readonly_fields = ('optionYes', 'optionNo')
+    list_filter = (StartedFilter,)
+    search_fields = ('desc', )
 
 class VotingAdmin(admin.ModelAdmin):
     list_display = ('name', 'start_date', 'end_date')
@@ -68,3 +72,6 @@ admin.site.register(Voting, VotingAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(VotingByPreference, VotingByPreferenceAdmin)
 admin.site.register(QuestionByPreference, QuestionByPreferenceAdmin)
+admin.site.register(QuestionYesNo, QuestionYesNoAdmin)
+admin.site.register(VotingYesNo, VotingAdmin)
+
