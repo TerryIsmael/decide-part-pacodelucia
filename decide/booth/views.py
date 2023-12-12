@@ -2,8 +2,6 @@ import json
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
-
-from django.core import serializers
 from voting.models import VotingYesNo
 
 

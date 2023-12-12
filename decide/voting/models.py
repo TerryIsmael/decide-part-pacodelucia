@@ -2,8 +2,6 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
-
 from base import mods
 from base.models import Auth, Key
 from store.models import Vote, VoteYesNo
@@ -213,7 +211,7 @@ class VotingYesNo(models.Model):
         auth = self.auths_yesno.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
         decrypt_url = "/decrypt/{}/".format(self.id)
-        auths = [{"name": a.name, "url": a.url} for a in self.auths_yesno.all()]
+
 
         # first, we do the shuffle
         data = { "msgs": votes }
@@ -241,7 +239,6 @@ class VotingYesNo(models.Model):
         options = []
         options.append(self.question.optionYes)
         options.append(self.question.optionNo)
-        ls = []
         opts = []
         for opt in options:
             if isinstance(tally, list):
