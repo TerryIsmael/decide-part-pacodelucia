@@ -10,7 +10,6 @@ from rest_framework.status import (
         HTTP_201_CREATED as ST_201,
         HTTP_204_NO_CONTENT as ST_204,
         HTTP_400_BAD_REQUEST as ST_400,
-        HTTP_401_UNAUTHORIZED as ST_401,
         HTTP_409_CONFLICT as ST_409
 )
 
@@ -23,15 +22,15 @@ class AllAuthsAPIView(generics.ListAPIView):
 
     def post(self, request, *args, **kwargs):
 
-        id = None
+        auth_id = None
         name = request.data.get('name')
         url = request.data.get('url')
         me = request.data.get('me')
 
         try:
             if (request.data.get('id') is not None):
-                id = request.data.get('id')
-                auth = Auth(id=id, name=name, url=url, me=me)
+                auth_id = request.data.get('id')
+                auth = Auth(id=auth_id, name=name, url=url, me=me)
             else:
                 auth = Auth(name=name, url=url, me=me)
             auth.save()
@@ -43,10 +42,10 @@ class AllAuthsAPIView(generics.ListAPIView):
 
     def delete(self, request, *args, **kwargs):
 
-        id = request.data.get('id')
+        auth_id = request.data.get('id')
 
         try:
-            auth = Auth.objects.get(id=id)
+            auth = Auth.objects.get(id=auth_id)
             auth.delete()
         except Auth.DoesNotExist:
             return Response('Auth does not exist', status=ST_400)
