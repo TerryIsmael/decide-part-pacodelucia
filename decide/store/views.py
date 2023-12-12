@@ -93,7 +93,7 @@ class StoreByPreferenceView(generics.ListAPIView):
         self.check_permissions(request)
         return super().get(request)
       
-     def post(self, request):
+    def post(self, request):
         """
          * voting: id
          * voter: id

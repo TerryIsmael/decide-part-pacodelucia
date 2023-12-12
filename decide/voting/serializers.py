@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Question, QuestionOption, Voting, QuestionByPreference, QuestionOptionByPreference, VotingByPreference, Voting, VotingYesNo,QuestionYesNo
+from .models import Question, QuestionOption,QuestionByPreference, QuestionOptionByPreference, VotingByPreference, Voting, VotingYesNo,QuestionYesNo
 from base.serializers import KeySerializer, AuthSerializer
 
 

@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption, QuestionByPreference, QuestionOptionByPreference,VotingByPreference, QuestionOption,QuestionYesNo, VotingYesNo
+from voting.models import Voting, Question, QuestionOption, QuestionByPreference, QuestionOptionByPreference,VotingByPreference, QuestionYesNo, VotingYesNo
 from datetime import datetime
 
 
