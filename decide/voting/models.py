@@ -2,8 +2,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import json
-from django.core import serializers
+
 from base import mods
 from base.models import Auth, Key
 from store.models import VoteByPreference
