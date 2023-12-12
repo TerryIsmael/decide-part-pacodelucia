@@ -24,7 +24,7 @@ class FrontendTest(StaticLiveServerTestCase):
         #Crea un usuario admin y otro no admin
         self.base = BaseTestCase()
         self.base.setUp()
-	
+
         #Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True

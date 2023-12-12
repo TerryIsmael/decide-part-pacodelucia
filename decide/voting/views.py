@@ -13,7 +13,6 @@ from base.models import Auth
 from django.http import JsonResponse
 import json
 from base import mods
-from .models import Voting
 from census.models import Census
 
 class VotingView(generics.ListCreateAPIView):
@@ -122,21 +121,19 @@ def getVoteStringKeys(req, **kwargs):
         context['voting'] = json.dumps(r[0])
         context['KEYBITS'] = settings.KEYBITS
         return JsonResponse(context)
-    except:
+    except Exception as _:
         return JsonResponse({}, status=404)
-    
 
 def getVotingsByUser(request):
     decideid = request.COOKIES.get('decide')
     context = {}
     try:
         token = Token.objects.get(key=decideid)
-        print(token)
         user_id = token.user.id
         census = Census.objects.filter(voter_id=user_id)
         votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
-        context['votings'] = VotingSerializer(votings, many=True).data  
+        context['votings'] = VotingSerializer(votings, many=True).data
         context['Access-Control-Allow-Credentials'] = 'true'
         return JsonResponse(context)
-    except:
+    except Exception as _:
         return JsonResponse({}, status=401)
