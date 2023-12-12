@@ -2,8 +2,6 @@
 import { ref, onMounted } from "vue";
 import Voting from "../../models/Voting.js";
 
-// TODO: redirigir y auths redirigiendo
-
 export default {
   setup() {
     const votings = ref({});
@@ -24,7 +22,7 @@ export default {
         console.error("Error:", error);
       }
     };
-    
+
     const fetchQuestions = async () => {
       try {
         const response = await fetch("http://localhost:8000/voting/all-questions/", {
@@ -33,6 +31,19 @@ export default {
         });
         const data = await response.json();
         questions.value = data;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    const fetchAuths = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/base/auth/", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+        auths.value = data;
       } catch (error) {
         console.error("Error:", error);
       }
@@ -52,7 +63,7 @@ export default {
           const questionData = await questionResponse.json();
           questions.value = questionData;
           const authResponse = await fetch(
-            "http://localhost:8000/voting/all-auths/",
+            "http://localhost:8000/base/auth/",
             {
               method: "GET",
               credentials: "include",
@@ -183,30 +194,32 @@ export default {
     onMounted(fetchvotings);
 
     return {
-    votings,
-    selectedVoting,
-    showForm,
-    changeSelected,
-    dateFormat,
-    isNumberInTally,
-    New,
-    editing,
-    questions,
-    auths,
-    changeEditing,
-    newVoting,
-    saveVoting,
-    applyAction,
-    deleteVoting,
-    loading,
-    fetchQuestions,
-  };
-},
+      votings,
+      selectedVoting,
+      New,
+      editing,
+      questions,
+      auths,
+      newVoting,
+      loading,
+      showForm,
+      changeSelected,
+      dateFormat,
+      isNumberInTally,
+      changeEditing,
+      saveVoting,
+      applyAction,
+      deleteVoting,
+      fetchQuestions,
+      fetchAuths,
+    };
+  },
 };
 </script>
 
 <template>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="nueva-cadena-de-integridad" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="nueva-cadena-de-integridad" crossorigin="anonymous">
   <div>
     <h2>Listado de votaciones</h2>
     <ul>
@@ -230,11 +243,13 @@ export default {
             <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
             <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
           </div>
-          <div>
-            <label for="auths">Auths: </label>
-            <select required id="auths" v-model="newVoting.auths" multiple>
+          <label for="auths">Auths: </label>
+          <div style="display:flex; align-items: center;justify-content: center;">
+            <select style="height: 60%;" required id="auths" v-model="newVoting.auths" multiple>
               <option v-for="auth in auths" :key="auth.id" :value="auth"> {{ auth.name }} </option>
             </select>
+            <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')"> Nueva...</button>
+            <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
           </div>
           <div>
             <button class="little-button" @click="changeEditing(false)"> Cancelar </button>
@@ -335,13 +350,15 @@ export default {
               <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
               <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
             </div>
-            <div>
-              <label for="auths">Auths: </label>
-              <select id="auths" v-model="voting.auths" multiple>
+            <label for="auths">Auths: </label>
+            <div style="display:flex; align-items: center;justify-content: center;">
+              <select style="height: 60%;" id="auths" v-model="voting.auths" multiple>
                 <option v-for="auth in auths" :key="auth.id" :value="auth">
                   {{ auth.name }}
                 </option>
               </select>
+              <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')"> Nueva...</button>
+              <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
             </div>
           </div>
 
@@ -394,7 +411,16 @@ button:disabled {
   background-color: grey;
 }
 
-.adjusted{
+.adjusted {
   width: auto;
+}
+
+.auth_adjusted {
+  width: auto;
+  height: 30%;
+}
+
+.big_auth{
+  height: 60%;
 }
 </style>

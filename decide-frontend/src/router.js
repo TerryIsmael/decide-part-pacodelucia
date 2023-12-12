@@ -5,6 +5,7 @@ import Tokens from './components/Tokens.vue';
 import AdminLogin from './components/AdminLogin.vue';
 import Vote from './components/Vote.vue';
 import Question from './components/Question.vue';
+import Auth from './components/Auth.vue';
 
 const routes = [
   { path: '/admin/voting', component: Voting },
@@ -12,7 +13,8 @@ const routes = [
   { path: '/', component: HelloWorld },
   { path: '/admin/login', component: AdminLogin },
   { path: '/admin/vote', component: Vote },
-  { path: '/admin/question', component: Question }
+  { path: '/admin/question', component: Question },
+  { path: '/admin/auth', component: Auth}
 ];
 
 const router = createRouter({

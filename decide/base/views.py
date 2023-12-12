@@ -1,3 +1,54 @@
 from django.shortcuts import render
+from django.db.utils import IntegrityError
+from base.perms import UserIsStaffOrAdmin
+from base.models import Auth
+from base.serializers import AuthSerializer
+from rest_framework import generics
+import django_filters.rest_framework
+from rest_framework.response import Response
+from rest_framework.status import (
+        HTTP_201_CREATED as ST_201,
+        HTTP_204_NO_CONTENT as ST_204,
+        HTTP_400_BAD_REQUEST as ST_400,
+        HTTP_401_UNAUTHORIZED as ST_401,
+        HTTP_409_CONFLICT as ST_409
+)
 
-# Create your views here.
+class AllAuthsAPIView(generics.ListAPIView):
+
+    permission_classes = (UserIsStaffOrAdmin,)
+    serializer_class = AuthSerializer
+    queryset = Auth.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+
+    def post(self, request, *args, **kwargs):
+
+        id = None
+        name = request.data.get('name')
+        url = request.data.get('url')
+        me = request.data.get('me')
+
+        try:
+            if (request.data.get('id') is not None):
+                id = request.data.get('id')
+                auth = Auth(id=id, name=name, url=url, me=me)
+            else:
+                auth = Auth(name=name, url=url, me=me)
+            auth.save()
+
+        except IntegrityError:
+            return Response('Error trying to create Auth', status=ST_409)
+        
+        return Response('Auths created', status=ST_201)
+
+    def delete(self, request, *args, **kwargs):
+
+        id = request.data.get('id')
+
+        try:
+            auth = Auth.objects.get(id=id)
+            auth.delete()
+        except Auth.DoesNotExist:
+            return Response('Auth does not exist', status=ST_400)
+
+        return Response('Auth deleted', status=ST_204)
