@@ -20,7 +20,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption, QuestionByPreference, QuestionOptionByPreference,VotingByPreference
 from datetime import datetime
 
 
@@ -45,6 +45,247 @@ class VotingModelTestCase(BaseTestCase):
     def testExist(self):
         v=Voting.objects.get(name='Votacion')
         self.assertEquals(v.question.options.all()[0].option, "opcion 1")
+
+class VotingByPreferenceModelTestCase(BaseTestCase):
+    def setUp(self):
+        q=QuestionByPreference(desc='Descripcion')
+        q.save()
+
+        opt1 = QuestionOptionByPreference(question=q, option='Opción ejemplo 1')
+        opt1.save()
+        opt1 = QuestionOptionByPreference(question=q, option='Opción ejemplo 2')
+        opt1.save()
+
+        self.v = VotingByPreference(name='VotacionPorPreferencia', question=q)
+        self.v.save()
+        super().setUp()
+    
+    def tearDown(self):
+        super().tearDown()
+        self.v = None
+
+    def testExist(self):
+        v=VotingByPreference.objects.get(name='VotacionPorPreferencia')
+        self.assertEquals(v.question.options.all()[0].option, "Opción ejemplo 1")
+
+class VotingByPreferenceTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_to_string(self):
+        v = self.create_voting_by_preference()
+        self.assertEqual(str(v), "test voting by preference")
+        self.assertEqual(str(v.question), "test by preference question")
+        self.assertEqual(str(v.question.options.all()[0]), "option 1 (2)")
+
+    def create_voting_by_preference(self):
+        q = QuestionByPreference(desc='test by preference question')
+        q.save()
+        for i in range(5):
+            opt = QuestionOptionByPreference(question=q, option='option {}'.format(i+1))
+            opt.save()
+        v = VotingByPreference(name='test voting by preference', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths.add(a)
+
+        return v
+    
+    def create_voters_by_preference(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+    
+    def encrypt_msg_by_preference(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+    
+    def get_or_create_user_by_preference(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+    
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for i in range(random.randint(0, 5)):
+                cont=0
+                for opt in v.question.options.all():
+                    if cont==0:
+                        clear[opt.number] = 0
+                    opt.number=opt.number+1
+                    cont=cont+1
+                
+                a, b = self.encrypt_msg_by_preference(opt.number, v)
+                data = {
+                        'votingbypreference': v.id,
+                        'voter': voter.voter_id,
+                        'vote': { 'a': a, 'b': b },
+                }
+                    
+                user = self.get_or_create_user_by_preference(voter.voter_id)
+                self.login(user=user.username)
+                voter = voters.pop()
+                mods.post('store', json=data)
+        return clear
+    
+    def test_complete_voting_by_preference(self):
+        v = self.create_voting_by_preference()
+        self.create_voters_by_preference(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        for q in v.postproc:
+            self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    
+    def test_create_voting_by_preference_API(self):
+        self.login()
+        data = {
+            'name': 'Example',
+            'desc': 'Description example',
+            'question': 'Your preferences ',
+            'question_opt': ['cat', 'dog', 'horse']
+        }
+        response = self.client.post('/custom/votingbypreference', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        voting = VotingByPreference.objects.get(name='Example')
+        self.assertEqual(voting.desc, 'Description example')
+        
+    def test_create_voting_from_api_by_preference(self):
+        data = {'name': 'Example'}
+        response = self.client.post('/custom/votingbypreference', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post('voting', params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            'name': 'Example',
+            'desc': 'Description example',
+            'question': 'Your preferences ',
+            'question_opt': ['cat', 'dog', 'horse']
+        }
+
+        response = self.client.post('/custom/votingbypreference', data, format='json')
+        self.assertEqual(response.status_code, 201)
+    
+    def test_update_voting_by_preference(self):
+        voting = self.create_voting_by_preference()
+
+        data = {'action': 'start'}
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        data = {'action': 'bad'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+        # STATUS VOTING: not started
+        for action in ['stop', 'tally']:
+            data = {'action': action}
+            response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.json(), 'Voting is not started')
+
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
+
+        # STATUS VOTING: started
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is not stopped')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting stopped')
+
+        # STATUS VOTING: stopped
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting tallied')
+
+        # STATUS VOTING: tallied
+        data = {'action': 'start'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already started')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already stopped')
+
+        data = {'action': 'tally'}
+        response = self.client.put('/custom/votingbypreference/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting already tallied')    
+        
+  
+
 
 class VotingTestCase(BaseTestCase):
 
@@ -73,6 +314,7 @@ class VotingTestCase(BaseTestCase):
 
         voting = Voting.objects.get(name='Example')
         self.assertEqual(voting.desc, 'Description example')
+    
         
 
     def encrypt_msg(self, msg, v, bits=settings.KEYBITS):

@@ -254,17 +254,19 @@ class VotingByPreference(models.Model):
         opts = []
         dicpreferences={}
         options = self.question.options.all()
-        for t in range(len(tally)):
-            tally_str = str(tally[t])
-            tally_str_with_commas = tally_str.replace("10000", ",")
-            tally_list = [int(num) for num in tally_str_with_commas.split(',') if num]
-            for opt in options:
-                if isinstance(tally, list):
-                    key=opt.number
-                    if key in dicpreferences:
-                        dicpreferences[key]+=(len(options) - tally_list[opt.number-2])
-                    else:
-                        dicpreferences[key]=(len(options) - tally_list[opt.number-2])
+        if isinstance(tally, list):
+            
+            for t in range(len(tally)):
+                tally_str = str(tally[t])
+                tally_str_with_commas = tally_str.replace("10000", ",")
+                tally_list = [int(num) for num in tally_str_with_commas.split(',') if num]
+                for opt in options:
+                    if isinstance(tally, list):
+                        key=opt.number
+                        if key in dicpreferences:
+                            dicpreferences[key]+=(len(options) - tally_list[opt.number-2])
+                        else:
+                            dicpreferences[key]=(len(options) - tally_list[opt.number-2])
                         
         for key in dicpreferences:
             votes = dicpreferences[key]
