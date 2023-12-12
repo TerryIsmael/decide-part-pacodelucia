@@ -45,14 +45,13 @@ class SimpleVotingYesNoSerializer(serializers.HyperlinkedModelSerializer):
     question = QuestionYesNoSerializer(many=False)
 
     class Meta:
-        model = Voting
+        model = VotingYesNo
         fields = ('name', 'desc', 'question', 'start_date', 'end_date')
 
 class VotingYesNoSerializer(serializers.HyperlinkedModelSerializer):
     question = QuestionYesNoSerializer(many=False)
     pub_key = KeySerializer()
-    auths = AuthSerializer(many=True)
-
+    auths_yesno = AuthSerializer(many=True)
     class Meta:
         model = VotingYesNo
         fields = ('id', 'name', 'desc', 'question', 'start_date',
