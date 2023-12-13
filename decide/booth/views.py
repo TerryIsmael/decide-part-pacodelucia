@@ -11,7 +11,7 @@ class BoothView(TemplateView):
     template_name = 'booth/booth.html'
 
     def get_context_data(self, **kwargs):
-        print("Entré a get_context_data")
+       
         context = super().get_context_data(**kwargs)
         vid = kwargs.get('voting_id', 0)
 

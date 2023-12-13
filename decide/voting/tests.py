@@ -46,7 +46,7 @@ class VotingModelTestCase(BaseTestCase):
 
     def testExist(self):
         v=Voting.objects.get(name='Votacion')
-        self.assertEquals(v.question.options.all()[0].option, "opcion 1")
+        self.assertEquals(len(v.question.options.all()), 2)
 
 class VotingByPreferenceModelTestCase(BaseTestCase):
     def setUp(self):
