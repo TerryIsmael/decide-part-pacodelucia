@@ -54,8 +54,6 @@ jobs:
         cd decide
         python manage.py migrate
     - name: Run tests
-      env:
-        VITE_API_URL: http://localhost:8000/
       run: |
         cd decide
         coverage run --branch --source=. ./manage.py test decide  --keepdb 
