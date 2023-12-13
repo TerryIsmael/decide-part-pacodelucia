@@ -13,7 +13,7 @@ export default {
     const newVoting = ref(new Voting());
     const loading = ref(false);
 
-    const fetchvotings = async () => {
+    const fetchVotings = async () => {
       try {
         const response = await fetch("http://localhost:8000/voting/");
         const data = await response.json();
@@ -106,7 +106,7 @@ export default {
       } catch (error) {
         console.error("Error:", response.status, error.json());
       }
-      fetchvotings();
+      fetchVotings();
       loading.value = false;
     };
 
@@ -128,7 +128,7 @@ export default {
       } catch (error) {
         console.error("Error:", response.status, error.json());
       }
-      fetchvotings();
+      fetchVotings();
     }
 
     const saveVoting = async (voting) => {
@@ -156,7 +156,7 @@ export default {
       }
 
       newVoting.value = new Voting();
-      fetchvotings();
+      fetchVotings();
     };
 
     const isNumberInTally = (voting, number) => {
@@ -191,7 +191,7 @@ export default {
       return `${formattedDay}/${formattedMonth}/${year} ${formattedHours}:${formattedMinutes}`;
     };
 
-    onMounted(fetchvotings);
+    onMounted(fetchVotings);
 
     return {
       votings,
