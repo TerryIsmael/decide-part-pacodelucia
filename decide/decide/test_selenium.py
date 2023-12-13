@@ -88,11 +88,7 @@ class FrontendTest(StaticLiveServerTestCase):
         button = self.driver.find_element(By.CSS_SELECTOR, ".login-button")
         button.click()
         # wait until something in the page changes (in this case, a div appears)
-        try:
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
-        except Exception as _:
-            errormessage = self.driver.find_element(By.CSS_SELECTOR, ".error-message").text
-            print(errormessage)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
             
         message = self.driver.find_element(By.CSS_SELECTOR, ".success-message").text
         self.assertEquals(message, "Bienvenido noadmin")
