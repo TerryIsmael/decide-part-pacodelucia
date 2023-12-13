@@ -78,11 +78,11 @@
                     }),
                 })
                 .then((response) => {
-                    if (response.ok) {
-                        return response.json();
+                    /* if (response.ok) {
+                        */return response.json();/*
                     } else {
                         throw new Error('Usuario o contraseña incorrectos');
-                    }
+                    } */
                 })
                 .then((data) => {
                     throw new Error(JSON.stringify(data));
