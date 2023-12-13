@@ -16,7 +16,7 @@ export default {
 
         const fetchvotes = async () => {
             try {
-                const response = await fetch("http://localhost:8000/store/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/store/", {
                     method: "GET",
                     credentials: "include",
                 }
@@ -55,7 +55,7 @@ export default {
             const json={
                 "id": id
             }
-            await fetch("http://localhost:8000/store/", {
+            await fetch(import.meta.env.VITE_API_URL + "/store/", {
                 method: "DELETE",
                 credentials: "include",
                 body: JSON.stringify(json),

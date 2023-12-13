@@ -14,7 +14,7 @@ export default {
 
         const fetchUsers = async () => {
             try {
-                const response = await fetch("http://localhost:8000/authentication/user/",
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/",
                     {
                         method: "GET",
                         credentials: "include",
@@ -42,7 +42,7 @@ export default {
             };
             
             try {
-                const response = await fetch("http://localhost:8000/authentication/user",
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user",
                     {
                         method: "DELETE",
                         headers: {
@@ -86,7 +86,7 @@ export default {
 
             editing.value = false;
             try {
-                const response = await fetch("http://localhost:8000/authentication/user/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -20,7 +20,7 @@ export default {
 
         const fetchCensuss = async () => {
             try {
-                const response = await fetch("http://localhost:8000/census/all-censuss/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/all-censuss/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -38,7 +38,7 @@ export default {
                         return a - b;
                     });
                 });
-                const response2 = await fetch("http://localhost:8000/authentication/all-users/", {
+                const response2 = await fetch(import.meta.env.VITE_API_URL + "/authentication/all-users/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -47,7 +47,7 @@ export default {
                     return a.id - b.id;
                 })
 
-                const response3 = await fetch("http://localhost:8000/voting/voting/", {
+                const response3 = await fetch(import.meta.env.VITE_API_URL + "/voting/voting/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -95,7 +95,7 @@ export default {
             };
 
             try {
-                await fetch("http://localhost:8000/census/", {
+                await fetch(import.meta.env.VITE_API_URL + "/census/", {
                     method: "POST",
                     credentials: "include",
                     headers: {
@@ -126,7 +126,7 @@ export default {
                 voters: [census.voter_id],
             }
 
-            fetch("http://localhost:8000/census/"+census.voting_id+"/", {
+            fetch(import.meta.env.VITE_API_URL + "/census/"+census.voting_id+"/", {
                 method: "DELETE",
                 credentials: "include",
                 headers: {

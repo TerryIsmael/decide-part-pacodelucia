@@ -16,7 +16,7 @@ export default {
 
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/voting/all-questions/", {
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "GET",
           credentials: "include",
         });
@@ -54,7 +54,7 @@ export default {
       };
 
       try {
-        await fetch("http://localhost:8000/voting/all-questions/", {
+        await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -110,7 +110,7 @@ export default {
         id: id,
       };
       try {
-        const response = await fetch("http://localhost:8000/voting/all-questions/",
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/",
           {
             method: "DELETE",
             headers: {
