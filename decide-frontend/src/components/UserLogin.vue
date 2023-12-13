@@ -81,7 +81,9 @@
                     if (response.ok) {
                         return response.json();
                     } else {
-                        throw new Error('Usuario o contraseña incorrectos');
+                        response.json().then((data) => {
+                            throw new Error(JSON.stringify(data));
+                        });
                     }
                 })
                 .then((data) => {
