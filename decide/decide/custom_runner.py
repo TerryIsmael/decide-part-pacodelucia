@@ -9,7 +9,7 @@ class CustomNoseTestSuiteRunner(NoseTestSuiteRunner):
 
         os.system("kill $(ps aux | grep -E 'node .*/node_modules/.bin/vite' | grep 'decide' | awk '{print $2}') 2>/dev/null")
 	
-        os.system(f"cd ../decide-frontend && npm run dev -- --host 0 --port {settings.FRONTEND_TEST_PORT} &")
+        os.system(f"cd ../decide-frontend && nohup npm run dev -- --host 0 --port {settings.FRONTEND_TEST_PORT} &")
         os.system(f"VITE_API_URL=http://localhost:{settings.FRONTEND_TEST_PORT}/")
         print(f"FRONTEND URL: http://localhost:{settings.FRONTEND_TEST_PORT}")
 

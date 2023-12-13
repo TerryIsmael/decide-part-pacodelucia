@@ -1,6 +1,5 @@
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-import logging
 
 from base.tests import BaseTestCase
 from django.utils import timezone
@@ -22,7 +21,6 @@ class FrontendTest(StaticLiveServerTestCase):
         super().setUpClass()
 
     def setUp(self):
-        logging.disable(logging.NOTSET)
         #Crea un usuario admin y otro no admin
         self.base = BaseTestCase()
         self.base.setUp()
@@ -64,7 +62,6 @@ class FrontendTest(StaticLiveServerTestCase):
         super().setUp()
 
     def tearDown(self):
-        logging.disable(logging.CRITICAL)
         super().tearDown()
         self.driver.quit()
 
@@ -89,15 +86,9 @@ class FrontendTest(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "username").send_keys("noadmin")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
         button = self.driver.find_element(By.CSS_SELECTOR, ".login-button")
-        print(button.text)
         button.click()
         # wait until something in the page changes (in this case, a div appears)
-        try:
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
-        except Exception as e:
-            print(e)
-            errormessage = self.driver.find_element(By.CSS_SELECTOR, ".error-message").text
-            print(errormessage)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
             
         message = self.driver.find_element(By.CSS_SELECTOR, ".success-message").text
         self.assertEquals(message, "Bienvenido noadmin")
@@ -110,13 +101,6 @@ class FrontendTest(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
         button = self.driver.find_element(By.CSS_SELECTOR, ".login-button")
         button.click()
-        
-        try:
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
-        except Exception as e:
-            print(e)
-            errormessage = self.driver.find_element(By.CSS_SELECTOR, ".error-message").text
-            print(errormessage)
 
         # wait until something in the page changes (in this case, a voting-card class appears)
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".voting-card")))
