@@ -1,7 +1,7 @@
 ALLOWED_HOSTS = ["*"]
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
-CSRF_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = ["*"]
+CSRF_ALLOWED_ORIGINS = ["*"]
 CORS_ALLOW_METHODS = ('DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT')
 CORS_ALLOW_HEADERS = ('authorization', 'content-type')
 CORS_ALLOW_CREDENTIALS = True
