@@ -18,6 +18,7 @@ from django.contrib.auth import authenticate, login
 import json
 from django.middleware.csrf import get_token
 from .serializers import UserSerializer
+from rest_framework import generics
 from base.perms import UserIsStaffOrAdmin
 import django_filters.rest_framework
 
@@ -59,7 +60,7 @@ class RegisterView(APIView):
         except IntegrityError:
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
-    
+
 def getTokens(request):
     sessionid = request.COOKIES.get('sessionid', '')
     if sessionid == '':
@@ -216,3 +217,10 @@ class UserView(APIView):
         except ObjectDoesNotExist:
             return Response({}, status=HTTP_404_NOT_FOUND)
         return Response({})
+
+class getAllUsers(generics.ListAPIView):
+    permission_classes = (UserIsStaffOrAdmin,)
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+
