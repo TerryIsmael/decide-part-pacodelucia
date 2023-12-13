@@ -9,6 +9,7 @@ import Mixnet from './components/Mixnet.vue';
 import User from './components/User.vue';
 import Auth from './components/Auth.vue';
 import Census from './components/Census.vue';
+import AdminHome from './components/AdminHome.vue';
 
 const routes = [
   { path: '/admin/voting', component: Voting },
@@ -21,6 +22,7 @@ const routes = [
   { path: '/admin/user', component: User },
   { path: '/admin/auth', component: Auth },
   { path: '/admin/census', component: Census },
+  { path: '/admin', component: AdminHome}
 ];
 
 const router = createRouter({
