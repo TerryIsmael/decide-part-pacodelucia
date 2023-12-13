@@ -1,12 +1,51 @@
 <script>
 import { ref, onMounted } from "vue";
 import {MixnetForm,Auth} from "../../models/MixnetForm.js";
+import {useRouter} from "vue-router";
 
 export default {
     setup() {
+        const token = ref('');
+        const router = useRouter();
+
+        const init = () => {
+            var cookies = document.cookie.split(';');
+            cookies.forEach(cookie => {
+                var cookiePair = cookie.split('=');
+                if (cookiePair[0].trim() === 'sessionid' && cookiePair[1]) {
+                    token = pair[1];
+                    fetchMixnets();
+                }
+            });
+
+        }
 
         const mixnets = ref([])
         const selectedMixnet = ref(null);
+
+        const isUserLogged = async () => {
+            fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
+                    method: 'GET',
+                    credentials: 'include',
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        router.push('/admin/login');
+                    }
+                })
+                .then((data) => {
+                    if (data.user_data && data.user_data.is_staff) {
+                        
+                    } else {
+                        router.push('/admin/login');
+                    }
+                })
+                .catch(() => {
+                    router.push('/admin/login');
+                });
+        }
 
         const fetchMixnets = async () => {
             const response = await fetch(import.meta.env.VITE_API_URL + "/mixnet", {
@@ -29,6 +68,8 @@ export default {
         };
 
         onMounted(()=>{
+            init();
+            isUserLogged();
             fetchMixnets();
             }
         );
