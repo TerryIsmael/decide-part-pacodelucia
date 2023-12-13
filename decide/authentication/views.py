@@ -176,9 +176,9 @@ class UserView(APIView):
     def post(self, request, *args, **kwargs):
         user_id = request.data.get('id', None)
         username = request.data.get('username', '')
-        pwd = request.data.get('password', '')
+        pword = request.data.get('password', '')
 
-        if not username or (not user_id and not pwd):
+        if not username or (not user_id and not pword):
             return Response({}, status=HTTP_400_BAD_REQUEST)
         
         email = request.data.get('email', '')
@@ -190,8 +190,8 @@ class UserView(APIView):
 
         try:
             user = User(id=user_id,username=username, email=email, first_name=first_name, last_name=last_name, is_staff=is_staff, is_active=is_active, is_superuser=is_superuser)
-            if(pwd is None or pwd != ''):
-                user.set_password(pwd)
+            if(pword is None or pword != ''):
+                user.set_password(pword)
             elif user_id != '':
                 user.password = User.objects.get(id=user_id).password
             else:
