@@ -236,6 +236,10 @@ export default {
     </ul>
 
     <button class="little-button" @click="cambiarSeleccionada(New), changeEditing(true)">Crear Nueva Votación</button>
+    
+    <p> 
+      <router-link to="/admin/grafica" class="nav-link" href="/">Gráfica</router-link>
+    </p>
 
     <br><br>
     <div v-if="votacionSeleccionada == 'New' && editing == true">

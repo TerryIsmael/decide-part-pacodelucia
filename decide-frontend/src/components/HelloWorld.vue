@@ -52,6 +52,7 @@ const count = ref(0)
     <a href="https://github.com/vuejs/language-tools" target="_blank">Volar</a>
     in your IDE for a better DX
   </p>
+  
   <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
   <table>
       <thead>
