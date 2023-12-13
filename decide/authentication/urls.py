@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import GetUserView, LogoutView, RegisterView, getTokens, deleteToken, addToken
+from .views import GetUserView, LogoutView, RegisterView, getTokens, deleteToken, addToken, adminLogin, isAdmin
 
 
 urlpatterns = [
@@ -12,4 +12,6 @@ urlpatterns = [
     path('get-auth/', getTokens),
     path('del-auth/<int:userId>', deleteToken),
     path('add-auth/<int:userId>', addToken),
+    path('login-auth/', adminLogin),
+    path('admin-auth/', isAdmin)
 ]

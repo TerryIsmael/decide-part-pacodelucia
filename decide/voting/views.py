@@ -154,22 +154,8 @@ class VotingFrontView(generics.ListCreateAPIView):
     serializer_class = VotingSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_fields = ('id', )
-
-    def get(self, request, *args, **kwargs):
-        
-        idpath = kwargs.get('voting_id')
-        self.queryset = Voting.objects.all()
-        version = request.version
-        if version not in settings.ALLOWED_VERSIONS:
-            version = settings.DEFAULT_VERSION
-        if version == 'v2':
-            self.serializer_class = SimpleVotingSerializer
-
-        return super().get(request, *args, **kwargs)
-
+    permission_classes = (UserIsStaffOrAdmin,)
     def post(self, request, *args, **kwargs):
-
-        self.permission_classes = (UserIsStaffOrAdmin,)
         self.check_permissions(request)
         for data in ['name', 'desc', 'question', 'auths']:
             if not data in request.data:
@@ -231,7 +217,7 @@ class VotingFrontView(generics.ListCreateAPIView):
             elif not voting.end_date:
                 msg = 'Voting is not stopped'
                 st = status.HTTP_400_BAD_REQUEST
-            elif voting.tally:
+            elif voting.tally or voting.tally == []:
                 msg = 'Voting already tallied'
                 st = status.HTTP_400_BAD_REQUEST
             else:   
