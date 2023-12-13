@@ -78,6 +78,7 @@
                     }),
                 })
                 .then((response) => {
+                    throw new Error(response.body + ' ' + response.status + ' ' + response.statusText + ' ' + response.url + ' ' + response.type + ' ' + response.ok + ' ' + response.headers);
                     if (response.ok) {
                         return response.json();
                     } else {
