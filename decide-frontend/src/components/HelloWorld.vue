@@ -1,9 +1,20 @@
 <script setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router';
 
 defineProps({
   msg: String,
 })
+
+const routes = [
+  { path: '/', name: 'Home' },
+  { path: '/admin/voting', name: 'ListVoting' },
+  { path: '/admin/voting/stats', name: 'VotingStats' },
+  // Add other routes as needed
+];
+
+const route = useRoute();
+
 
 const count = ref(0)
 </script>
@@ -43,6 +54,26 @@ const count = ref(0)
   </p>
   
   <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+  <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Nombre de la Ruta</th>
+          <th>Ir a  ...</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="route in routes" :key="route.path">
+          <td>{{ route.path }}</td>
+          <td>{{ route.name }}</td>
+          <td>
+            <router-link :to="route.path">
+              <button>Ir a {{ route.name }}</button>
+            </router-link>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 </template>
 
 <style scoped>
