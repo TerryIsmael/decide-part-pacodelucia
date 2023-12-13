@@ -8,10 +8,8 @@ from rest_framework.response import Response
 from store.models import Vote 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer
-from base.serializers import AuthSerializer
 from base.perms import UserIsStaffOrAdmin, UserIsStaff
 from base.models import Auth
-
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -143,11 +141,6 @@ class AllQuestionsView(generics.ListAPIView):
         question = get_object_or_404(Question, pk=request.data.get('id'))
         question.delete()
         return Response({}, status=status.HTTP_200_OK)
-
-class AllAuthsAPIView(generics.ListAPIView):
-    queryset = Auth.objects.all()
-    serializer_class = AuthSerializer
-    permission_classes = [permissions.IsAdminUser]
 
 class VotingFrontView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
