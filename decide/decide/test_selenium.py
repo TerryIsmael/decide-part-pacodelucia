@@ -85,7 +85,7 @@ class FrontendTest(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "username").click()
         self.driver.find_element(By.ID, "username").send_keys("noadmin")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
-        button = self.driver.find_element(By.CSS_SELECTOR, ".login-button").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".login-button").click()
         # wait until something in the page changes (in this case, a div appears)
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".success-message")))
         message = self.driver.find_element(By.CSS_SELECTOR, ".success-message").text
@@ -97,7 +97,7 @@ class FrontendTest(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "username").click()
         self.driver.find_element(By.ID, "username").send_keys("noadmin")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
-        button = self.driver.find_element(By.CSS_SELECTOR, ".login-button").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".login-button").click()
 
         # wait until something in the page changes (in this case, a voting-card class appears)
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".voting-card")))
