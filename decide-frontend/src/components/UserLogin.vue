@@ -81,12 +81,11 @@
                     if (response.ok) {
                         return response.json();
                     } else {
-                        response.json().then((data) => {
-                            throw new Error(JSON.stringify(data));
-                        });
+                        throw new Error('Usuario o contraseña incorrectos');
                     }
                 })
                 .then((data) => {
+                    throw new Error(JSON.stringify(data));
                     this.token = data.token;
                     document.cookie = `decide=${this.token}`;
                     this.getUser();
