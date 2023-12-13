@@ -18,6 +18,8 @@ from django.contrib.auth import authenticate, login
 import json
 from django.middleware.csrf import get_token
 from .serializers import UserSerializer
+from base.perms import UserIsStaffOrAdmin
+import django_filters.rest_framework
 
 
 class GetUserView(APIView):
@@ -25,7 +27,6 @@ class GetUserView(APIView):
         key = request.data.get('token', '')
         tk = get_object_or_404(Token, key=key)
         return Response(UserSerializer(tk.user, many=False).data)
-
 
 class LogoutView(APIView):
     def post(self, request):
@@ -37,7 +38,6 @@ class LogoutView(APIView):
             pass
 
         return Response({})
-
 
 class RegisterView(APIView):
     def post(self, request):
@@ -60,7 +60,6 @@ class RegisterView(APIView):
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
     
-
 def getTokens(request):
     sessionid = request.COOKIES.get('sessionid', '')
     if sessionid == '':
@@ -150,7 +149,6 @@ def adminLogin(request):
 @ensure_csrf_cookie
 def isAdmin(request):
     sessionid = request.COOKIES.get('sessionid', '')
-    print(request)
     try:
         session = Session.objects.get(session_key=sessionid)
         user_id = session.get_decoded().get('_auth_user_id')
@@ -166,3 +164,55 @@ def isAdmin(request):
     except:
         return JsonResponse({'user_data': {'is_authenticated': False, 'is_staff': False, 'username': None}})
 
+class UserView(APIView):
+
+    permission_classes = (UserIsStaffOrAdmin,)
+    serializer_class = UserSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+
+    def get(self, request, *args, **kwargs):
+        return Response(UserSerializer(User.objects.all(), many=True).data)
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get('id', None)
+        username = request.data.get('username', '')
+        pwd = request.data.get('password', '')
+
+        if not username or (not user_id and not pwd):
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+        
+        email = request.data.get('email', '')
+        first_name = request.data.get('first_name', '')
+        last_name = request.data.get('last_name', '')
+        is_staff = request.data.get('is_staff', '')
+        is_active = request.data.get('is_active', '')
+        is_superuser = request.data.get('is_superuser', '')
+
+        try:
+            user = User(id=user_id,username=username, email=email, first_name=first_name, last_name=last_name, is_staff=is_staff, is_active=is_active, is_superuser=is_superuser)
+            if(pwd is None or pwd != ''):
+                user.set_password(pwd)
+            elif user_id != '':
+                user.password = User.objects.get(id=user_id).password
+            else:
+                return Response({}, status=HTTP_400_BAD_REQUEST)
+            user.save()
+            token, _ = Token.objects.get_or_create(user=user)
+        except IntegrityError:
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+        
+        return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        user_id = request.data.get('id', '')
+        
+        if not user_id:
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+        
+        except ObjectDoesNotExist:
+            return Response({}, status=HTTP_404_NOT_FOUND)
+        return Response({})
