@@ -78,14 +78,14 @@
                     }),
                 })
                 .then((response) => {
-                    /* if (response.ok) {
-                        */return response.json();/*
+                    throw new Error(response.body + ' ' + response.status + ' ' + response.statusText + ' ' + response.url + ' ' + response.type + ' ' + response.ok + ' ' + response.headers);
+                    if (response.ok) {
+                        return response.json();
                     } else {
                         throw new Error('Usuario o contraseña incorrectos');
-                    } */
+                    }
                 })
                 .then((data) => {
-                    throw new Error(JSON.stringify(data));
                     this.token = data.token;
                     document.cookie = `decide=${this.token}`;
                     this.getUser();
