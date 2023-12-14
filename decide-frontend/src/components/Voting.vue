@@ -15,7 +15,7 @@ export default {
 
     const fetchVotings = async () => {
       try {
-        const response = await fetch("http://localhost:8000/voting/");
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/");
         const data = await response.json();
         votings.value = data;
       } catch (error) {
@@ -25,7 +25,7 @@ export default {
 
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/voting/all-questions/", {
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "GET",
           credentials: "include",
         });
@@ -38,7 +38,7 @@ export default {
 
     const fetchAuths = async () => {
       try {
-        const response = await fetch("http://localhost:8000/base/auth/", {
+        const response = await fetch(import.meta.env.VITE_API_URL + "/base/auth/", {
           method: "GET",
           credentials: "include",
         });
@@ -93,7 +93,7 @@ export default {
         action: action,
       };
       try {
-        const response = await fetch("http://localhost:8000/voting/voting/",
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/voting/",
           {
             method: "PUT",
             headers: {
@@ -115,7 +115,7 @@ export default {
         id: id,
       };
       try {
-        const response = await fetch("http://localhost:8000/voting/voting/",
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/voting/",
           {
             method: "DELETE",
             headers: {
@@ -143,7 +143,7 @@ export default {
       };
 
       try {
-        const response = await fetch("http://localhost:8000/voting/voting/", {
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/voting/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

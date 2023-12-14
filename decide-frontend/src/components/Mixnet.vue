@@ -1,51 +1,26 @@
 <script>
-import { ref, onMounted } from "vue";
-import {MixnetForm,Auth} from "../../models/MixnetForm.js";
-import {useRouter} from "vue-router";
+import { ref, onMounted, inject } from "vue";
 
 export default {
     setup() {
-        const token = ref('');
-        const router = useRouter();
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
 
-        const init = () => {
-            var cookies = document.cookie.split(';');
-            cookies.forEach(cookie => {
-                var cookiePair = cookie.split('=');
-                if (cookiePair[0].trim() === 'sessionid' && cookiePair[1]) {
-                    token = pair[1];
-                    fetchMixnets();
-                }
-            });
-
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false;
+            if (logged.value) {
+                //Init functions
+                fetchMixnets();
+            }
         }
+
+        onMounted(init);
 
         const mixnets = ref([])
         const selectedMixnet = ref(null);
-
-        const isUserLogged = async () => {
-            fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
-                    method: 'GET',
-                    credentials: 'include',
-                })
-                .then((response) => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        router.push('/admin/login');
-                    }
-                })
-                .then((data) => {
-                    if (data.user_data && data.user_data.is_staff) {
-                        
-                    } else {
-                        router.push('/admin/login');
-                    }
-                })
-                .catch(() => {
-                    router.push('/admin/login');
-                });
-        }
 
         const fetchMixnets = async () => {
             const response = await fetch(import.meta.env.VITE_API_URL + "/mixnet", {
@@ -67,14 +42,7 @@ export default {
             selectedMixnet.value = selectedMixnet.value === mixnet ? null : mixnet;
         };
 
-        onMounted(()=>{
-            init();
-            isUserLogged();
-            fetchMixnets();
-            }
-        );
-
-        return{
+        return {
             mixnets,
             selectedMixnet,
             fetchMixnets,

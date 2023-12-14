@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { Census } from "../../models/Census.js";
 
 export default {
@@ -17,10 +17,26 @@ export default {
         const newCensusError = ref(null);
         const users = ref([]);
         const waiting = ref(null);
+        
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
+
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false;
+            if (logged.value) {
+                //Init functions
+                fetchCensuss();
+            }
+        }
+
+        onMounted(init);
 
         const fetchCensuss = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + "/census/all-censuss/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -38,7 +54,7 @@ export default {
                         return a - b;
                     });
                 });
-                const response2 = await fetch(import.meta.env.VITE_API_URL + "/authentication/all-users/", {
+                const response2 = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/front/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -95,7 +111,7 @@ export default {
             };
 
             try {
-                await fetch(import.meta.env.VITE_API_URL + "/census/", {
+                await fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                     method: "POST",
                     credentials: "include",
                     headers: {
@@ -122,25 +138,24 @@ export default {
 
         const deleteCensus = async (census) => {
             waiting.value = census.voter_id;
-            const voters ={
+            const censusJson ={
+                voting_id: census.voting_id,
                 voters: [census.voter_id],
             }
 
-            fetch(import.meta.env.VITE_API_URL + "/census/"+census.voting_id+"/", {
+            fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                 method: "DELETE",
                 credentials: "include",
                 headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(voters),  
+                    body: JSON.stringify(censusJson),  
             });
 
             await fetchCensuss();
             censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
             waiting.value = null;
         };
-
-        onMounted(fetchCensuss);
 
         return {
             censuss,

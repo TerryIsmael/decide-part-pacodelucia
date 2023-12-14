@@ -147,7 +147,8 @@ class VotingFrontView(generics.ListCreateAPIView):
     serializer_class = VotingSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_fields = ('id', )
-    permission_classes = (UserIsStaff,)
+    permission_classes = (UserIsAdminToken,)
+    
     def post(self, request, *args, **kwargs):
         self.check_permissions(request)
         for data in ['name', 'desc', 'question', 'auths']:

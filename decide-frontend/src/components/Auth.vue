@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import Auth from "../../models/Auth.js";
 
 export default {
@@ -9,10 +9,25 @@ export default {
         const editing = ref(false);
         const newAuth = ref(new Auth());
         const New = "New"
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
+        
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false; 
+            if (logged.value) {
+                //Init functions
+                fetchAuths();
+            }
+        }
+
+        onMounted(init);
 
         const fetchAuths = async () => {
             try {
-                const response = await fetch("http://localhost:8000/base/auth", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/base/auth", {
                     method: "GET",
                     credentials: "include",
                 }
@@ -59,7 +74,7 @@ export default {
                 me: newAuth.value.me,
             };
             try {
-                const response = await fetch("http://localhost:8000/base/auth/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/base/auth/", {
                     method: "POST",
                     credentials: "include",
                     headers: {
@@ -84,10 +99,7 @@ export default {
             }
         };
         
-        onMounted(() => {
-            fetchAuths();
-        }
-        );
+        
 
         return {
             auths,

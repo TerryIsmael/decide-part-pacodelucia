@@ -1,7 +1,7 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { Option } from "../../models/Question.js";
-import {useRouter} from "vue-router";
+
 
 export default {
   setup() {
@@ -14,46 +14,26 @@ export default {
     const newOptionError = ref(null);
     const optionError = ref(null);
     const newDesc = ref("");
-
-    const token = ref('');
-    const router = useRouter();
-
-    const init = () => {
-        isUserLogged();
-        fetchQuestions();
-    }
-
-    const isUserLogged = async () => {
-        fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
-                method: 'GET',
-                credentials: 'include',
-            })
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    router.push('/admin/login');
-                }
-            })
-            .then((data) => {
-                if (data.user_data && data.user_data.is_staff) {
-                    
-                } else {
-                    router.push('/admin/login');
-                }
-            })
-            .catch(() => {
-                router.push('/admin/login');
-            });
+    const logged = inject("logged");
+    const navBarLoaded = inject('navBarLoaded')
+    
+    const init = async () => {
+      while (!navBarLoaded.value) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
-
+      navBarLoaded.value = false; 
+      if (logged.value) {
+        //Init functions
+        fetchQuestions();
+      }
+    }
+    
     const fetchQuestions = async () => {
       try {
         const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "GET",
           credentials: "include",
         });
-        console.log(response)
         const data = await response.json();
         questions.value = data;
       } catch (error) {

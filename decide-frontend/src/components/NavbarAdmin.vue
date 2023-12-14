@@ -1,12 +1,14 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { useRouter } from "vue-router";
+
 export default {
   setup() {
     const router = useRouter();
-    const logged = ref(false)
-    const username = ref("")
+    const logged = inject('logged')
+    const username = inject('username')
     const error = ref(null)
+    const navBarLoaded = inject('navBarLoaded')
 
     const isLogged = () => {
       fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
@@ -15,27 +17,29 @@ export default {
       })
         .then((response) => {
           if (response.ok) {
+            navBarLoaded.value = true;
+            logged.value = true;
             return response.json();
           } else {
-            if (window.location.href != window.location.origin+"/admin/login"){
-              window.location.href=window.location.origin+"/admin/login"
+            if (window.location.href != window.location.origin + "/admin/login") {
+              window.location.href = window.location.origin + "/admin/login"
             }
           }
         })
         .then((data) => {
           if (data.user_data.is_staff) {
-            logged.value=true
-            username.value=data.user_data.username  
+            logged.value = true;
+            username.value = data.user_data.username
           } else {
-            if (window.location.href != window.location.origin+"/admin/login"){
-              window.location.href=window.location.origin+"/admin/login"
+            if (window.location.href != window.location.origin + "/admin/login") {
+              window.location.href = window.location.origin + "/admin/login"
             }
           }
         })
         .catch(() => {
-          if (window.location.href != window.location.origin+"/admin/login"){
-              window.location.href=window.location.origin+"/admin/login"
-            }
+          if (window.location.href != window.location.origin + "/admin/login") {
+            window.location.href = window.location.origin + "/admin/login"
+          }
         });
     }
 
@@ -47,8 +51,8 @@ export default {
       })
         .then((response) => {
           if (response.ok) {
-            logged.value=false ;
-            window.location.href="/admin/login"
+            logged.value = false;
+            window.location.href = "/admin/login"
           } else {
             form = true;
           }
@@ -56,16 +60,17 @@ export default {
     };
 
     onMounted(isLogged);
+
     return {
       logged,
       username,
       error,
+      router,
       isLogged,
       logout,
-      router,
-    };
-  },
-};
+    }
+  }
+}
 
 </script>
 

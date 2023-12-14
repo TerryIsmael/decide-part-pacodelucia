@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import User from "../../models/User.js";
 
 export default {
@@ -11,10 +11,25 @@ export default {
         const newUser = ref(new User());
         const loading = ref(false);
         const newUserError = ref(null);
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
+
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false;
+            if (logged.value) {
+                //Init functions
+                fetchUsers();
+            }
+        }
+
+        onMounted(init);
 
         const fetchUsers = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/",
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/front/",
                     {
                         method: "GET",
                         credentials: "include",
@@ -28,7 +43,7 @@ export default {
 
         const changeEditing = async (newValue) => {
             if (newValue == true && selectedUser.value != "New") {
-                newUser.value = {...users.value.find(x => x.id == selectedUser.value)};
+                newUser.value = { ...users.value.find(x => x.id == selectedUser.value) };
             } else {
                 newUser.value = new User();
             }
@@ -40,9 +55,9 @@ export default {
             const userDelete = {
                 id: id,
             };
-            
+
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user",
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/front/",
                     {
                         method: "DELETE",
                         headers: {
@@ -86,7 +101,7 @@ export default {
 
             editing.value = false;
             try {
-                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/front/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -108,7 +123,7 @@ export default {
             newUserError.value = null;
         };
 
-        onMounted(fetchUsers);
+        
 
         return {
             users,
@@ -156,7 +171,7 @@ export default {
                         <label for="is_staff">Staff </label>
                         <input type="checkbox" id="is_staff" v-model="newUser.is_staff" />
                         <label for="is_superuser">Superusuario </label>
-                        <input type="checkbox" id="is_superuser" v-model="newUser.is_superuser"/>
+                        <input type="checkbox" id="is_superuser" v-model="newUser.is_superuser" />
                     </div>
                     <div>
                         <button class="little-button adjusted" type="submit"> Guardar </button>
