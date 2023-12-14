@@ -92,7 +92,7 @@ export default {
                     if (data.user_data.is_staff) {
                         this.success = `Bienvenido ${data.user_data.username}`;
                         setTimeout(() => {
-                            this.$router.push('/');
+                            this.$router.push('/admin');
                         }, 2000);   
                     } else {
                         this.form = true;
@@ -119,7 +119,7 @@ export default {
                 .then((data) => {
                     if (data.user_data.is_staff) {
                         setTimeout(() => {
-                            this.$router.push('/');
+                            this.$router.push('/admin');
                         }, 2000); 
                     } else {
                         this.form = true;
