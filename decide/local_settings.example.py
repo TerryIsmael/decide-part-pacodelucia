@@ -1,3 +1,6 @@
+from decouple import config
+
+
 ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
@@ -52,6 +55,12 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Imprime el correo por consola en vez de enviarse
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'  # Cambiado a la dirección del servidor SMTP de Outlook
+EMAIL_PORT = 587  # Puerto típicamente usado por Outlook para TLS
+EMAIL_USE_TLS = True  # Usar TLS para una conexión segura
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
