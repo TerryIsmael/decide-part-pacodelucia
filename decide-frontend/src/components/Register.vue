@@ -67,7 +67,7 @@ export default {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/authentication/register/', {
+            const response = await fetch(import.meta.env.VITE_API_URL+'authentication/register/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
