@@ -195,11 +195,11 @@ export default {
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
                 <label for="newVotingId">Id de la votación</label>
                 <select required id="newVotingId" v-model="newVotingId">
-                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }} </option>
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name }} </option>
                 </select>
                 <label for="newVoterId">Añadir usuario</label>
                 <select required id="newVoterId" v-model="newVoterId">
-                    <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
+                    <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id}}. {{ user.username }} </option>
                 </select>
                 <button class="little-button" type="submit">Añadir</button>
             </form>
@@ -218,7 +218,7 @@ export default {
                         <form @submit.prevent="saveCensus">
                             <label for="newVoterId">Añadir usuario</label>
                             <select required id="newVoterId" v-model="newVoterId">
-                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
+                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id}}. {{ user.username }} </option>
                             </select>
                             <button class="little-button" type="submit">Añadir</button>
                         </form>
