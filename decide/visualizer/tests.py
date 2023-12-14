@@ -6,6 +6,7 @@ from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 
 class StatsViewTest(BaseTestCase):
@@ -13,7 +14,7 @@ class StatsViewTest(BaseTestCase):
         super().setUp()
         self.question = Question(desc='Test Question')
         self.question.save()
-        self.auth = Auth(name='http://localhost:8080', url='http://localhost:8080', me=True)
+        self.auth = Auth(name=settings.BASEURL , url=settings.BASEURL, me=True)
         self.auth.save()
         self.voting = Voting(name='Test Voting', question=self.question, start_date=timezone.now())
         self.voting.save()

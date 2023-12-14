@@ -32,7 +32,7 @@
         const votingId = this.$route.params.id;
         console.log(`Solicitando datos para la votación con id: ${votingId}`);
 
-        axios.get(`http://localhost:8080/${votingId}/stats`)
+        axios.get(import.meta.env.VITE_API_URL + `${votingId}/stats`)
             .then(response => {
             console.log('Datos recibidos:', response.data);
             this.stats = response.data;
