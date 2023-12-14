@@ -10,4 +10,7 @@ jsonnet==0.18.0
 django-nose==1.4.6
 django-rest-swagger==2.2.0
 selenium==4.7.2
+dj_database_url==2.1.0
 pynose==1.4.8
+whitenoise==6.5.0s
+gunicorn==21.2.0
