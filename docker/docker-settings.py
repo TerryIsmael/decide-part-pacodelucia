@@ -1,11 +1,25 @@
 DEBUG = True
 
+CORS_ALLOWED_ORIGINS = ['http://10.5.0.1:5173', 'http://10.5.0.1:8000', 'http://10.5.0.1:3000', 'http://localhost:3000', 'http://localhost:8000']
+CSRF_ALLOWED_ORIGINS = ['http://10.5.0.1:5173', 'http://10.5.0.1:8000', 'http://10.5.0.1:3000', 'http://localhost:3000', 'http://localhost:8000']
+CORS_ALLOW_METHODS = ('DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT')
+CORS_ALLOW_HEADERS = ('authorization', 'content-type')
+CORS_ALLOW_CREDENTIALS = True
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.common.CommonMiddleware',
+]
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD':'',
+        'PASSWORD':'postgres',
         'HOST': 'db',
         'PORT': 5432,
     }
@@ -15,7 +29,7 @@ STATIC_ROOT = '/app/static/'
 MEDIA_ROOT = '/app/static/media/'
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['http://10.5.0.1:8000']
+CSRF_TRUSTED_ORIGINS = ['http://10.5.0.1:8000', 'http://10.5.0.1:5173', 'http://10.5.0.1:3000', 'http://localhost:3000', 'http://localhost:8000']
 
 # Modules in use, commented modules that you won't use
 MODULES = [
@@ -30,16 +44,18 @@ MODULES = [
     'voting',
 ]
 
-BASEURL = 'http://10.5.0.1:8000'
+BASEURL = 'http://10.5.0.1:3000'
+BACKEND_TEST_PORT = 8000
+FRONTEND_TEST_PORT = 5173
 
 APIS = {
-    'authentication': 'http://10.5.0.1:8000',
-    'base': 'http://10.5.0.1:8000',
-    'booth': 'http://10.5.0.1:8000',
-    'census': 'http://10.5.0.1:8000',
-    'mixnet': 'http://10.5.0.1:8000',
-    'postproc': 'http://10.5.0.1:8000',
-    'store': 'http://10.5.0.1:8000',
-    'visualizer': 'http://10.5.0.1:8000',
-    'voting': 'http://10.5.0.1:8000',
+    'authentication': BASEURL,
+    'base': BASEURL,
+    'booth': BASEURL,
+    'census': BASEURL,
+    'mixnet': BASEURL,
+    'postproc': BASEURL,
+    'store': BASEURL,
+    'visualizer': BASEURL,
+    'voting': BASEURL,
 }
