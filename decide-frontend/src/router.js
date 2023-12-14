@@ -6,6 +6,10 @@ import AdminLogin from './components/AdminLogin.vue';
 import Vote from './components/Vote.vue';
 import Question from './components/Question.vue';
 import AdminHome from './components/AdminHome.vue';
+import Mixnet from './components/Mixnet.vue';
+import User from './components/User.vue';
+import Auth from './components/Auth.vue';
+import Census from './components/Census.vue';
 
 const routes = [
   { path: '/admin/voting', component: Voting },
@@ -15,6 +19,10 @@ const routes = [
   { path: '/admin/vote', component: Vote },
   { path: '/admin/question', component: Question },
   { path: '/admin', component: AdminHome}
+  { path: '/admin/mixnet', component: Mixnet },
+  { path: '/admin/user', component: User },
+  { path: '/admin/auth', component: Auth },
+  { path: '/admin/census', component: Census },
 ];
 
 const router = createRouter({
