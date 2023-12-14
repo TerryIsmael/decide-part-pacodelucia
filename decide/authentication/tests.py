@@ -248,7 +248,7 @@ class RegisterViewTest(TestCase):
         data = {'username': 'testuser'}
 
         url = ('/authentication/authEmail/')  
-        response = self.client.post(url, data)
+        self.client.post(url, data)
         user = User.objects.get(username='testuser')
         self.assertFalse(user.is_active)
 
