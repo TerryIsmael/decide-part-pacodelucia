@@ -5,7 +5,6 @@ from census.models import Census
 from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
-from django.core.exceptions import ValidationError
 from django.conf import settings
 
 

@@ -1,24 +1,16 @@
-from datetime import timedelta
 import json
 from django.views.generic import TemplateView
-from django.conf import settings
 from django.http import Http404
-from django.db.models.functions import ExtractHour
 from base import mods
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from voting.models import Voting, VotingYesNo,VotingByPreference
 from census.models import Census
 from store.models import Vote
-from .models import Stats
-from django.db.models import Sum, Count,Avg
 
 # views.py
 
-from django.http import JsonResponse
-
 def stats(request,voting_id):
-    stats = Stats.objects.first()
 
      # Obtener la votación específica
     voting = get_object_or_404(Voting, id=voting_id)
