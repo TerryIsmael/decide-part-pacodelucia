@@ -173,7 +173,9 @@ export default {
 
         <div v-if="selectedQuestion == New && editing == true">
           <div>
-            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <div>
+              <p class="bold" style="color:rgb(211, 91, 91)">{{optionError}}</p>
+            </div>
             <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
               <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
@@ -188,7 +190,9 @@ export default {
               </div>
 
               <p>Nueva opción</p>
-              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
+              <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{newOptionError}}</p>
+              </div>
               <label for="newOptionNumber">Id: </label>
               <input type="number" id="newOptionNumber" min="1" v-model="newOption.number" />
               <label for="newOption">Opción: </label>
@@ -235,7 +239,9 @@ export default {
 
           <div v-else>
 
-            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <div>
+              <p class="bold" style="color:rgb(211, 91, 91)">{{optionError}}</p>
+            </div>
             <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
               <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
@@ -249,7 +255,9 @@ export default {
               </div>
 
               <p>Nueva opción</p>
-              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
+              <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{newOptionError}}</p>
+              </div>
               <label for="optionNumber">Id: </label>
               <input type="number" id="optionNumber" min="1" v-model="newOption.number" />
               <label for="newOption">Opción: </label>

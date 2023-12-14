@@ -75,12 +75,22 @@ export default {
 
         const saveUser = async () => {
 
+            if (newUser.value.id == undefined && (newUser.value.password == undefined || newUser.value.password.trim() == "")) {
+                newUserError.value = "El nombre de usuario y la contraseña no pueden estar vacíos o estar formadas por espacios en blanco";
+                return;
+            }
+
+            if (newUser.value.username == undefined || newUser.value.username.trim() == ""){
+                newUserError.value = "El nombre de usuario no puede estar vacío";
+                return;
+            }
+
             const userPost = {
                 id: newUser.value.id,
                 username: newUser.value.username.trim(),
-                password: newUser.value.password,
-                first_name: newUser.value.first_name,
-                last_name: newUser.value.last_name,
+                password: newUser.value.password?.trim(),
+                first_name: newUser.value.first_name?.trim(),
+                last_name: newUser.value.last_name?.trim(),
                 email: newUser.value.email,
                 is_active: newUser.value.is_active,
                 is_staff: newUser.value.is_staff,
@@ -88,11 +98,6 @@ export default {
             };
 
             const sameUsernames = users.value.filter(x => x.username == newUser.value.username);
-
-            if (userPost.username == "") {
-                newUserError.value = "El nombre de usuario no puede estar vacío";
-                return;
-            }
 
             if (sameUsernames != undefined && sameUsernames.filter(x => x.id != newUser.value.id).length > 0) {
                 newUserError.value = "Ya existe un usuario con ese nombre";
@@ -154,7 +159,9 @@ export default {
 
             <div v-if="selectedUser == 'New' && editing == true">
                 <form @submit.prevent="saveUser">
-                    <p v-if="newUserError != null" class="error">{{ newUserError }}</p>
+                    <div>
+                        <p class="bold" style="color:rgb(211, 91, 91)">{{newUserError}}</p>
+                    </div>
                     <div>
                         <label for="username">Nombre de usuario: </label>
                         <input type="text" id="username" v-model="newUser.username" required />
@@ -162,15 +169,15 @@ export default {
                         <input type="password" id="password" v-model="newUser.password" required />
                         <label for="email_address">Email: </label>
                         <input type="email" id="email_address" v-model="newUser.email" />
-                        <label for="first_name">Nombre </label>
+                        <label for="first_name">Nombre: </label>
                         <input type="text" id="first_name" v-model="newUser.first_name" />
-                        <label for="last_name">Apellido </label>
+                        <label for="last_name">Apellido: </label>
                         <input type="text" id="last_name" v-model="newUser.last_name" />
-                        <label for="is_active">Activo </label>
+                        <label for="is_active">Activo: </label>
                         <input type="checkbox" id="is_active" v-model="newUser.is_active" />
-                        <label for="is_staff">Staff </label>
+                        <label for="is_staff">Staff: </label>
                         <input type="checkbox" id="is_staff" v-model="newUser.is_staff" />
-                        <label for="is_superuser">Superusuario </label>
+                        <label for="is_superuser">Superusuario: </label>
                         <input type="checkbox" id="is_superuser" v-model="newUser.is_superuser" />
                     </div>
                     <div>
@@ -200,11 +207,13 @@ export default {
 
                     <div v-else>
                         <form @submit.prevent="saveUser">
-                            <p v-if="newUserError != null" class="error">{{ newUserError }}</p>
+                            <div>
+                                <p class="bold" style="color:rgb(211, 91, 91)">{{newUserError}}</p>
+                            </div>
                             <div>
                                 <label for="username">Nombre de usuario: </label>
                                 <input type="text" id="username" v-model="newUser.username" required />
-                                <label for="password">Contraseña: </label>
+                                <label for="password">Contraseña (no rellenar si no se desea cambiar): </label>
                                 <input type="password" id="password" v-model="newUser.password" />
                                 <label for="email_address">Email: </label>
                                 <input type="email" id="email_address" v-model="newUser.email" />

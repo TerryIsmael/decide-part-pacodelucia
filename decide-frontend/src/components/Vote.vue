@@ -99,7 +99,6 @@ export default {
 };
 </script>
 
-
 <template>
     <div>
         <h2>Listado de votos</h2>
@@ -122,7 +121,7 @@ export default {
                                 <p><span class="bold">Voter id:</span> {{ vote.voter_id }}</p>
                                 <p><span class="bold">A:</span> {{ vote.a }}</p>
                                 <p><span class="bold">B:</span> {{ vote.b }}</p>
-                                <button class="little-button" @click="deleteVote(vote.id)">Eliminar</button>
+                                <button class="little-button" style="background-color: rgb(211, 91, 91);" @click="deleteVote(vote.id)">Eliminar</button>
                             </div>
                         </div>
                     </li>

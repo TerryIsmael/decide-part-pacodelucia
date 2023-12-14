@@ -11,6 +11,7 @@ export default {
         const New = "New"
         const logged = inject("logged");
         const navBarLoaded = inject('navBarLoaded')
+        const errorMessage = ref("");
         
         const init = async () => {
             while (!navBarLoaded.value) {
@@ -41,6 +42,7 @@ export default {
 
         const changeSelected = (id) => {
             selectedAuth.value = selectedAuth.value === id ? null : id;
+            errorMessage.value = "";
         };
 
         const deleteAuth = async (id) => {
@@ -66,11 +68,17 @@ export default {
         };
 
         const saveAuth = async () => {
-            editing.value = false;
+
+            if (newAuth.value.name==undefined || newAuth.value.name.trim() === "") {
+                errorMessage.value = "El nombre no puede estar vacío";
+                return;
+            }
+
+            
             const authPost = {
                 id: newAuth.value.id,
-                name: newAuth.value.name,
-                url: newAuth.value.url,
+                name: newAuth.value.name.trim(),
+                url: newAuth.value.url.trim(),
                 me: newAuth.value.me,
             };
             try {
@@ -82,18 +90,21 @@ export default {
                     },
                     body: JSON.stringify(authPost),
                 });
+                editing.value = false;
+                newAuth.value = new Auth();
+                errorMessage.value = "";
+                fetchAuths();
             } catch (error) {
                 console.error("Error:", response.status, error.json());
             }
-
-            newAuth.value = new Auth();
-            fetchAuths();
+            
         };
         
         const changeEditing = (value) => {
+            errorMessage.value = "";
             editing.value = value;
             if (value && selectedAuth.value !== New) {
-                newAuth.value = auths.value.find((auth) => auth.id === selectedAuth.value);
+                newAuth.value = {...auths.value.find((auth) => auth.id === selectedAuth.value)};
             } else {
                 newAuth.value = new Auth();
             }
@@ -107,6 +118,7 @@ export default {
             editing,
             newAuth,
             New,
+            errorMessage,
             changeSelected,
             deleteAuth,
             saveAuth,
@@ -125,6 +137,9 @@ export default {
         </button>
 
         <div v-if="selectedAuth == New && editing == true">
+            <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{errorMessage}}</p>
+            </div>
             <form @submit.prevent="saveAuth">
                 <label for = "name">Nombre</label>
                 <input required type="text" id="name" v-model="newAuth.name"/>
@@ -147,6 +162,9 @@ export default {
                 </h3>
                 <div v-if="selectedAuth == auth.id">
                     <div v-if="editing">
+                        <div>
+                            <p class="bold" style="color:rgb(211, 91, 91)">{{errorMessage}}</p>
+                        </div>
                         <form @submit.prevent="saveAuth">
                             <label for = "name">Nombre</label>
                             <input required type="text" id="name" v-model="newAuth.name"/>

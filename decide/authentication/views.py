@@ -21,6 +21,7 @@ from .serializers import UserSerializer
 from rest_framework import generics
 from base.perms import UserIsStaff, UserIsAdminToken
 import django_filters.rest_framework
+from base import mods
 
 
 class GetUserView(APIView):
@@ -134,12 +135,15 @@ def adminLogin(request):
             password = data.get('password')
 
             user = authenticate(request, username=username, password=password)
-
+            
             if user is not None and user.is_staff:
                 login(request, user)
                 csrf_token = get_token(request)
+                tk=Token.objects.get_or_create(user=user)
                 response = JsonResponse({'message': 'Login exitoso', 'sessionid': request.session.session_key})
                 response.set_cookie('csrftoken', csrf_token, samesite='Lax')
+                response.set_cookie('auth-token', tk[0].key, samesite='Lax')
+                
                 return response
             else:
                 return JsonResponse({'message': 'Credenciales incorrectas'}, status=401)

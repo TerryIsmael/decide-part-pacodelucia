@@ -214,8 +214,8 @@ class VotingFrontView(generics.ListCreateAPIView):
             elif voting.tally or voting.tally == []:
                 msg = 'Voting already tallied'
                 st = status.HTTP_400_BAD_REQUEST
-            else:   
-                token = request.session.get('auth-token', '')
+            else: 
+                token = request.COOKIES.get('auth-token', '')
                 if Vote.objects.filter(voting_id=voting.id).exists():
                     voting.tally_votes(token)
                     msg = 'Voting tallied'
