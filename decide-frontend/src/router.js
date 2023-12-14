@@ -18,11 +18,11 @@ const routes = [
   { path: '/admin/login', component: AdminLogin },
   { path: '/admin/vote', component: Vote },
   { path: '/admin/question', component: Question },
-  { path: '/admin', component: AdminHome}
   { path: '/admin/mixnet', component: Mixnet },
   { path: '/admin/user', component: User },
   { path: '/admin/auth', component: Auth },
   { path: '/admin/census', component: Census },
+  { path: '/admin', component: AdminHome}
 ];
 
 const router = createRouter({

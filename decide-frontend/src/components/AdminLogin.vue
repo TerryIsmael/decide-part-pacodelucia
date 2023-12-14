@@ -16,7 +16,7 @@
           <label for="password">Contraseña:</label>
           <input type="password" id="password" v-model="password" required>
         </div>
-        <button class="login-button" :disabled="isButtonDisabled" type="submit">INICIAR SESIÓN</button>
+        <button class="login-button"  type="submit">INICIAR SESIÓN</button>
       </form>
     </div>
     <p v-else>Cargando...</p>
@@ -92,8 +92,8 @@ export default {
                     if (data.user_data.is_staff) {
                         this.success = `Bienvenido ${data.user_data.username}`;
                         setTimeout(() => {
-                            this.$router.push('/admin');
-                        }, 2000);   
+                            window.location.href="/admin";
+                        }, 1000);   
                     } else {
                         this.form = true;
                         throw new Error('Usuario o contraseña incorrectos');
@@ -195,7 +195,7 @@ form {
         background-color: #2196F3;
         color: rgb(255, 255, 255);
         border-radius: 5px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Añade una sombra al botón */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         padding: 10px;
         font-size: 16px;
         cursor: pointer;
@@ -204,17 +204,17 @@ form {
         margin-top: 30px;
     }
     .login-button:active {
-        background-color: #0a7bd0; /* Cambia esto a tu color preferido */
+        background-color: #0a7bd0; 
         color: #ffffff;
     }
 
     .login-button:hover {
-        background-color: #0a8be6; /* Cambia esto a tu color preferido */
+        background-color: #0a8be6;
         color: #ffffff;
     }
 
     .login-button:disabled {
-        background-color: #cccccc; /* Cambia esto a tu color preferido */
+        background-color: #cccccc; 
         color: #888888;
     }
 </style>

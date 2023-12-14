@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { Census } from "../../models/Census.js";
 
 export default {
@@ -17,10 +17,26 @@ export default {
         const newCensusError = ref(null);
         const users = ref([]);
         const waiting = ref(null);
+        
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
+
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false;
+            if (logged.value) {
+                //Init functions
+                fetchCensuss();
+            }
+        }
+
+        onMounted(init);
 
         const fetchCensuss = async () => {
             try {
-                const response = await fetch("http://localhost:8000/census/all-censuss/", {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -38,7 +54,7 @@ export default {
                         return a - b;
                     });
                 });
-                const response2 = await fetch("http://localhost:8000/authentication/all-users/", {
+                const response2 = await fetch(import.meta.env.VITE_API_URL + "/authentication/user/front/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -47,7 +63,7 @@ export default {
                     return a.id - b.id;
                 })
 
-                const response3 = await fetch("http://localhost:8000/voting/voting/", {
+                const response3 = await fetch(import.meta.env.VITE_API_URL + "/voting/voting/", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -95,7 +111,7 @@ export default {
             };
 
             try {
-                await fetch("http://localhost:8000/census/", {
+                await fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                     method: "POST",
                     credentials: "include",
                     headers: {
@@ -122,25 +138,24 @@ export default {
 
         const deleteCensus = async (census) => {
             waiting.value = census.voter_id;
-            const voters ={
+            const censusJson ={
+                voting_id: census.voting_id,
                 voters: [census.voter_id],
             }
 
-            fetch("http://localhost:8000/census/"+census.voting_id+"/", {
+            fetch(import.meta.env.VITE_API_URL + "/census/front/", {
                 method: "DELETE",
                 credentials: "include",
                 headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(voters),  
+                    body: JSON.stringify(censusJson),  
             });
 
             await fetchCensuss();
             censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
             waiting.value = null;
         };
-
-        onMounted(fetchCensuss);
 
         return {
             censuss,
@@ -180,11 +195,11 @@ export default {
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
                 <label for="newVotingId">Id de la votación</label>
                 <select required id="newVotingId" v-model="newVotingId">
-                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }} </option>
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name }} </option>
                 </select>
                 <label for="newVoterId">Añadir usuario</label>
                 <select required id="newVoterId" v-model="newVoterId">
-                    <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
+                    <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id}}. {{ user.username }} </option>
                 </select>
                 <button class="little-button" type="submit">Añadir</button>
             </form>
@@ -203,7 +218,7 @@ export default {
                         <form @submit.prevent="saveCensus">
                             <label for="newVoterId">Añadir usuario</label>
                             <select required id="newVoterId" v-model="newVoterId">
-                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }} </option>
+                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id}}. {{ user.username }} </option>
                             </select>
                             <button class="little-button" type="submit">Añadir</button>
                         </form>

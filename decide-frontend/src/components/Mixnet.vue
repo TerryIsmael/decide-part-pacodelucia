@@ -1,15 +1,29 @@
 <script>
-import { ref, onMounted } from "vue";
-import {MixnetForm,Auth} from "../../models/MixnetForm.js";
+import { ref, onMounted, inject } from "vue";
 
 export default {
     setup() {
+        const logged = inject("logged");
+        const navBarLoaded = inject('navBarLoaded')
+
+        const init = async () => {
+            while (!navBarLoaded.value) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            navBarLoaded.value = false;
+            if (logged.value) {
+                //Init functions
+                fetchMixnets();
+            }
+        }
+
+        onMounted(init);
 
         const mixnets = ref([])
         const selectedMixnet = ref(null);
 
         const fetchMixnets = async () => {
-            const response = await fetch("http://localhost:8000/mixnet", {
+            const response = await fetch(import.meta.env.VITE_API_URL + "/mixnet", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -28,12 +42,7 @@ export default {
             selectedMixnet.value = selectedMixnet.value === mixnet ? null : mixnet;
         };
 
-        onMounted(()=>{
-            fetchMixnets();
-            }
-        );
-
-        return{
+        return {
             mixnets,
             selectedMixnet,
             fetchMixnets,

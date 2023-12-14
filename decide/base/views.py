@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.utils import IntegrityError
-from base.perms import UserIsStaffOrAdmin
+from base.perms import UserIsAdminToken
 from base.models import Auth
 from base.serializers import AuthSerializer
 from rest_framework import generics
@@ -15,7 +15,7 @@ from rest_framework.status import (
 
 class AllAuthsAPIView(generics.ListAPIView):
 
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsAdminToken,)
     serializer_class = AuthSerializer
     queryset = Auth.objects.all()
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)

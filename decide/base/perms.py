@@ -11,14 +11,15 @@ class UserIsStaff(permissions.BasePermission):
         response = mods.post('authentication/getuser', json={'token': request.auth.key},
                 response=True)
         return response.json().get('is_staff', False)
-
-class UserIsStaffOrAdmin(permissions.BasePermission): 
-
+    
+class UserIsAdminToken(permissions.BasePermission):
     def has_permission(self, request, view):
-        if not request.auth:
-            if request.user.is_anonymous:
-                return False
-            return request.user.is_staff or request.user.is_superuser
-        response = mods.post('authentication/getuser', json={'token': request.auth.key},
-                response=True)
-        return response.json().get('is_staff', False) or response.json().get('is_admin', False)
+        sessionid = request.COOKIES.get('sessionid', '')
+        if sessionid == None or sessionid == '':
+            return False
+        response = mods.post('authentication/admin-auth', json={'sessionid': sessionid},
+                response=True, headers = {'Content-Type': 'application/json'})
+        return response.status_code == 200
+        
+    
+
