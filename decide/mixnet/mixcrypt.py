@@ -34,13 +34,14 @@ True
 '''
 
 
-from pprint import pprint
-
 from Crypto.PublicKey import ElGamal
 from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util.number import GCD
+from multiprocessing import Pool
 
+nb_cpus=4
+pool = Pool(processes=nb_cpus)
 
 def rand(p):
     while True:
@@ -49,7 +50,7 @@ def rand(p):
     return k
 
 
-def gen_multiple_key(*crypts):
+def gen_multiple_key_worker(crypts):
     k1 = crypts[0]
     k = MixCrypt(k=k1.k, bits=k1.bits)
     k.k.y = 1
@@ -58,20 +59,34 @@ def gen_multiple_key(*crypts):
     k.k.y = k.k.y % k.k.p
     return k
 
+def gen_multiple_key(*crypts):
+    results = pool.map(gen_multiple_key_worker, [crypts])
+    return results[0]
+
+def multiple_decrypt_worker(args):
+    a, b, k = args
+    return k.decrypt((a, b))
 
 def multiple_decrypt(c, *crypts):
     a, b = c
-    for k in crypts:
-        b = k.decrypt((a, b))
-    return b
+    decrypt_args = [(a, b, k) for k in crypts]
+    decrypted_values = pool.map(multiple_decrypt_worker, decrypt_args)
+    return decrypted_values[-1]
 
+def multiple_decrypt_shuffle_worker(args):
+    k, b, last = args
+    return k.shuffle_decrypt(b, last)
 
 def multiple_decrypt_shuffle(ciphers, *crypts):
     b = ciphers
-    for i, k in enumerate(crypts):
-        last = i == len(crypts) - 1
-        b = k.shuffle_decrypt(b, last)
-    return b
+    shuffle_args = [(k, b, i == len(crypts) - 1) for i, k in enumerate(crypts)]
+    decrypted_values = pool.map(multiple_decrypt_shuffle_worker, shuffle_args)
+    return decrypted_values[-1]
+
+def multiple_decrypt_shuffle2_worker(args):
+    k, b, pubkey, last = args
+    b = k.shuffle(b, pubkey)
+    return k.multiple_decrypt(b, last=last)
 
 def multiple_decrypt_shuffle2(ciphers, *crypts, pubkey=None):
     '''
@@ -87,23 +102,16 @@ def multiple_decrypt_shuffle2(ciphers, *crypts, pubkey=None):
     >>> clears == d
     False
     >>> sorted(clears) == sorted(d)
-    True
-    '''
-
+    True   '''
     b = ciphers.copy()
+    decrypt_args = [(k, b, pubkey, i == len(crypts) - 1) for i, k in enumerate(crypts)]
+    decrypted_values = pool.map(multiple_decrypt_shuffle2_worker, decrypt_args)
+    return decrypted_values[-1]
 
-    # shuffle
-    for k in crypts:
-        b = k.shuffle(b, pubkey)
-
-    # decrypt
-    for i, k in enumerate(crypts):
-        last = i == len(crypts) - 1
-        b = k.multiple_decrypt(b, last=last)
-    return b
 
 
 class MixCrypt:
+    
     def __init__(self, k=None, bits=256):
         self.bits = bits
         if k:
@@ -136,17 +144,19 @@ class MixCrypt:
         m = self.k._decrypt(c)
         return m
 
-    def multiple_decrypt(self, msgs, last=True):
-        msgs2 = []
-        for a, b in msgs:
-            clear = self.decrypt((a, b))
-            if last:
-                msg = clear
-            else:
-                msg = (a, clear)
-            msgs2.append(msg)
-        return msgs2
+    def multiple_decrypt_worker(self, args):
+        a, b, last = args
+        clear = self.decrypt((a, b))
+        return clear if last else (a, clear)
 
+    def multiple_decrypt(self, msgs, last=True):      
+        decrypt_args = [(a, b, last) for a, b in msgs]
+        decrypted_values = pool.map(self.multiple_decrypt_worker, decrypt_args)
+        
+        return decrypted_values
+    
+
+    #No paralelizada porque las claves de ElGamal no son serializables y al intentar paralelizar lanza un PicklingError
     def shuffle_decrypt(self, msgs, last=True):
         msgs2 = msgs.copy()
         msgs3 = []
@@ -161,7 +171,7 @@ class MixCrypt:
             msgs3.append(msg)
 
         return msgs3
-
+    
     def reencrypt(self, cipher, pubkey=None):
         '''
         >>> B = 256
@@ -198,6 +208,7 @@ class MixCrypt:
                 x[d] = i
         return x
 
+    #Esta funcion tampoco es paralelizable porque las claves de elgamal no son serializables
     def shuffle(self, msgs, pubkey=None):
         '''
         Reencrypt and shuffle
@@ -205,14 +216,19 @@ class MixCrypt:
 
         msgs2 = msgs.copy()
         perm = self.gen_perm(len(msgs))
+        args = []
         for i, p in enumerate(perm):
             m = msgs[p]
+            args.append((m,pubkey))
             nm = self.reencrypt(m, pubkey)
             msgs2[i] = nm
 
         return msgs2
 
-
+        
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+
+    pool.close()
+    pool.join()
