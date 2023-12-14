@@ -98,7 +98,7 @@ export default {
             });
         },
         getVoting() {
-            fetch(import.meta.env.VITE_API_URL + 'voting/' + this.$route.params.id + '/stringkeys')
+            fetch(import.meta.env.VITE_API_URL + '/voting/' + this.$route.params.id + '/stringkeys')
             .then((response) => {
                 if (response.ok) {
                     return response.json();
