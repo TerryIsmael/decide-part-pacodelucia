@@ -70,3 +70,13 @@ class StatsViewTest(BaseTestCase):
         response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['census'], 50.0)
+
+    def test_stats_with_no_votes_or_census(self):
+        self.vote1.delete()
+        self.vote2.delete()
+        self.census1.delete()
+        self.census2.delete()
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 0)
+        self.assertEqual(response.json()['census'], 0.0)
