@@ -9,7 +9,7 @@ export default {
     const username = inject('username')
     const error = ref(null)
     const navBarLoaded = inject('navBarLoaded')
-
+    
     const isLogged = () => {
       fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
         method: 'GET',
