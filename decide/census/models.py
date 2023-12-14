@@ -1,6 +1,4 @@
 from django.db import models
-from datetime import datetime
-
 
 class Census(models.Model):
 
@@ -14,7 +12,7 @@ class Census(models.Model):
         ("NP", "No response")
     ]
 
-    CIVIL_STATE = [   
+    CIVIL_STATE = [
         ("SI","Single"),
         ("MA", "Married"),
         ("DI", "Divorced"),
@@ -43,6 +41,5 @@ class Census(models.Model):
     gender = models.CharField(max_length=2, choices=GENDER, null=True)
     civil_state = models.CharField(max_length=2, choices=CIVIL_STATE, null=True)
     works = models.CharField(max_length=2, choices=WORKS, null=True)
-    
     class Meta:
         unique_together = (('voting_id','voter_id','born_year','gender','civil_state','works'),)

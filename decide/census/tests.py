@@ -13,16 +13,13 @@ from selenium.webdriver.common.keys import Keys
 from .models import Census
 from base import mods
 from base.tests import BaseTestCase
-from datetime import datetime
-from datetime import date
 from .views import filterClass
-from .views import CreateCensus
-from .forms import CreationCensusForm
-from django.test import TestCase
+#from .views import CreateCensus
+#from .forms import CreationCensusForm
 from django.http import HttpRequest
 
 class CreateCensusTest(TestCase):
-    #Método de prueba sencillo
+    
     def setUp(self):
         self.censo1 = Census.objects.create(
             voting_id= 1,
@@ -104,7 +101,7 @@ class CreateCensusTest(TestCase):
     #     request = HttpRequest()
     #     request.method = 'PUT'
     #     response = view.post(request)
-    #     self.assertEqual(response.status_code, 405)  
+    #     self.assertEqual(response.status_code, 405)
 
 
 class CensusFilter(TestCase):

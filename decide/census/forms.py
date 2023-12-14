@@ -14,7 +14,7 @@ class CreationCensusForm(forms.Form):
         ("NP", "No response")
     ]
 
-    CIVIL_STATE = [   
+    CIVIL_STATE = [
         ("SI","Single"),
         ("MA", "Married"),
         ("DI", "Divorced"),
@@ -27,7 +27,7 @@ class CreationCensusForm(forms.Form):
         ("UN", "Unemployed"),
         ("RE", "Retiree"),
         ("PE", "Pensioner")
-    ] 
+    ]
 
     RELIGION = [
         ("CH", "Christianity"),
@@ -46,10 +46,9 @@ class CreationCensusForm(forms.Form):
     gender = forms.ChoiceField(choices=GENDER)
     civil_state = forms.ChoiceField(choices=CIVIL_STATE)
     works = forms.ChoiceField(choices=WORKS)
-    
     class Meta:
 
-        model = Census 
+        model = Census
         fields = (
             'voting_id', 
             'voter_id',
