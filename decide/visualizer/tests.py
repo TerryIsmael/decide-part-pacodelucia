@@ -87,3 +87,13 @@ class StatsViewTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['votes'], 0)
         self.assertEqual(response.json()['census'], 0.0)
+        
+    def test_stats_with_votes_and_census(self):
+        Census.objects.create(voting_id=self.voting.id, voter_id=3)
+        Census.objects.create(voting_id=self.voting.id, voter_id=4)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=3)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=4)
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 4)
+        self.assertEqual(response.json()['census'], 50.0)
