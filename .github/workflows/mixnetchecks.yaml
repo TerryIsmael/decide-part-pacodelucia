@@ -1,3 +1,5 @@
+name: Mixnet tests exec. time
+
 on:
   push:
     branches:
