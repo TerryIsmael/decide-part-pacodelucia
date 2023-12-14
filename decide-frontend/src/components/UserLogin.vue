@@ -69,7 +69,7 @@
                 if (this.token) {
                     headers['Authorization'] = `Bearer ${this.token}`;
                 }
-                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/login/', {
+                fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/login/', {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify({
@@ -95,7 +95,7 @@
                 });
             },
             getUser() {
-                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
+                fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/getuser/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -123,7 +123,7 @@
                 });
             },
             isLogged() {
-                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
+                fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/getuser/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

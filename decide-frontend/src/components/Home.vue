@@ -87,7 +87,7 @@ export default {
       });
     }, 
     isLogged() {
-      fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/getuser/', {
+      fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/getuser/', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ export default {
       getData(){
     },
     getData() {
-      fetch(import.meta.env.VITE_API_URL + 'voting/getbyuser', {
+      fetch(import.meta.env.VITE_API_URL + '/voting/getbyuser', {
         method: 'GET',
         credentials: 'include',
       })

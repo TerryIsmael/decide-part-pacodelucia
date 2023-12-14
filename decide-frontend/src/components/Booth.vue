@@ -70,7 +70,7 @@ export default {
     },
     methods: {
         getUser() {
-            fetch(import.meta.env.VITE_API_URL+'gateway/authentication/getuser/', {
+            fetch(import.meta.env.VITE_API_URL+'/gateway/authentication/getuser/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -98,7 +98,7 @@ export default {
             });
         },
         getVoting() {
-            fetch(import.meta.env.VITE_API_URL + 'voting/' + this.$route.params.id + '/stringkeys')
+            fetch(import.meta.env.VITE_API_URL + '/voting/' + this.$route.params.id + '/stringkeys')
             .then((response) => {
                 if (response.ok) {
                     return response.json();
@@ -141,7 +141,7 @@ export default {
         },
         vote() {
             var v = this.encrypt();
-            fetch(import.meta.env.VITE_API_URL + 'gateway/store/', {
+            fetch(import.meta.env.VITE_API_URL + '/gateway/store/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
