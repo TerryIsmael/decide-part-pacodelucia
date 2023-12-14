@@ -1,6 +1,7 @@
 import json
 
 from random import choice
+from django.conf import settings
 
 from locust import (
     HttpUser,
@@ -11,7 +12,7 @@ from locust import (
 )
 
 
-HOST = "http://localhost:8000"
+HOST =  settings.BASEURL
 VOTING = 2
 
 
