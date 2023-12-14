@@ -5,6 +5,8 @@ from census.models import Census
 from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
+from django.core.exceptions import ValidationError
+
 
 class StatsViewTest(BaseTestCase):
     def setUp(self):
@@ -87,7 +89,7 @@ class StatsViewTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['votes'], 0)
         self.assertEqual(response.json()['census'], 0.0)
-        
+
     def test_stats_with_votes_and_census(self):
         Census.objects.create(voting_id=self.voting.id, voter_id=3)
         Census.objects.create(voting_id=self.voting.id, voter_id=4)
@@ -96,4 +98,14 @@ class StatsViewTest(BaseTestCase):
         response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['votes'], 4)
-        self.assertEqual(response.json()['census'], 50.0)
+        self.assertEqual(response.json()['census'], 100.0)
+
+    def test_stats_with_votes_no_census(self):
+        Vote.objects.all().delete()
+        Census.objects.all().delete()
+        Vote.objects.create(voting_id=self.voting.id, voter_id=3)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=4)
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 2)
+        self.assertEqual(response.json()['census'], 0.0)
