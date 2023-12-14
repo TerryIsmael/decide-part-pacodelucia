@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Census
+from .models import Census, CensusYesNo
 
 
 class CensusAdmin(admin.ModelAdmin):
@@ -9,5 +9,11 @@ class CensusAdmin(admin.ModelAdmin):
 
     search_fields = ('voter_id', )
 
+class CensusYesNoAdmin(admin.ModelAdmin):
+    list_display = ('voting_yesno_id', 'voter_id')
+    list_filter = ('voting_yesno_id', )
+
+    search_fields = ('voter_id', )
 
 admin.site.register(Census, CensusAdmin)
+admin.site.register(CensusYesNo, CensusYesNoAdmin)
