@@ -21,7 +21,6 @@ from .serializers import UserSerializer
 from rest_framework import generics
 from base.perms import UserIsStaff, UserIsAdminToken
 import django_filters.rest_framework
-from base import mods
 
 
 class GetUserView(APIView):
