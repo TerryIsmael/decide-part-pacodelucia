@@ -22,6 +22,11 @@ class DefVisualizer(TaskSet):
         self.client.get("/visualizer/{0}/".format(VOTING))
 
 
+class GraficaStatsTaskSet(TaskSet):
+    @task
+    def get_grafica_stats(self):
+        self.client.get(f"/admin/grafica")
+
 class DefVoters(SequentialTaskSet):
 
     def on_start(self):
@@ -73,3 +78,9 @@ class Voters(HttpUser):
     host = HOST
     tasks = [DefVoters]
     wait_time= between(3,5)
+
+
+class StatsGrafica(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [GraficaStatsTaskSet]
+    wait_time = between(3, 5)
