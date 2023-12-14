@@ -9,7 +9,7 @@ from rest_framework import generics
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
-from base.perms import UserIsStaffOrAdmin
+from base.perms import UserIsStaff
 
 
 class StoreView(generics.ListAPIView):
@@ -19,7 +19,7 @@ class StoreView(generics.ListAPIView):
     filterset_fields = ('voting_id', 'voter_id')
 
     def get(self, request):
-        self.permission_classes = (UserIsStaffOrAdmin,)
+        self.permission_classes = (UserIsStaff,)
         self.check_permissions(request)
         return super().get(request)
 

@@ -19,7 +19,7 @@ import json
 from django.middleware.csrf import get_token
 from .serializers import UserSerializer
 from rest_framework import generics
-from base.perms import UserIsStaffOrAdmin
+from base.perms import UserIsStaff
 import django_filters.rest_framework
 
 
@@ -167,7 +167,7 @@ def isAdmin(request):
 
 class UserView(APIView):
 
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsStaff,)
     serializer_class = UserSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
 
@@ -219,7 +219,7 @@ class UserView(APIView):
         return Response({})
 
 class getAllUsers(generics.ListAPIView):
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsStaff,)
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)

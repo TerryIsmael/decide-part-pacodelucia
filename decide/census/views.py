@@ -10,13 +10,13 @@ from rest_framework.status import (
         HTTP_409_CONFLICT as ST_409
 )
 
-from base.perms import UserIsStaffOrAdmin
+from base.perms import UserIsStaff
 from .models import Census
 from .serializers import CensusSerializer
 import django_filters.rest_framework
 
 class CensusCreate(generics.ListCreateAPIView):
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsStaff,)
         
     def create(self, request, *args, **kwargs):
         voting_id = request.data.get('voting_id')
@@ -52,7 +52,7 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
     
 class AllCensus(generics.ListAPIView):
     
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsStaff,)
     serializer_class = CensusSerializer
     queryset = Census.objects.all()
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)

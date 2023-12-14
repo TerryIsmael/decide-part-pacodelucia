@@ -4,39 +4,55 @@ import { useRouter } from "vue-router";
 export default {
   setup() {
     const router = useRouter();
-    const logged = ref(true)
+    const logged = ref(false)
     const username = ref("")
     const error = ref(null)
+
     const isLogged = () => {
       fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
         method: 'GET',
         credentials: 'include',
       })
         .then((response) => {
-          console.log(response)
           if (response.ok) {
             return response.json();
           } else {
-            form = true;
+            if (window.location.href != window.location.origin+"/admin/login"){
+              window.location.href=window.location.origin+"/admin/login"
+            }
           }
         })
         .then((data) => {
           if (data.user_data.is_staff) {
-            setTimeout(() => {
-              router.push('/admin');
-            }, 2000);
+            logged.value=true
+            username.value=data.user_data.username  
           } else {
-            form = true;
+            if (window.location.href != window.location.origin+"/admin/login"){
+              window.location.href=window.location.origin+"/admin/login"
+            }
           }
         })
         .catch(() => {
-          form = true;
+          if (window.location.href != window.location.origin+"/admin/login"){
+              window.location.href=window.location.origin+"/admin/login"
+            }
         });
     }
 
     const logout = () => {
-      document.cookie = 'decide=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      router.push('/admin').then(() => { router.go(0); });
+      document.cookie = 'sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      fetch(import.meta.env.VITE_API_URL + '/admin/logout/', {
+        method: 'GET',
+        credentials: 'include',
+      })
+        .then((response) => {
+          if (response.ok) {
+            logged.value=false ;
+            window.location.href="/admin/login"
+          } else {
+            form = true;
+          }
+        })
     };
 
     onMounted(isLogged);

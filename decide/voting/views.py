@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from store.models import Vote 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer
-from base.perms import UserIsStaffOrAdmin, UserIsStaff
+from base.perms import UserIsStaff,UserIsAdminToken
 from base.models import Auth
 
 class VotingView(generics.ListCreateAPIView):
@@ -105,14 +105,14 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
 class AllQuestionsView(generics.ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer 
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = (UserIsAdminToken,)
 
     def get(self, request, *args, **kwargs):
         self.queryset = Question.objects.all()
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
-        self.permission_classes = (UserIsStaffOrAdmin,)
+        self.permission_classes = (UserIsAdminToken,)
         self.check_permissions(request)
         for data in ['desc', 'options']:
             if not data in request.data:
@@ -147,7 +147,7 @@ class VotingFrontView(generics.ListCreateAPIView):
     serializer_class = VotingSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_fields = ('id', )
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsStaff,)
     def post(self, request, *args, **kwargs):
         self.check_permissions(request)
         for data in ['name', 'desc', 'question', 'auths']:
