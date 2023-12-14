@@ -69,7 +69,7 @@
                 if (this.token) {
                     headers['Authorization'] = `Bearer ${this.token}`;
                 }
-                fetch(import.meta.env.VITE_API_URL + 'gateway/authentication/login/', {
+                fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/login/', {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify({
