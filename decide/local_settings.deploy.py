@@ -65,7 +65,7 @@ DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
 
-CORS_ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
+CORS_ORIGIN_WHITELIST = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
 ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
 ALLOWED_ORIGINS.append('https://{}'.format(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME')))
 CSRF_COOKIE_SECURE = True
