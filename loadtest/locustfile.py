@@ -1,6 +1,6 @@
 import json
 
-from random import choice, random
+from random import choice
 
 from locust import (
     HttpUser,
