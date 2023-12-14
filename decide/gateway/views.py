@@ -13,6 +13,5 @@ class Gateway(APIView):
     def post(self, request, submodule, route):
         kwargs = {'HTTP_AUTHORIZATION': request.META.get('HTTP_AUTHORIZATION', '')}
         kwargs['json'] = {k: v for k, v in request.data.items()}
-
         resp = mods.query(submodule, route, method='post', response=True, **kwargs)
         return Response(resp.json(), status=resp.status_code)
