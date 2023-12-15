@@ -1,7 +1,7 @@
 import { createApp, ref } from 'vue';
 import App from './App.vue';
-import router from './router';
 import navbarAdmin from './components/NavbarAdmin.vue';
+import router from './router.js';
 import './style.css'
 
 const app = createApp(App);

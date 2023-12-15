@@ -46,6 +46,7 @@ h1 {
   align-items: flex-end;
   place-items: center;
   min-width: 320px;
+  width: 100vw;
   min-height: 100vh;
 }
 ul {
@@ -146,7 +147,6 @@ select option:checked {
   margin-bottom: 10px;
 }
 
-
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -169,4 +169,22 @@ button {
 .bold {
   font-weight: bold;
   color: #ffffff;
+
+#app {
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
 }
