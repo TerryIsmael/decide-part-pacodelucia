@@ -27,6 +27,11 @@ class VotingStatsTaskSet(TaskSet):
         voting_id = 2
         self.client.get(f"/{voting_id}/stats")
 
+class AdminVotingStats(TaskSet):
+    @task
+    def get_admin_voting_stats(self):
+        self.client.get("/admin/voting/stats")
+
 
 class GraficaStatsTaskSet(TaskSet):
     @task
@@ -96,7 +101,15 @@ class StatsBackend(HttpUser):
     tasks = [VotingStatsTaskSet]
     wait_time = between(3, 5)
 
+    
+class AdminVotingStatsFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminVotingStats]
+    wait_time = between(3, 5)
+
+
 class StatsGrafica(HttpUser):
     host = 'http://localhost:5173'
     tasks = [GraficaStatsTaskSet]
     wait_time = between(3, 5)
+

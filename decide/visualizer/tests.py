@@ -5,6 +5,20 @@ from census.models import Census
 from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium import webdriver
+from django.contrib.auth.models import User
+import pytest
+import time
+import json
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 
 class StatsViewTest(BaseTestCase):
     def setUp(self):
@@ -80,4 +94,5 @@ class StatsViewTest(BaseTestCase):
         response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['census'], 50.0)
+
 

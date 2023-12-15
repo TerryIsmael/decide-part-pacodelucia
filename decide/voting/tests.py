@@ -265,7 +265,8 @@ class VotingTestCase(BaseTestCase):
         data = {} #El campo action es requerido en la request
         self.login()
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
-        self.assertEquals(response.status_code, 405)
+        self.assertEquals(response.status_code, 405) 
+    
         
 class LogInSuccessTests(StaticLiveServerTestCase):
 
@@ -298,6 +299,7 @@ class LogInSuccessTests(StaticLiveServerTestCase):
 
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/")
+
 
 class LogInErrorTests(StaticLiveServerTestCase):
 
@@ -411,3 +413,6 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+
+
