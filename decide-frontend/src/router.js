@@ -7,7 +7,11 @@ import Register from './components/Register.vue'
 import EmailAuthentication from './components/EmailAuthentication.vue'
 import PageNotFound from './components/PageNotFound.vue';
 
+
 const routes = [
+  { path: '/', component: Home },
+  { path: '/register', component: Register },
+  { path: '/authEmail', component: EmailAuthentication },
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
@@ -15,6 +19,7 @@ const routes = [
   { path: '/authEmail', component: EmailAuthentication },
   { path: '/', component: Home },
   { path: '/:pathMatch(.*)*', component: PageNotFound  }
+
 ];
 
 const router = createRouter({

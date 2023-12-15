@@ -36,7 +36,6 @@ EMAIL_HOST_PASSWORD = 'decidepacodelucia123'
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
