@@ -19,11 +19,8 @@ from base.tests import BaseTestCase
 from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
-from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption, Auth
 from datetime import datetime
-from .serializers import QuestionSerializer
-from rest_framework import status
 
 class VotingModelTestCase(BaseTestCase):
     def setUp(self):
