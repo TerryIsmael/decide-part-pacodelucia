@@ -8,10 +8,8 @@ from rest_framework.response import Response
 from store.models import Vote 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer
-from base.serializers import AuthSerializer
-from base.perms import UserIsStaffOrAdmin, UserIsStaff
+from base.perms import UserIsStaff,UserIsAdminToken
 from base.models import Auth
-
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -107,14 +105,14 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
 class AllQuestionsView(generics.ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer 
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = (UserIsAdminToken,)
 
     def get(self, request, *args, **kwargs):
         self.queryset = Question.objects.all()
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
-        self.permission_classes = (UserIsStaffOrAdmin,)
+        self.permission_classes = (UserIsAdminToken,)
         self.check_permissions(request)
         for data in ['desc', 'options']:
             if not data in request.data:
@@ -144,17 +142,13 @@ class AllQuestionsView(generics.ListAPIView):
         question.delete()
         return Response({}, status=status.HTTP_200_OK)
 
-class AllAuthsAPIView(generics.ListAPIView):
-    queryset = Auth.objects.all()
-    serializer_class = AuthSerializer
-    permission_classes = [permissions.IsAdminUser]
-
 class VotingFrontView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
     serializer_class = VotingSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_fields = ('id', )
-    permission_classes = (UserIsStaffOrAdmin,)
+    permission_classes = (UserIsAdminToken,)
+    
     def post(self, request, *args, **kwargs):
         self.check_permissions(request)
         for data in ['name', 'desc', 'question', 'auths']:
@@ -220,8 +214,8 @@ class VotingFrontView(generics.ListCreateAPIView):
             elif voting.tally or voting.tally == []:
                 msg = 'Voting already tallied'
                 st = status.HTTP_400_BAD_REQUEST
-            else:   
-                token = request.session.get('auth-token', '')
+            else: 
+                token = request.COOKIES.get('auth-token', '')
                 if Vote.objects.filter(voting_id=voting.id).exists():
                     voting.tally_votes(token)
                     msg = 'Voting tallied'
