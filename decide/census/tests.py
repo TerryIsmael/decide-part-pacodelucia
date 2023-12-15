@@ -34,7 +34,17 @@ class CreateCensusTest(TestCase):
             country = "Spain",
             religion = "CH"
         )
-
+        self.censo2 = Census.objects.create(
+            voting_id= 1,
+            voter_id= 1,
+            born_year = 2004,
+            gender = "FE",
+            civil_state = "MA",
+            works = "WO",
+            country = "Spain",
+            religion = "HI",
+            census_group = 1
+        )
     def test_censo_create(self):
         self.assertEqual(self.censo1.voting_id,1)
         self.assertEqual(self.censo1.voter_id,1)
@@ -42,6 +52,16 @@ class CreateCensusTest(TestCase):
         self.assertEqual(self.censo1.gender,"MA")
         self.assertEqual(self.censo1.civil_state,"SI")
         self.assertEqual(self.censo1.works,"ST")
+
+        self.assertEqual(self.censo2.voting_id,1)
+        self.assertEqual(self.censo2.voter_id,1)
+        self.assertEqual(self.censo2.born_year,2004)
+        self.assertEqual(self.censo2.gender,"FE")
+        self.assertEqual(self.censo2.civil_state,"MA")
+        self.assertEqual(self.censo2.works,"WO")
+        self.assertEqual(self.censo2.country,"Spain")
+        self.assertEqual(self.censo2.religion,"HI")
+        self.assertEqual(self.censo2.census_group,1)
 
 
 #LOS TESTS COMENTADOS AQUÍ DEBAJO SON PARA CUANDO YA SE HAYA HECHO EL HTML
