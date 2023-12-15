@@ -282,7 +282,99 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
         self.assertEquals(response.status_code, 405)
 
+class VotingFrontTestCase(BaseTestCase):
+
+    def setUp(self):
+        self.q = Question(desc='Descripcion')
+        self.q.save()
+        
+        opt1 = QuestionOption(question=self.q, option='opcion 1')
+        opt1.save()
+        opt1 = QuestionOption(question=self.q, option='opcion 2')
+        opt1.save()
+
+        self.a = Auth.objects.create(url=settings.BASEURL, me=True, name='test auth')
+        self.a.save()
+
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def login(self, user='admin', password='qwerty'):
+        data = {'username': user, 'password': password}
+        response = mods.post('authentication/login', json=data, response=True)
+        response2 = mods.post('authentication/login-auth', json=data, response=True)
+        self.assertEqual(response.status_code, 200)
+        self.token = response.json().get('token')
+        self.assertTrue(self.token)
+        csrf_token = response2.cookies.get('csrftoken')
+        auth_token = response2.cookies.get('auth_token')
+        self.client.cookies['csrftoken'] = csrf_token
+        self.client.cookies['auth-token'] = auth_token
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        
+    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+
+    def create_voting(self):
+        q = Question(desc='test question')
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(question=q, option='option {}'.format(i+1))
+            opt.save()
+        v = Voting(name='test voting', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths.add(a)
+
+        return v
+  
+    def create_voters(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+
+    def get_or_create_user(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for opt in v.question.options.all():
+            clear[opt.number] = 0
+            for i in range(random.randint(0, 5)):
+                a, b = self.encrypt_msg(opt.number, v)
+                data = {
+                    'voting': v.id,
+                    'voter': voter.voter_id,
+                    'vote': { 'a': a, 'b': b },
+                }
+                clear[opt.number] += 1
+                user = self.get_or_create_user(voter.voter_id)
+                self.login(user=user.username)
+                voter = voters.pop()
+                mods.post('store', json=data)
+        return clear
+    
     def test_update_voting_front(self):
+
         voting = self.create_voting()
 
         # login with user admin
