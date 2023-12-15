@@ -40,8 +40,6 @@ from Crypto import Random
 from Crypto.Util.number import GCD
 from multiprocessing import Pool
 
-nb_cpus=4
-pool = Pool(processes=nb_cpus)
 
 def rand(p):
     while True:
