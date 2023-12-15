@@ -42,7 +42,6 @@ export default {
             error: '',
         };
     },
-  
     methods: {
     async register() {
         try {
