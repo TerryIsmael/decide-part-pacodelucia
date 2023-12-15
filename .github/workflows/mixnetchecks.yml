@@ -45,4 +45,5 @@ jobs:
       run: |
         cd decide
         echo "Execution time of mixnet tests"
-        (time ./manage.py test mixnet --keepdb) &> test_execution_time.txt
+        time_info=$(time ./manage.py test mixnet --keepdb 2>&1)
+        echo $time_info
