@@ -1,9 +1,12 @@
 import random
+import pandas as pd
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,10 +14,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+from voting.models import Question, Voting
+
 from .models import Census
 from base import mods
 from base.tests import BaseTestCase
 from datetime import datetime
+from io import BytesIO
 
 
 class CensusTestCase(BaseTestCase):
@@ -92,12 +98,61 @@ class CensusImportTestCase(BaseTestCase):
         super().tearDown()
 
     def test_import_census_excel(self):
+        print("------------------------------------------")
+        print(list(Census.objects.all()))
+        print("------------------------------------------")
         with open("census/test_files/import_test_data.xlsx", 'rb') as file:
             file_content = file.read()
         test_file = SimpleUploadedFile("file.xlsx", file_content)
         response = self.client.post('/census/import/', {'file': test_file}, format='multipart')
-        self.assertEqual(response.status_code, 201)
         
+        print("------------------------------------------")
+        print(list(map(lambda c: f"{c.voting_id} - {c.voter_id}  ",Census.objects.all())))
+        print("------------------------------------------")
+
+        self.assertEqual(response.status_code, 201)
+
+        census_1 = Census.objects.filter(voting_id = 1, voter_id = 1)
+        census_2 = Census.objects.filter(voting_id = 1, voter_id = 2)
+        census_3 = Census.objects.filter(voting_id = 2, voter_id = 1)
+
+        self.assertTrue(census_1.exists())
+        self.assertTrue(census_2.exists())
+        self.assertTrue(census_3.exists())
+   
+class CensusExportTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.census = Census(voting_id = 1, voter_id = 1)
+        self.census.save()
+
+        q = Question(desc='Descripcion')
+        q.save()
+
+        self.voting = Voting(name = "Test voting", question = q)
+        self.voting.save()
+
+    def tearDown(self):
+        super().tearDown()
+        self.census = None
+        self.voting = None
+
+    def test_export_census_excel(self):
+        url = reverse("census export", kwargs={'voting_id': 1})
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename=output.xlsx')
+
+        excel_content = response.content
+        excel_df = pd.read_excel(BytesIO(excel_content))
+
+        self.assertTrue('voting_id' in excel_df.columns and 'voter_id' in excel_df.columns)
+        self.assertEqual(excel_df['voting_id'].iloc[0], 1)
+        self.assertEqual(excel_df['voter_id'].iloc[0], 1)   
 
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
