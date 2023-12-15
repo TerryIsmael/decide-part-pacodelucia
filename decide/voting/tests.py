@@ -480,7 +480,7 @@ class VotingFrontTestCase(BaseTestCase):
     def test_create_voting_front_400(self):
         data = {'name': 'Example'}
         
-        data2 = {
+        data_good = {
             'name': 'example name',
             'desc': 'example description',
             'question': self.q.id,
@@ -495,7 +495,7 @@ class VotingFrontTestCase(BaseTestCase):
         response = self.client.post('/voting/voting/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
-        response = self.client.post('/voting/voting/', data2, format='json')
+        response = self.client.post('/voting/voting/', data_good, format='json')
         self.assertEqual(response.status_code, 403)
 
         # login with user admin
@@ -523,8 +523,8 @@ class VotingFrontTestCase(BaseTestCase):
         response = self.client.delete('/voting/voting/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
+        #Post without data
         self.login()
-
         response = self.client.delete('/voting/voting/')
         self.assertEqual(response.status_code, 404)
 
@@ -564,6 +564,15 @@ class QuestionFrontTestCase(BaseTestCase):
         self.login()
         response = self.client.get('/voting/all-questions/')
         self.assertEqual(response.status_code, 200)
+
+    def test_get_all_questions_400(self):
+        response = self.client.get('/voting/all-questions/')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.get('/voting/all-questions/')
+        self.assertEqual(response.status_code, 403)
         
     def test_create_question_front(self):  
         self.login()
@@ -652,8 +661,8 @@ class QuestionFrontTestCase(BaseTestCase):
         response = self.client.delete('/voting/all-questions/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
+        #Post without data
         self.login()
-
         response = self.client.delete('/voting/all-questions/')
         self.assertEqual(response.status_code, 404)
 

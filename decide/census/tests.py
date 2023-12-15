@@ -195,6 +195,9 @@ class CensusFrontTestCase(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             
         def test_list_census_400(self):
+            response = self.client.get('/census/front/', format='json')
+            self.assertEqual(response.status_code, 401)
+            
             self.login(user='noadmin')
             response = self.client.get('/census/front/', format='json')
             self.assertEqual(response.status_code, 403)
