@@ -27,6 +27,11 @@ class VotingStatsTaskSet(TaskSet):
         voting_id = 2
         self.client.get(f"/{voting_id}/stats")
 
+class AdminVotingStats(TaskSet):
+    @task
+    def get_admin_voting_stats(self):
+        self.client.get("/admin/voting/stats")
+
 
 class DefVoters(SequentialTaskSet):
 
@@ -90,3 +95,9 @@ class StatsBackend(HttpUser):
     host = HOST
     tasks = [VotingStatsTaskSet]
     wait_time = between(3, 5)
+    
+class AdminVotingStatsFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminVotingStats]
+    wait_time = between(3, 5)
+
