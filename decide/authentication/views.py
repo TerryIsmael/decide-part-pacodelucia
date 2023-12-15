@@ -15,8 +15,6 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from .serializers import UserSerializer
-import secrets
-import string
 
 class GetUserView(APIView):
     def post(self, request):
