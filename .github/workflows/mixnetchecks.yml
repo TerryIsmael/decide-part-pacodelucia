@@ -3,7 +3,7 @@ name: Mixnet tests exec. time
 on:
   push:
     branches:
-      -'Feat/12.*'
+      - 'Feat/12.*'
 jobs:
   build:
     strategy:
