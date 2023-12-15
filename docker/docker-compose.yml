@@ -4,13 +4,13 @@ services:
   db:
     restart: always
     container_name: decide_db
-    image: postgres:11.18-bullseye
+    image: postgres:14-alpine
     volumes:
       - db:/var/lib/postgresql/data
     networks:
       - decide
     environment:
-      - POSTGRES_PASSWORD=
+      - POSTGRES_PASSWORD=postgres
   web:
     restart: always
     container_name: decide_web
@@ -35,9 +35,23 @@ services:
     volumes:
       - static:/app/static
     ports:
-      - "8000:80"
+      - "3000:80"
     depends_on:
       - web
+    networks:
+      - decide
+  front:
+    env_file:
+      - .env.docker
+    restart: always
+    container_name: decide_front
+    image: decide_front:latest
+    build:
+        context: .
+        dockerfile: Dockerfile-front
+    command: sh -c "npm run dev -- --host 0 --port 5173"
+    ports:
+      - "8000:5173"
     networks:
       - decide
 
