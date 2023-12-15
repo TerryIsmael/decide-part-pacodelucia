@@ -98,17 +98,10 @@ class CensusImportTestCase(BaseTestCase):
         super().tearDown()
 
     def test_import_census_excel(self):
-        print("------------------------------------------")
-        print(list(Census.objects.all()))
-        print("------------------------------------------")
         with open("census/test_files/import_test_data.xlsx", 'rb') as file:
             file_content = file.read()
         test_file = SimpleUploadedFile("file.xlsx", file_content)
         response = self.client.post('/census/import/', {'file': test_file}, format='multipart')
-        
-        print("------------------------------------------")
-        print(list(map(lambda c: f"{c.voting_id} - {c.voter_id}  ",Census.objects.all())))
-        print("------------------------------------------")
 
         self.assertEqual(response.status_code, 201)
 
