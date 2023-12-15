@@ -267,11 +267,11 @@ class VotingFrontView(generics.ListCreateAPIView):
                             'number': option.number,
                             'votes': votes,
                             'postproc': 0
-                        })
+                    })
                     voting.tally = []
                     voting.save()
                     msg = 'No votes to tally'
-                 else:
+        else:
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
@@ -415,7 +415,7 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
         voting = get_object_or_404(VotingYesNo, pk=voting_id)
         msg = ''
         st = status.HTTP_200_OK
-                if action == 'start':
+        if action == 'start':
             if voting.start_date:
                 msg = 'Voting already started'
                 st = status.HTTP_400_BAD_REQUEST
