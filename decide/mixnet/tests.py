@@ -28,7 +28,7 @@ class MixnetCase(APITestCase):
         return cipher
 
     def test_create(self):
-        st = time.time()
+
         data = {
             "voting": 1,
             "auths": [
@@ -45,12 +45,10 @@ class MixnetCase(APITestCase):
         self.assertEqual(type(key["g"]), int)
         self.assertEqual(type(key["p"]), int)
         self.assertEqual(type(key["y"]), int)
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_create: ', elapsed_time, ' seconds')
+
 
     def test_shuffle(self):
-        st = time.time()
+
         self.test_create()
 
         clear = [2, 3, 4, 5]
@@ -67,12 +65,10 @@ class MixnetCase(APITestCase):
 
         self.assertNotEqual(shuffled, encrypt)
 
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_shuffle: ', elapsed_time, ' seconds')
+
 
     def test_shuffle2(self):
-        st = time.time()
+
         self.test_create()
 
         clear = [2, 3, 4, 5]
@@ -90,12 +86,9 @@ class MixnetCase(APITestCase):
 
         self.assertNotEqual(shuffled, encrypt)
 
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_shuffle2: ', elapsed_time, ' seconds')
 
     def test_decrypt(self):
-        st = time.time()
+
         self.test_create()
 
         clear = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
@@ -118,9 +111,6 @@ class MixnetCase(APITestCase):
 
         self.assertEqual(sorted(clear), sorted(clear2))
 
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_decrypt: ', elapsed_time, ' seconds')
 
     def test_multiple_auths(self):
         '''
@@ -137,7 +127,7 @@ class MixnetCase(APITestCase):
         Then we decrypt with the first voting/auth and decrypt the result
         with the second voting/auth.
         '''
-        st = time.time()
+
         data = { "voting": 1, "auths": [ { "name": "auth1", "url": "http://localhost:8000" } ] }
         response = self.client.post('/mixnet/', data, format='json')
         key = response.json()
@@ -178,15 +168,11 @@ class MixnetCase(APITestCase):
         self.assertNotEqual(clear, clear2)
         self.assertEqual(sorted(clear), sorted(clear2))
 
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_multiple_auths: ', elapsed_time, ' seconds')
 
     def test_multiple_auths_mock(self):
         '''
         This test emulates a two authorities shuffle and decryption.
         '''
-        st = time.time()
         data = {
             "voting": 1,
             "auths": [
@@ -212,7 +198,3 @@ class MixnetCase(APITestCase):
 
         self.assertNotEqual(clear, clear1)
         self.assertEqual(sorted(clear), sorted(clear1))
-
-        et = time.time()
-        elapsed_time = et-st
-        print('Execution time for test_multiple_auths_mock: ', elapsed_time, ' seconds')
