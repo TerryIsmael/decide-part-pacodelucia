@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import GetUserView, LogoutView, RegisterView, getTokens, deleteToken, addToken, adminLogin, isAdmin
+from .views import GetUserView, LogoutView, RegisterView, getTokens, deleteToken, addToken, adminLogin, isAdmin, UserView, UserFrontView
 
 
 urlpatterns = [
@@ -13,5 +13,7 @@ urlpatterns = [
     path('del-auth/<int:userId>', deleteToken),
     path('add-auth/<int:userId>', addToken),
     path('login-auth/', adminLogin),
-    path('admin-auth/', isAdmin)
+    path('admin-auth/', isAdmin),
+    path('user/', UserView.as_view()),
+    path('user/front/', UserFrontView.as_view()),
 ]

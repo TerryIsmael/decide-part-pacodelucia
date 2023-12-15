@@ -1,6 +1,7 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { Option } from "../../models/Question.js";
+
 
 export default {
   setup() {
@@ -13,14 +14,26 @@ export default {
     const newOptionError = ref(null);
     const optionError = ref(null);
     const newDesc = ref("");
-
+    const logged = inject("logged");
+    const navBarLoaded = inject('navBarLoaded')
+    
+    const init = async () => {
+      while (!navBarLoaded.value) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      navBarLoaded.value = false; 
+      if (logged.value) {
+        //Init functions
+        fetchQuestions();
+      }
+    }
+    
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/voting/all-questions/", {
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "GET",
           credentials: "include",
         });
-
         const data = await response.json();
         questions.value = data;
       } catch (error) {
@@ -54,7 +67,7 @@ export default {
       };
 
       try {
-        await fetch("http://localhost:8000/voting/all-questions/", {
+        await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -110,7 +123,7 @@ export default {
         id: id,
       };
       try {
-        const response = await fetch("http://localhost:8000/voting/all-questions/",
+        const response = await fetch(import.meta.env.VITE_API_URL + "/voting/all-questions/",
           {
             method: "DELETE",
             headers: {
@@ -126,24 +139,24 @@ export default {
       fetchQuestions();
     }
 
-    onMounted(fetchQuestions);
+    onMounted(init);
 
     return {
       questions,
       selectedQuestion,
       New,
       editing,
+      newOption,
+      newOptions,
+      newOptionError,
+      optionError,
+      newDesc,
       saveQuestion,
       changeSelected,
       changeEditing,
       addOption,
-      newOption,
-      newOptions,
       removeOption,
-      newOptionError,
       deleteQuestion,
-      optionError,
-      newDesc,
     };
   },
 };
@@ -160,7 +173,9 @@ export default {
 
         <div v-if="selectedQuestion == New && editing == true">
           <div>
-            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <div>
+              <p class="bold" style="color:rgb(211, 91, 91)">{{optionError}}</p>
+            </div>
             <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
               <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
@@ -175,7 +190,9 @@ export default {
               </div>
 
               <p>Nueva opción</p>
-              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
+              <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{newOptionError}}</p>
+              </div>
               <label for="newOptionNumber">Id: </label>
               <input type="number" id="newOptionNumber" min="1" v-model="newOption.number" />
               <label for="newOption">Opción: </label>
@@ -222,7 +239,9 @@ export default {
 
           <div v-else>
 
-            <p v-if="optionError != null" class="error">{{ optionError }}</p>
+            <div>
+              <p class="bold" style="color:rgb(211, 91, 91)">{{optionError}}</p>
+            </div>
             <form @submit.prevent="saveQuestion">
               <label class="questionDescLabel" for="desc">Descripción: </label>
               <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
@@ -236,7 +255,9 @@ export default {
               </div>
 
               <p>Nueva opción</p>
-              <p v-if="newOptionError != null" class="error">{{ newOptionError }}</p>
+              <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{newOptionError}}</p>
+              </div>
               <label for="optionNumber">Id: </label>
               <input type="number" id="optionNumber" min="1" v-model="newOption.number" />
               <label for="newOption">Opción: </label>
