@@ -23,7 +23,7 @@ from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BI
 from .serializers import StringListSerializer, CensusSerializer
 
 class CensusCreate(generics.ListCreateAPIView):
-    # permission_classes = (UserIsStaff,)
+    permission_classes = (UserIsStaff,)
     serializer_class = StringListSerializer
 
     def create(self, request, *args, **kwargs):
@@ -73,7 +73,7 @@ class CensusImport(generics.ListCreateAPIView):
             else:
                 raise Exception("Uploaded file is not an excel file")
 
-            for _, row in df.iloc[1:].iterrows():
+            for _, row in df.iloc[0:].iterrows():
                 census = Census(voting_id=row['voting_id'], voter_id=row['voter_id'])
                 census.save()
                
