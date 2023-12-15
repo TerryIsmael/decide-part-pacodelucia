@@ -221,7 +221,7 @@ class VotingFrontView(generics.ListCreateAPIView):
         voting = get_object_or_404(Voting, pk=request.data.get('id'))
         msg = ''
         st = status.HTTP_200_OK
-                if action == 'start':
+        if action == 'start':
             if voting.start_date:
                 msg = 'Voting already started'
                 st = status.HTTP_400_BAD_REQUEST
