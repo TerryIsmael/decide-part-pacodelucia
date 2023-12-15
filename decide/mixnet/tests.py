@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase
 
 from mixnet.mixcrypt import MixCrypt
 from mixnet.mixcrypt import ElGamal
+import time
 
 from base import mods
 
@@ -27,6 +28,7 @@ class MixnetCase(APITestCase):
         return cipher
 
     def test_create(self):
+
         data = {
             "voting": 1,
             "auths": [
@@ -44,7 +46,9 @@ class MixnetCase(APITestCase):
         self.assertEqual(type(key["p"]), int)
         self.assertEqual(type(key["y"]), int)
 
+
     def test_shuffle(self):
+
         self.test_create()
 
         clear = [2, 3, 4, 5]
@@ -61,7 +65,10 @@ class MixnetCase(APITestCase):
 
         self.assertNotEqual(shuffled, encrypt)
 
+
+
     def test_shuffle2(self):
+
         self.test_create()
 
         clear = [2, 3, 4, 5]
@@ -79,7 +86,9 @@ class MixnetCase(APITestCase):
 
         self.assertNotEqual(shuffled, encrypt)
 
+
     def test_decrypt(self):
+
         self.test_create()
 
         clear = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
@@ -101,6 +110,7 @@ class MixnetCase(APITestCase):
         self.assertNotEqual(clear, clear2)
 
         self.assertEqual(sorted(clear), sorted(clear2))
+
 
     def test_multiple_auths(self):
         '''
@@ -158,11 +168,11 @@ class MixnetCase(APITestCase):
         self.assertNotEqual(clear, clear2)
         self.assertEqual(sorted(clear), sorted(clear2))
 
+
     def test_multiple_auths_mock(self):
         '''
         This test emulates a two authorities shuffle and decryption.
         '''
-
         data = {
             "voting": 1,
             "auths": [
