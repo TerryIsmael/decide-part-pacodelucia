@@ -43,7 +43,7 @@ class Census(models.Model):
     gender = models.CharField(max_length=2, choices=GENDER, null=True)
     civil_state = models.CharField(max_length=2, choices=CIVIL_STATE, null=True)
     works = models.CharField(max_length=2, choices=WORKS, null=True)
-    census_group = models.PositiveIntegerField(null=True)
+    census_group = models.PositiveIntegerField(null=True, blank=True)
     
     class Meta:
         unique_together = (('voting_id','voter_id','born_year','gender','civil_state','works'),)

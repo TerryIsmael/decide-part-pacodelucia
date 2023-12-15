@@ -46,6 +46,7 @@ class CreationCensusForm(forms.Form):
     gender = forms.ChoiceField(choices=GENDER)
     civil_state = forms.ChoiceField(choices=CIVIL_STATE)
     works = forms.ChoiceField(choices=WORKS)
+    census_group = forms.IntegerField(required=False)
     
     class Meta:
 
@@ -58,7 +59,8 @@ class CreationCensusForm(forms.Form):
             'civil_state',
             'works',
             'country',
-            'religion'
+            'religion',
+            'census_group'
         )
 
     def save (self, commit = True):
@@ -72,6 +74,7 @@ class CreationCensusForm(forms.Form):
         census.works= self.cleaned_data['works']
         census.country = self.cleaned_data['country']
         census.religion = self.cleaned_data['religion']
+        census.census_group = self.cleaned_data['census_group']
 
         if commit:
             census.save()
