@@ -1,0 +1,49 @@
+name: Mixnet tests exec. time
+
+on:
+  push:
+    branches:
+      - 'Feat/12.*'
+jobs:
+  build:
+    strategy:
+      matrix:
+        pyversion: ['3.8','3.9']
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:11.18-bullseye
+        env:
+          POSTGRES_USER: decide
+          POSTGRES_PASSWORD: decide
+          POSTGRES_DB: decide
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{matrix.pyversion}}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{matrix.pyversion}}
+    - name: psycopg2 prerequisites
+      run: sudo apt-get install libpq-dev
+    - name: Install dependencies and config
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        cp decide/local_settings.gactions.py decide/local_settings.py
+    - name: Run migrations (unnecessary)
+      run: |
+        cd decide
+        python manage.py migrate
+    - name: Run tests
+      run: |
+        cd decide
+        echo "Execution time of mixnet tests"
+        time_info=$(time ./manage.py test mixnet --keepdb 2>&1)
+        echo $time_info
