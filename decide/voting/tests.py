@@ -24,6 +24,8 @@ from voting.models import Voting, Question, QuestionOption, Auth, QuestionByPref
 from datetime import datetime
 from rest_framework.authtoken.models import Token
 
+
+
 class VotingModelTestCase(BaseTestCase):
     def setUp(self):
         q = Question(desc='Descripcion')
@@ -1350,6 +1352,4 @@ class VotingYesNoTestCase(BaseTestCase):
         response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
-
-
-
+        

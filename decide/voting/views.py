@@ -404,7 +404,6 @@ class VotingByPreferenceUpdate(generics.RetrieveUpdateDestroyAPIView):
 class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
     queryset = VotingYesNo.objects.all()
     serializer_class = VotingYesNoSerializer
-
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     permission_classes = (UserIsStaff,)
 
@@ -412,6 +411,7 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
         action = request.data.get('action')
         if not action:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
         voting = get_object_or_404(VotingYesNo, pk=voting_id)
         msg = ''
         st = status.HTTP_200_OK
@@ -420,11 +420,9 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
                 msg = 'Voting already started'
                 st = status.HTTP_400_BAD_REQUEST
             else:
-                voting.create_pubkey()
                 voting.start_date = timezone.now()
                 voting.save()
                 msg = 'Voting started'
-
         elif action == 'stop':
             if not voting.start_date:
                 msg = 'Voting is not started'
@@ -436,7 +434,6 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
                 voting.end_date = timezone.now()
                 voting.save()
                 msg = 'Voting stopped'
-
         elif action == 'tally':
             if not voting.start_date:
                 msg = 'Voting is not started'
@@ -454,8 +451,3 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
-
-    def delete(self, request, *args, **kwars):
-        voting = get_object_or_404(Voting, pk=request.data.get('id'))
-        voting.delete()
-        return Response({}, status=status.HTTP_200_OK)

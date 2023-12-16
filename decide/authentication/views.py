@@ -109,8 +109,9 @@ class AuthView(APIView):
                 user.save()
             
         except IntegrityError:
-            return Response({}, status=HTTP_400_BAD_REQUEST)
-        return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'user_pk': user.pk}, status=status.HTTP_201_CREATED)
 
 def getTokens(request):
     sessionid = request.COOKIES.get('sessionid', '')
