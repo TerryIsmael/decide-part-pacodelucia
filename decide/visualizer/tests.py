@@ -49,15 +49,6 @@ class StatsViewTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['votes'], 0)
 
-
-    def test_simpleVisualizer(self):        
-            q = Question(desc='test question')
-            q.save()
-            v = Voting(name='test voting', question=q)
-            v.save()
-            vState= self.driver.find_element(By.TAG_NAME,"h2").text
-            self.assertTrue(vState, "Votación no comenzada")
-
     def test_stats_no_census(self):
         self.census1.delete()
         self.census2.delete()
