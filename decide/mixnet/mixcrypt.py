@@ -32,13 +32,14 @@ False
 >>> sorted(clears) == sorted(d)
 True
 '''
-pool = Pool()
 
 from Crypto.PublicKey import ElGamal
 from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util.number import GCD
 from multiprocessing import Pool
+
+pool = Pool()
 
 
 def rand(p):
