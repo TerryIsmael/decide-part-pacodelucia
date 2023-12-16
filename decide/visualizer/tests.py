@@ -5,19 +5,8 @@ from census.models import Census
 from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from selenium import webdriver
-from django.contrib.auth.models import User
-import pytest
-import time
-import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from django.conf import settings
 
 
@@ -67,7 +56,6 @@ class StatsViewTest(BaseTestCase):
             q.save()
             v = Voting(name='test voting', question=q)
             v.save()
-            response =self.driver.get(f'{self.live_server_url}/visualizer/{v.pk}/')
             vState= self.driver.find_element(By.TAG_NAME,"h2").text
             self.assertTrue(vState, "Votación no comenzada")
 

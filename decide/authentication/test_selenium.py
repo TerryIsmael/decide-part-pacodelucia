@@ -1,8 +1,6 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-
 from base.tests import BaseTestCase
 import time
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -10,14 +8,8 @@ from selenium.webdriver.common.keys import Keys
 from base.models import Auth
 from django.conf import settings
 from django.utils import timezone
-
 from voting.models import Question, Voting, QuestionOption
 
-import pytest
-import json
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class AdminTestCase(StaticLiveServerTestCase):
 
