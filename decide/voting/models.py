@@ -92,8 +92,8 @@ class Voting(models.Model):
         }
         try:
             key = mods.post('mixnet', baseurl=auth.url, json=data)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -132,8 +132,8 @@ class Voting(models.Model):
         try:
             response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -143,8 +143,8 @@ class Voting(models.Model):
         try:
             response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -203,8 +203,8 @@ class VotingByPreference(models.Model):
         }
         try:
             key = mods.post('mixnet', baseurl=auth.url, json=data)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -252,8 +252,8 @@ class VotingByPreference(models.Model):
         try:
             response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -263,8 +263,8 @@ class VotingByPreference(models.Model):
         try:
             response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -336,8 +336,8 @@ class VotingYesNo(models.Model):
         }
         try:
             key = mods.post('mixnet', baseurl=auth.url, json=data)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -383,8 +383,8 @@ class VotingYesNo(models.Model):
         try:
             response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -394,8 +394,8 @@ class VotingYesNo(models.Model):
         try:
             response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-        except ConnectionError as e:
-            raise ConnectionError("No se ha podido conectar con el servidor de mezcla") from e
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
