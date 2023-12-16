@@ -1,4 +1,5 @@
-from python:3.10-alpine
+
+FROM python:3.10-alpine
 
 RUN apk add --no-cache git postgresql-dev gcc libc-dev
 RUN apk add --no-cache gcc g++ make libffi-dev python3-dev build-base
@@ -12,7 +13,8 @@ RUN pip install ipython
 
 WORKDIR /app
 
-RUN git clone https://github.com/TerryIsmael/decide-part-pacodelucia.git .
+RUN git clone --single-branch --branch develop https://github.com/TerryIsmael/decide-part-pacodelucia.git .
+
 RUN pip install -r requirements.txt
 
 WORKDIR /app/decide
