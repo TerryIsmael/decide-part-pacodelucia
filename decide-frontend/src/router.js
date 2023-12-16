@@ -7,6 +7,10 @@ import Register from './components/Register.vue'
 import EmailAuthentication from './components/EmailAuthentication.vue'
 import PageNotFound from './components/PageNotFound.vue';
 
+import ListVoting from './components/ListVoting.vue';
+import GraficaView from './components/GraficaView.vue';
+import VotingStats from './components/VotingStats.vue';
+
 
 const routes = [
   { path: '/', component: Home },
@@ -15,9 +19,16 @@ const routes = [
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
-  { path: '/:pathMatch(.*)*', component: PageNotFound  }
+  { path: '/:pathMatch(.*)*', component: PageNotFound  },
 
+  { path: '/admin/voting', component: ListVoting },
+
+  { path: '/admin/grafica', component: GraficaView },
+  { path: '/admin/voting/stats', component: VotingStats },
 ];
+
+
+
 
 const router = createRouter({
     routes,

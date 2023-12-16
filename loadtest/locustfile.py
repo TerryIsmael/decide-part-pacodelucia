@@ -36,6 +36,16 @@ class VotingStatsTaskSet(TaskSet):
         voting_id = 2
         self.client.get(f"/{voting_id}/stats")
 
+class AdminVotingStats(TaskSet):
+    @task
+    def get_admin_voting_stats(self):
+        self.client.get("/admin/voting/stats")
+
+
+class GraficaStatsTaskSet(TaskSet):
+    @task
+    def get_grafica_stats(self):
+        self.client.get(f"/admin/grafica")
 
 
 class DefVoters(SequentialTaskSet):
@@ -128,6 +138,7 @@ class Voters(HttpUser):
     tasks = [DefVoters]
     wait_time= between(3,5)
 
+
 class VisualizerYesNo(HttpUser):
     host = HOST
     tasks = [DefVisualizerYesNo]
@@ -138,6 +149,7 @@ class VotersYesNo(HttpUser):
     tasks = [DefVotersYesNo]
     wait_time= between(3,5)
 
+
 class StatsFrontend(HttpUser):
     host = 'http://localhost:5173'
     tasks = [VotingStatsTaskSet]
@@ -147,3 +159,15 @@ class StatsBackend(HttpUser):
     host = HOST
     tasks = [VotingStatsTaskSet]
     wait_time = between(3, 5)
+
+class AdminVotingStatsFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminVotingStats]
+    wait_time = between(3, 5)
+
+
+class StatsGrafica(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [GraficaStatsTaskSet]
+    wait_time = between(3, 5)
+

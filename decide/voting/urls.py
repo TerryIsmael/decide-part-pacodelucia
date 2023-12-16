@@ -12,4 +12,6 @@ urlpatterns = [
     path('votingbypreference/<int:voting_id>/', views.VotingByPreferenceUpdate.as_view(), name='votingbypreference'),
     path('votingyesno/', views.VotingYesNoView.as_view(), name='votingyesno'),
     path('votingyesno/<int:voting_id>/', views.VotingYesNoUpdate.as_view(), name='votingyesno'),
+    path('all-questions/', views.AllQuestionsView.as_view(), name='all_questions'),
+    path('all-auths/', views.AllAuthsAPIView.as_view(), name='all_auths_api')
 ]
