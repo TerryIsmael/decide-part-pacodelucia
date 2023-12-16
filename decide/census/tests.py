@@ -111,7 +111,7 @@ class CensusTest(StaticLiveServerTestCase):
         self.cleaner.find_element(By.ID, "id_password").click()
         self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
 
-        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+        self.cleaner.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
 
         self.cleaner.get(self.live_server_url+"/admin/census/census/add")
         now = datetime.now()
@@ -152,7 +152,8 @@ class CensusTest(StaticLiveServerTestCase):
         self.cleaner.find_element(By.ID, "id_password").click()
         self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
 
-        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+        self.cleaner.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+
 
         self.cleaner.get(self.live_server_url+"/admin/census/census/add")
         now = datetime.now()
@@ -177,57 +178,58 @@ class CensusPreferenceTestCase(BaseTestCase):
         self.censuspreference = None
 
     def test_check_vote_permissions(self):
-        response = self.client.get('/censuspreference/{}/?voter_id={}'.format(1, 2), format='json')
+        response = self.client.get('/census/censuspreference/{}/?voter_id={}'.format(1, 2), format='json')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), 'Invalid voter')
 
-        response = self.client.get('/censuspreference/{}/?voter_id={}'.format(1, 1), format='json')
+        response = self.client.get('/census/censuspreference/{}/?voter_id={}'.format(1, 1), format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), 'Valid voter')
 
     def test_list_voting_preference(self):
-        response = self.client.get('/censuspreference/?voting_preference_id={}'.format(1), format='json')
+        response = self.client.get('/census/censuspreference/?voting_preference_id={}'.format(1), format='json')
         self.assertEqual(response.status_code, 401)
 
         self.login(user='noadmin')
-        response = self.client.get('/censuspreference/?voting_preference_id={}'.format(1), format='json')
+        response = self.client.get('/census/censuspreference/?voting_preference_id={}'.format(1), format='json')
         self.assertEqual(response.status_code, 403)
 
         self.login()
-        response = self.client.get('/censuspreference/?voting_preference_id={}'.format(1), format='json')
+        response = self.client.get('/census/censuspreference/?voting_preference_id={}'.format(1), format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'voters': [1]})
 
+
     def test_add_new_voters_conflict(self):
         data = {'voting_preference_id': 1, 'voters': [1]}
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 401)
 
         self.login(user='noadmin')
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
         self.login()
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 409)
 
     def test_add_new_voters(self):
         data = {'voting_preference_id': 2, 'voters': [1,2,3,4]}
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 401)
 
         self.login(user='noadmin')
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
         self.login()
-        response = self.client.post('/censuspreference/', data, format='json')
+        response = self.client.post('/census/censuspreference/', data, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(data.get('voters')), CensusPreference.objects.count() - 1)
 
     def test_destroy_voter(self):
         data = {'voters': [1]}
-        response = self.client.delete('/censuspreference/{}/'.format(1), data, format='json')
+        response = self.client.delete('/census/censuspreference/{}/'.format(1), data, format='json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, CensusPreference.objects.count())
 
@@ -262,7 +264,7 @@ class CensusPreferenceTest(StaticLiveServerTestCase):
 
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
 
-        self.cleaner.get(self.live_server_url+"/admin/censuspreference/censuspreference/add")
+        self.cleaner.get(self.live_server_url+"/admin/censuspreference/census/add")
         now = datetime.now()
         self.cleaner.find_element(By.ID, "id_voting_preference_id").click()
         self.cleaner.find_element(By.ID, "id_voting_preference_id").send_keys(now.strftime("%m%d%M%S"))
@@ -270,7 +272,7 @@ class CensusPreferenceTest(StaticLiveServerTestCase):
         self.cleaner.find_element(By.ID, "id_voter_id").send_keys(now.strftime("%m%d%M%S"))
         self.cleaner.find_element(By.NAME, "_save").click()
 
-        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/censuspreference/censuspreference")
+        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/censuspreference")
 
     def createCensusPreferenceEmptyError(self):
         self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
@@ -284,12 +286,12 @@ class CensusPreferenceTest(StaticLiveServerTestCase):
 
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
 
-        self.cleaner.get(self.live_server_url+"/admin/censuspreference/censuspreference/add")
+        self.cleaner.get(self.live_server_url+"/admin/census/censuspreference/add")
 
         self.cleaner.find_element(By.NAME, "_save").click()
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
-        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/censuspreference/censuspreference/add")
+        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/censuspreference/add")
 
     def createCensusPreferenceValueError(self):
         self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
@@ -303,7 +305,7 @@ class CensusPreferenceTest(StaticLiveServerTestCase):
 
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
 
-        self.cleaner.get(self.live_server_url+"/admin/censuspreference/censuspreference/add")
+        self.cleaner.get(self.live_server_url+"/admin/census/censuspreference/add")
         now = datetime.now()
         self.cleaner.find_element(By.ID, "id_voting_preference_id").click()
         self.cleaner.find_element(By.ID, "id_voting_preference_id").send_keys('64654654654654')
@@ -312,5 +314,5 @@ class CensusPreferenceTest(StaticLiveServerTestCase):
         self.cleaner.find_element(By.NAME, "_save").click()
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
-        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/censuspreference/censuspreference/add")
+        self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/censuspreference/add")
     
