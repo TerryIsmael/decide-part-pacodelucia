@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    <link type="text/css" rel="stylesheet"
+         href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="{% static "booth/style.css" %}" />
+{% endblock %}
+
+{% block content %}
+    <div id="app-visualizer">
+        <!-- Navbar -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <h1 class="navbar-brand">Decide</h1>
+            </div>
+        </nav>
+          
+
+        <div class="voting container">
+            <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
+
+            <h2 v-if="!voting.start_date">Votación no comenzada</h2>
+            <h2 v-else-if="!voting.end_date">Votación en curso</h2>
+            <div v-else>
+                <h2 class="heading">Resultados:</h2>
+
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Opción</th>
+                            <th>Puntuación</th>
+                            <th>Votos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="opt in voting.postproc" :key="opt.number">
+                            <th>[[opt.option]]</th>
+                            <td>[[opt.postproc]]</td>
+                            <td class="text-muted">[[opt.votes]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block extrabody %}
+    <!-- Vuejs -->
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+    <script src="https://unpkg.com/bootstrap@5.2.2/dist/js/bootstrap.js"></script>
+
+    <script>
+        var voting = {{voting|safe}};
+        const { createApp } = Vue
+        createApp({
+            delimiters: ['[[', ']]'],
+            data() {
+                return {
+                    voting: voting
+                }
+            }
+        }).mount('#app-visualizer')
+    </script>
+</body>
+{% endblock %}

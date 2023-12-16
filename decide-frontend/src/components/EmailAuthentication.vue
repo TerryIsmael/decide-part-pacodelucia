@@ -42,11 +42,10 @@ export default {
             error: '',
         };
     },
-
     methods: {
     async register() {
         try {
-            const response = await fetch('http://localhost:8000/authentication/authEmail/', {
+            const response = await fetch(import.meta.env.VITE_API_URL+'/authentication/authEmail/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

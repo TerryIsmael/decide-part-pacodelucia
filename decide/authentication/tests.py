@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
@@ -175,7 +174,7 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response = self.client.post('/authentication/register/', data)
+        self.client.post('/authentication/register/', data)
         user = User.objects.get(username=data['username'])       
         self.assertFalse(user.is_active)
 
@@ -200,7 +199,7 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response_register = self.client.post('/authentication/register/', data_register)
+        self.client.post('/authentication/register/', data_register)
 
         data = {
                 'username': 'testuser', 
@@ -208,7 +207,7 @@ class RegisterViewTest(TestCase):
                 }
 
         url = ('/authentication/authEmail/')  
-        response = self.client.post(url, data)
+        self.client.post(url, data)
         user = User.objects.get(username='testuser')
 
         self.assertTrue(user.is_active)
@@ -223,7 +222,7 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response_register = self.client.post('/authentication/register/', data_register)
+        self.client.post('/authentication/register/', data_register)
 
         data = {
                 'username': 'testuser', 
@@ -244,12 +243,12 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response_register = self.client.post('/authentication/register/', data_register)
+        self.client.post('/authentication/register/', data_register)
 
         data = {'username': 'testuser'}
 
         url = ('/authentication/authEmail/')  
-        response = self.client.post(url, data)
+        self.client.post(url, data)
         user = User.objects.get(username='testuser')
         self.assertFalse(user.is_active)
 
@@ -262,7 +261,7 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response_register = self.client.post('/authentication/register/', data_register)
+        self.client.post('/authentication/register/', data_register)
 
         data = {'username': 'testuser'}
 
@@ -280,11 +279,11 @@ class RegisterViewTest(TestCase):
             'email': 'test@example.com',
         }
 
-        response = self.client.post('/authentication/register/', data_register)
+        self.client.post('/authentication/register/', data_register)
         data = {'username': 'testuser', 'clave': 'incorrect_password'}
 
         url = ('/authentication/authEmail/')  
-        response = self.client.post(url, data)
+        self.client.post(url, data)
         user = User.objects.get(username='testuser')
         self.assertFalse(user.is_active)
 

@@ -18,6 +18,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from django.conf import settings
 
 
 class StatsViewTest(BaseTestCase):
@@ -25,7 +26,7 @@ class StatsViewTest(BaseTestCase):
         super().setUp()
         self.question = Question(desc='Test Question')
         self.question.save()
-        self.auth = Auth(name='http://localhost:8080', url='http://localhost:8080', me=True)
+        self.auth = Auth(name=settings.BASEURL , url=settings.BASEURL, me=True)
         self.auth.save()
         self.voting = Voting(name='Test Voting', question=self.question, start_date=timezone.now())
         self.voting.save()
@@ -96,3 +97,39 @@ class StatsViewTest(BaseTestCase):
         self.assertEqual(response.json()['census'], 50.0)
 
 
+    def test_stats_with_no_votes_or_census(self):
+        self.vote1.delete()
+        self.vote2.delete()
+        self.census1.delete()
+        self.census2.delete()
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 0)
+        self.assertEqual(response.json()['census'], 0.0)
+
+    def test_stats_with_census_no_votes(self):
+        Vote.objects.all().delete()
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 0)
+        self.assertEqual(response.json()['census'], 0.0)
+
+    def test_stats_with_votes_and_census(self):
+        Census.objects.create(voting_id=self.voting.id, voter_id=3)
+        Census.objects.create(voting_id=self.voting.id, voter_id=4)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=3)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=4)
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 4)
+        self.assertEqual(response.json()['census'], 100.0)
+
+    def test_stats_with_votes_no_census(self):
+        Vote.objects.all().delete()
+        Census.objects.all().delete()
+        Vote.objects.create(voting_id=self.voting.id, voter_id=3)
+        Vote.objects.create(voting_id=self.voting.id, voter_id=4)
+        response = self.client.get(reverse('stats', kwargs={'voting_id': self.voting.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['votes'], 2)
+        self.assertEqual(response.json()['census'], 0.0)
