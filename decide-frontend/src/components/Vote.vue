@@ -116,8 +116,8 @@ export default {
                                 <p><span class="bold">Id:</span> {{ vote.id }}</p>
                                 <p><span class="bold">Voting id:</span> {{ vote.voting_id }}</p>
                                 <p><span class="bold">Voter id:</span> {{ vote.voter_id }}</p>
-                                <p><span class="bold">A:</span> {{ vote.a }}</p>
-                                <p><span class="bold">B:</span> {{ vote.b }}</p>
+                                <p><span class="bold">A:</span> {{ BigInt.fromBigInt(vote.a) }}</p>
+                                <p><span class="bold">B:</span> {{ BigInt.fromBigInt(vote.b) }}</p>
                                 <button class="little-button" style="background-color: rgb(211, 91, 91);" @click="deleteVote(vote.id)">Eliminar</button>
                             </div>
                         </div>

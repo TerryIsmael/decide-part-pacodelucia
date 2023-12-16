@@ -1,29 +1,3 @@
-<template>
-    <div class="form-div" v-if="form">
-        <h1>Decide Login</h1>
-        <form @submit.prevent="login">
-            <div v-if="error" class="error-message">
-                {{ error }}
-            </div>
-            <div v-if="success" class="success-message">
-                {{ success }}
-            </div>
-            <div>
-                <label for="username">Usuario:</label>
-                <input type="text" id="username" v-model="user" required>
-            </div>
-            <div>
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" v-model="password" required>
-            </div>
-            <button class="login-button"  type="submit">INICIAR SESIÓN</button>
-        </form>
-    </div>
-    <div v-else>
-        <h1>Iniciando sesión...</h1>
-    </div>
-</template>
-
 <script>
 import { ref, onMounted, inject } from "vue";
 
@@ -77,8 +51,10 @@ export default {
             })
                 .then((response) => {
                     if (response.ok) {
+                        error.value = '';  
                         return response.json();
                     } else {
+                        error.value = 'Usuario o contraseña incorrectos';  
                         throw new Error('Usuario o contraseña incorrectos');
                     }
                 })
@@ -105,6 +81,7 @@ export default {
             })
                 .then((response) => {
                     if (response.ok) {
+                        logged.value = true;
                         return response.json();
                     } else {
                         throw new Error('Error obteniendo el usuario');
@@ -174,6 +151,34 @@ export default {
 } 
 
 </script>
+
+
+<template>
+    <div class="form-div" v-if="form">
+        <h1>Decide Login</h1>
+        <form @submit.prevent="login">
+            <div v-if="error" class="error-message">
+                {{ error }}
+            </div>
+            <div v-if="success" class="success-message">
+                {{ success }}
+            </div>
+            <div>
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" v-model="user" required>
+            </div>
+            <div>
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" v-model="password" required>
+            </div>
+            <button class="login-button"  type="submit">INICIAR SESIÓN</button>
+        </form>
+    </div>
+    <div v-else>
+        <h1>Iniciando sesión...</h1>
+    </div>
+</template>
+
 
 <style scoped>
 form {

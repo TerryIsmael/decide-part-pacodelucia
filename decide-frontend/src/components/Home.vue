@@ -14,17 +14,10 @@ export default {
     const token = ref("");
     
     const getData = () => {
-      var cookies = document.cookie.split(';');
-        cookies.forEach((cookie) => {
-          var pair = cookie.split('=');
-          if (pair[0].trim() === 'decide' && pair[1]) {
-            token.value = pair[1];
-          }
-          else {
-            logged.value = false;
-          }
-        });
 
+        if (!logged.value) {
+          return;
+        }
       fetch(import.meta.env.VITE_API_URL + '/voting/getbyuser', {
         method: 'GET',
         credentials: 'include',

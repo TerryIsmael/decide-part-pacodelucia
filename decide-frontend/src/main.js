@@ -17,5 +17,6 @@ app.provide("isInAdmin", ref(false));
 app.provide("loggedUser", ref(false));
 app.provide("userUsername", ref(''));
 app.provide("userError", ref(''));
+app.provide("inLogin", ref(false));
 
 app.mount('#app');

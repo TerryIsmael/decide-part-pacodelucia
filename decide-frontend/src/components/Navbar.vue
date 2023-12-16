@@ -8,54 +8,65 @@ export default {
     const username = inject("userUsername");
     const token = ref(null);
     const error = inject("userError");
+    const inLogin = inject("inLogin");
 
     const logout = () => {
-      document.cookie = 'decide=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie =
+        "decide=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       logged.value = false;
-      window.location.href = '/';
-    }
+      window.location.href = "/";
+    };
 
     const isLogged = () => {
+      logged.value = false;
       if (!isInAdmin.value) {
-        var cookies = document.cookie.split(';');
+        var cookies = document.cookie.split(";");
         cookies.forEach((cookie) => {
-          var pair = cookie.split('=');
-          if (pair[0].trim() === 'decide' && pair[1]) {
+          var pair = cookie.split("=");
+          if (pair[0].trim() === "decide" && pair[1]) {
             token.value = pair[1];
-          } else {
-            return logged.value = false;
-          }
-        });
-      }
-      fetch(import.meta.env.VITE_API_URL + '/gateway/authentication/getuser/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token: token.value,
-        }),
-      })
-        .then((response) => {
-          if (response.ok) {
             logged.value = true;
-            return response.json();
-            
-          } else {
-            throw new Error('Error obteniendo el usuario');
-          }
-        })
-        .then((data) => {
-          logged.value = true;
-          username.value = data.username;
-          return response.json();
-        })
-        .catch((error) => {
-          error.value = error.message
+          } 
         });
-    }
+        if (!logged.value){
+          return;
+        }
+        fetch(
+          import.meta.env.VITE_API_URL + "/gateway/authentication/getuser/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: token.value,
+            }),
+          }
+        )
+          .then((response) => {
+            if (response.ok) {
+              logged.value = true;
+              return response.json();
+            } else {
+              logged.false = false;
+              throw new Error("Error obteniendo el usuario");
+            }
+          })
+          .then((data) => {
+            username.value = data.username;
+            return response.json();
+          })
+          .catch((error) => {
+            error.value = error.message;
+          });
+      }
+    };
 
     onMounted(isLogged);
+
+    const goToLogin = () => {
+      window.location.href = "/login";
+    };
 
     return {
       error,
@@ -64,13 +75,15 @@ export default {
       isInAdmin,
       isLogged,
       logout,
-    }
-  }
-}
+      inLogin,
+      goToLogin,
+    };
+  },
+};
 </script>
 
 <template>
-  <div v-if="!isInAdmin">
+  <div v-if="!isInAdmin && !inLogin">
     <nav class="navbar">
       <div class="navbar-left">
         <a href="/">
@@ -79,12 +92,26 @@ export default {
       </div>
       <div class="navbar-right">
         <div v-if="logged && username" class="usuario">
-          <p>Usuario: </p>
+          <p>Usuario:</p>
           <p class="username" v-if="logged && username">{{ username }}</p>
         </div>
         <div class="buttons">
-          <button class="logout-btn" style="margin: 0%;" v-if="logged" @click="logout()">Cerrar sesión</button>
-          <button class="login-btn" style="margin: 0%" v-else @click="$router.push('/login')">Iniciar sesión</button>
+          <button
+            class="logout-btn"
+            style="margin: 0%"
+            v-if="logged"
+            @click="logout()"
+          >
+            Cerrar sesión
+          </button>
+          <button
+            class="login-btn"
+            style="margin: 0%"
+            v-else
+            @click="goToLogin()"
+          >
+            Iniciar sesión
+          </button>
         </div>
       </div>
     </nav>
@@ -159,7 +186,7 @@ export default {
 }
 
 .decide {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 26px;
   font-weight: bold;
   color: #ffffff;
@@ -168,7 +195,7 @@ export default {
 }
 
 .username {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 18px;
   font-weight: bold;
   color: #ffffff;

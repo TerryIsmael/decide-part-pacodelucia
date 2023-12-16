@@ -10,8 +10,12 @@ export default {
     const error = ref(null)
     const navBarLoaded = inject('navBarLoaded')
     const isInAdmin = inject('isInAdmin')
+    const inLogin = inject('inLogin')
 
     const isLogged = () => {
+      if (window.location.href.includes("/login")) {
+        inLogin.value = true
+      }
       if (!window.location.href.includes("/admin")) {
         return isInAdmin.value = false
       }
@@ -73,6 +77,7 @@ export default {
       router,
       isInAdmin,
       isLogged,
+      inLogin,
       logout,
     }
   }
@@ -80,7 +85,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="isInAdmin">
+  <div v-if="isInAdmin && !inLogin">
     <nav class="navbar">
       <div class="navbar-left">
         <a href="/admin">

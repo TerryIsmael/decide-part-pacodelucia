@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import Voting from "../../models/Voting.js";
 
 export default {
@@ -201,8 +201,22 @@ export default {
 
       return `${formattedDay}/${formattedMonth}/${year} ${formattedHours}:${formattedMinutes}`;
     };
-
+    
     onMounted(fetchVotings);
+
+    const transformBigInt = (bigIntValue) => {
+      
+      const chunkSize = 10;
+      const chunks = [];
+
+      for (let i = 0; i < bigIntValue.length; i += chunkSize) {
+        console.log(bigIntValue.slice(i, i + chunkSize));
+        chunks.push(bigIntValue.slice(i, i + chunkSize));
+      }
+
+      const transformedNumber =  chunks.join("");
+      return transformedNumber;
+    }
 
     return {
       votings,
@@ -224,6 +238,7 @@ export default {
       deleteVoting,
       fetchQuestions,
       fetchAuths,
+      transformBigInt,
     };
   },
 };
@@ -393,9 +408,10 @@ export default {
             <h4 v-if="voting.postproc == null">No finalizada</h4>
             <div v-if="voting.start_date != null">
               <h4>- PUB_KEY -</h4>
-              <p><span class="bold">P:</span> {{ voting.pub_key.p }}</p>
-              <p><span class="bold">G:</span> {{ voting.pub_key.g }}</p>
-              <p><span class="bold">Y:</span> {{ voting.pub_key.y }}</p>
+              
+              <p><span class="bold">P:</span> {{ BigInt.fromBigInt(voting.pub_key.p)}}</p>
+              <p><span class="bold">G:</span> {{ BigInt.fromBigInt(voting.pub_key.g)}}</p>
+              <p><span class="bold">Y:</span> {{ BigInt.fromBigInt(voting.pub_key.y)}}</p>
               
             </div>
             <div v-if="editing">
