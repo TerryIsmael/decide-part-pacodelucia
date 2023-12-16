@@ -105,19 +105,19 @@ class CensusFilter(generics.ListAPIView):
 
 class FilterClass():
 
-    def get_users_filtered(self, type, filter_value):
+    def get_users_filtered(self, filter_type, filter_value):
         user_ids = None
-        if type == 'gender':
+        if filter_type == 'gender':
             user_ids = self.filterGender(filter_value)
-        elif type == 'works':
+        elif filter_type == 'works':
             user_ids = self.filterWorks(filter_value)
-        elif type == 'civil_state':
+        elif filter_type == 'civil_state':
             user_ids = self.filterCivilState(filter_value)
-        elif type == 'born_year':
+        elif filter_type == 'born_year':
             user_ids = self.filterBornYear(filter_value)
-        elif type == 'country':
+        elif filter_type == 'country':
             user_ids = self.filterCountry(filter_value)
-        elif type == 'religion':
+        elif filter_type == 'religion':
             user_ids = self.filterReligion(filter_value)
 
         if not user_ids:
