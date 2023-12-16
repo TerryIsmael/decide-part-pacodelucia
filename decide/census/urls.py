@@ -9,4 +9,6 @@ urlpatterns = [
     path('import/ldap/', views.CensusImportLDAP.as_view(), name='census import ldap'),
     path('export/<int:voting_id>', views.CensusExport.as_view(), name="census export"),
     path('export/', views.CensusExport.as_view(), name="census export")
+    path('user-details/',views.UserDataCreate.as_view(),name='user_details_create'),
+    path('get-filtered-census',views.CensusFilter.as_view(),name='census_filter')
 ]

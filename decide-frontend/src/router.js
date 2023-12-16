@@ -15,9 +15,6 @@ const routes = [
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
-  { path: '/register', component: Register },
-  { path: '/authEmail', component: EmailAuthentication },
-  { path: '/', component: Home },
   { path: '/:pathMatch(.*)*', component: PageNotFound  }
 
 ];
