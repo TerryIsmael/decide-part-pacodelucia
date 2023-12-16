@@ -19,7 +19,7 @@ const routes = [
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
-  { path: '/:pathMatch(.*)*', component: PageNotFound  }
+  { path: '/:pathMatch(.*)*', component: PageNotFound  },
 
   { path: '/admin/voting', component: ListVoting },
 
