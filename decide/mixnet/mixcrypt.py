@@ -32,7 +32,7 @@ False
 >>> sorted(clears) == sorted(d)
 True
 '''
-
+pool = Pool()
 
 from Crypto.PublicKey import ElGamal
 from Crypto.Random import random
