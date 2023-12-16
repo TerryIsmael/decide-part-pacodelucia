@@ -36,10 +36,7 @@ export default {
                 }
                 );
                 const data = await response.json();
-                await data.map((vote) => {
-                    vote.a = BigInt(vote.a);
-                    vote.b = BigInt(vote.b);
-                });
+                
                 votes.value = data;
                 const set = new Set();
                 votes.value.forEach((vote) => set.add(vote.voting_id));

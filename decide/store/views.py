@@ -33,7 +33,6 @@ class StoreView(generics.ListAPIView):
         vid = request.data.get('voting')
         voting = mods.get('voting', params={'id': vid})
         if not voting or not isinstance(voting, list):
-            # print("por aqui 35")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         start_date = voting[0].get('start_date', None)
         # print ("Start date: "+  start_date)
@@ -43,7 +42,6 @@ class StoreView(generics.ListAPIView):
         #print (not_started)
         is_closed = end_date and parse_datetime(end_date) < timezone.now()
         if not_started or is_closed:
-            #print("por aqui 42")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         uid = request.data.get('voter')
@@ -60,13 +58,11 @@ class StoreView(generics.ListAPIView):
         voter = mods.post('authentication', entry_point='/getuser/', json={'token': token})
         voter_id = voter.get('id', None)
         if not voter_id or voter_id != uid:
-            # print("por aqui 59")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         # the user is in the census
         perms = mods.get('census/{}'.format(vid), params={'voter_id': uid}, response=True)
         if perms.status_code == 401:
-            # print("por aqui 65")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         a = vote.get("a")
@@ -143,7 +139,6 @@ class StoreByPreferenceView(generics.ListAPIView):
             }
         voting.append(voting_data)
         if not voting or not isinstance(voting, list):
-            # print("por aqui 35")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         start_date = voting[0].get('start_date', None)
         # print ("Start date: "+  start_date)
@@ -153,7 +148,6 @@ class StoreByPreferenceView(generics.ListAPIView):
         #print (not_started)
         is_closed = end_date and parse_datetime(end_date) < timezone.now()
         if not_started or is_closed:
-            #print("por aqui 42")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         uid = request.data.get('voter')
@@ -249,7 +243,6 @@ class StoreYesNoView(generics.ListAPIView):
         #print (not_started)
         is_closed = end_date and parse_datetime(end_date) < timezone.now()
         if not_started or is_closed:
-            #print("por aqui 42")
 
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 

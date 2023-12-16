@@ -9,8 +9,13 @@ export default {
     const username = inject('username')
     const error = ref(null)
     const navBarLoaded = inject('navBarLoaded')
-    
+    const isInAdmin = inject('isInAdmin')
+
     const isLogged = () => {
+      if (!window.location.href.includes("/admin")) {
+        return isInAdmin.value = false
+      }
+      isInAdmin.value = true
       fetch(import.meta.env.VITE_API_URL + '/authentication/admin-auth/', {
         method: 'GET',
         credentials: 'include',
@@ -66,34 +71,36 @@ export default {
       username,
       error,
       router,
+      isInAdmin,
       isLogged,
       logout,
     }
   }
 }
-
 </script>
 
 <template>
-  <nav class="navbar">
-    <div class="navbar-left">
-      <a href="/admin">
-        <h3 class="decide">Decide Admin</h3>
-      </a>
-    </div>
-    <div class="navbar-right">
-      <div v-if="logged && username" class="usuario">
-        <p>Usuario: </p>
-        <p class="username" v-if="logged && username">{{ username }}</p>
+  <div v-if="isInAdmin">
+    <nav class="navbar">
+      <div class="navbar-left">
+        <a href="/admin">
+          <h3 class="decide">Decide Admin</h3>
+        </a>
       </div>
+      <div class="navbar-right">
+        <div v-if="logged && username" class="usuario">
+          <p>Usuario: </p>
+          <p class="username" v-if="logged && username">{{ username }}</p>
+        </div>
 
-      <div class="buttons">
-        <button class="logout-btn" v-if="logged" @click="logout()">Cerrar sesión</button>
-        <button class="login-btn" v-else @click="router.push('/admin/login')">Iniciar sesión</button>
+        <div class="buttons">
+          <button class="logout-btn" v-if="logged" @click="logout()">Cerrar sesión</button>
+          <button class="login-btn" v-else @click="router.push('/admin/login')">Iniciar sesión</button>
+        </div>
+
       </div>
-
-    </div>
-  </nav>
+    </nav>
+  </div>
 </template>
   
 <style scoped>

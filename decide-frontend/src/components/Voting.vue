@@ -380,6 +380,8 @@ export default {
                 Nueva...</button>
               <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
             </div>
+          </form>
+        </div>
             <p v-if="voting.start_date != null">
               <span class="bold">Fecha de inicio: </span>
               {{ dateFormat(voting.start_date) }}
@@ -391,15 +393,16 @@ export default {
             <h4 v-if="voting.postproc == null">No finalizada</h4>
             <div v-if="voting.start_date != null">
               <h4>- PUB_KEY -</h4>
-              <p><span class="bold">P:</span> {{ BigInt(voting.pub_key.p) }}</p>
-              <p><span class="bold">G:</span> {{ BigInt(voting.pub_key.g) }}</p>
-              <p><span class="bold">Y:</span> {{ BigInt(voting.pub_key.y) }}</p>
+              <p><span class="bold">P:</span> {{ voting.pub_key.p }}</p>
+              <p><span class="bold">G:</span> {{ voting.pub_key.g }}</p>
+              <p><span class="bold">Y:</span> {{ voting.pub_key.y }}</p>
+              
             </div>
+            <div v-if="editing">
             <button class="little-button" @click="changeEditing(false)"> Cancelar </button>
             <button class="little-button" type="submit"> Guardar </button>
-          </form>
-        </div>
-      </div>
+            </div>
+          </div>
       </li>
     </ul>
   </div>

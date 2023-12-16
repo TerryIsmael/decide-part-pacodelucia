@@ -80,9 +80,9 @@ export default {
           </table>
           <div v-if="mixnet.pubkey">
             <p><span class="bold">--Pubkey--</span></p>
-            <p><span class="bold">P:</span> {{ BigInt(mixnet.pubkey.p) }}</p>
-            <p><span class="bold">G:</span> {{ BigInt(mixnet.pubkey.g) }}</p>
-            <p><span class="bold">Y:</span> {{ BigInt(mixnet.pubkey.y) }}</p>
+            <p><span class="bold">P:</span> {{ mixnet.pubkey.p }}</p>
+            <p><span class="bold">G:</span> {{ mixnet.pubkey.g }}</p>
+            <p><span class="bold">Y:</span> {{ mixnet.pubkey.y }}</p>
         </div>
         <br>
         </div>
