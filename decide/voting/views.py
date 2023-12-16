@@ -2,7 +2,7 @@ import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status
 from rest_framework.response import Response
 from store.models import Vote 
 from rest_framework.authtoken.models import Token

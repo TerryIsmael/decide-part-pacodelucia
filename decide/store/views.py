@@ -112,10 +112,8 @@ class StoreByPreferenceView(generics.ListAPIView):
          * voter: id
          * vote: { "a": int, "b": int }
         """
-        
-        voting = mods.get('voting', params={'id': vid})
-
         vid = request.data.get('voting')
+        voting = mods.get('voting', params={'id': vid})
         auxvoting = VotingByPreference.objects.get(id=vid)
         voting = []
         voting_data = {

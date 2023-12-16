@@ -22,7 +22,6 @@ from django.contrib.auth import authenticate, login
 import json
 from django.middleware.csrf import get_token
 from .serializers import UserSerializer
-from rest_framework import generics
 from base.perms import UserIsStaff, UserIsAdminToken
 import django_filters.rest_framework
 
@@ -217,7 +216,7 @@ def isAdmin(request):
             'username': user.username if user.is_authenticated else None,
         }
         return JsonResponse({'user_data': user_data})
-    except:
+    except Exception as e:
         return JsonResponse({'user_data': {'is_authenticated': False, 'is_staff': False, 'username': None}})
 
 class UserView(APIView):
