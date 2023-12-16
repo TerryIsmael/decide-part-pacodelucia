@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from .models import Question, QuestionOption, Voting, VotingByPreference, QuestionByPreference, QuestionOptionByPreference, QuestionYesNo,VotingYesNo
 from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer
-from base.serializers import AuthSerializer, VotingByPreferenceSerializer, SimpleVotingByPreferenceSerializer, VotingYesNoSerializer,SimpleVotingYesNoSerializer
+from voting.serializers import AuthSerializer, VotingByPreferenceSerializer, SimpleVotingByPreferenceSerializer, VotingYesNoSerializer,SimpleVotingYesNoSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
 from django.http import JsonResponse
