@@ -33,12 +33,13 @@ False
 True
 '''
 
-
 from Crypto.PublicKey import ElGamal
 from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util.number import GCD
 from multiprocessing import Pool
+
+pool = Pool()
 
 
 def rand(p):
@@ -109,7 +110,7 @@ def multiple_decrypt_shuffle2(ciphers, *crypts, pubkey=None):
 
 
 class MixCrypt:
-    
+  
     def __init__(self, k=None, bits=256):
         self.bits = bits
         if k:
@@ -147,7 +148,7 @@ class MixCrypt:
         clear = self.decrypt((a, b))
         return clear if last else (a, clear)
 
-    def multiple_decrypt(self, msgs, last=True):      
+    def multiple_decrypt(self, msgs, last=True):    
         decrypt_args = [(a, b, last) for a, b in msgs]
         decrypted_values = pool.map(self.multiple_decrypt_worker, decrypt_args)
         

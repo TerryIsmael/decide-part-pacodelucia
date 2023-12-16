@@ -5,7 +5,6 @@ from rest_framework.test import APITestCase
 
 from mixnet.mixcrypt import MixCrypt
 from mixnet.mixcrypt import ElGamal
-import time
 
 from base import mods
 
