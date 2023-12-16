@@ -11,7 +11,7 @@ from rest_framework.status import (
 )
 
 from base.perms import UserIsStaff
-from .models import Census
+from .models import Census,CensusPreference
 
 
 class CensusCreate(generics.ListCreateAPIView):
@@ -46,6 +46,42 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         voter = request.GET.get('voter_id')
         try:
             Census.objects.get(voting_id=voting_id, voter_id=voter)
+        except ObjectDoesNotExist:
+            return Response('Invalid voter', status=ST_401)
+        return Response('Valid voter')
+    
+class CensusPreferenceCreate(generics.ListCreateAPIView):
+    permission_classes = (UserIsStaff,)
+
+    def create(self, request, *args, **kwargs):
+        voting_preference_id = request.data.get('voting_preference_id')
+        voters = request.data.get('voters')
+        try:
+            for voter in voters:
+                censuspreference = CensusPreference(voting_preference_id=voting_preference_id, voter_id=voter)
+                censuspreference.save()
+        except IntegrityError:
+            return Response('Error try to create census', status=ST_409)
+        return Response('Census created', status=ST_201)
+
+    def list(self, request, *args, **kwargs):
+        voting_preference_id = request.GET.get('voting_preference_id')
+        voters = CensusPreference.objects.filter(voting_preference_id=voting_preference_id).values_list('voter_id', flat=True)
+        return Response({'voters': voters})
+
+
+class CensusPreferenceDetail(generics.RetrieveDestroyAPIView):
+
+    def destroy(self, request, voting_preference_id, *args, **kwargs):
+        voters = request.data.get('voters')
+        censuspreference = CensusPreference.objects.filter(voting_preference_id=voting_preference_id, voter_id__in=voters)
+        censuspreference.delete()
+        return Response('Voters deleted from census', status=ST_204)
+
+    def retrieve(self, request, voting_preference_id, *args, **kwargs):
+        voter = request.GET.get('voter_id')
+        try:
+            CensusPreference.objects.get(voting_preference_id=voting_preference_id, voter_id=voter)
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
