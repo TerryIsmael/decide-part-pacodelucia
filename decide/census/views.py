@@ -12,9 +12,7 @@ from rest_framework.status import (
 )
 
 from base.perms import UserIsStaff
-from django.shortcuts import render
 from .models import Census, UserData
-from django.views import View
 from .forms import CreationUserDetailsForm
 from .serializers import UserDataSerializer
 from authentication.serializers import UserSerializer
@@ -99,10 +97,10 @@ class CensusFilter(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def list(self, request, *args, **kwargs):
-        filter = request.GET["filter"]
+        filter_type = request.GET["filter"]
         filter_value = request.GET["filter_value"]
         filter_class = FilterClass()
-        return filter_class.get_users_filtered(filter, filter_value)
+        return filter_class.get_users_filtered(filter_type, filter_value)
 
 
 class FilterClass():

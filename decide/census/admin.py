@@ -9,7 +9,9 @@ class CensusAdmin(admin.ModelAdmin):
 
     search_fields = ('voter_id', )
 
+
 admin.site.register(Census, CensusAdmin)
+
 
 class UserDataAdmin(admin.ModelAdmin):
     list_display = ('voter_id', 'gender', 'works', 'civil_state', 'born_year', 'country', 'religion')
@@ -18,4 +20,6 @@ class UserDataAdmin(admin.ModelAdmin):
 
     search_fields = ('voter_id', )
 
+
 admin.site.register(UserData, UserDataAdmin)
+

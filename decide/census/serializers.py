@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
-
 from .models import UserData
-from base.serializers import KeySerializer, AuthSerializer
-
 
 class UserDataSerializer(serializers.HyperlinkedModelSerializer):
 

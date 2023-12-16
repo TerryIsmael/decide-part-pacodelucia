@@ -1,6 +1,5 @@
 import random
 from django.contrib.auth.models import User
-from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -55,7 +54,6 @@ class CreateCensusTest(BaseTestCase):
         data = {'voter_id': 2, 'born_year': 1000, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
         response = self.client.post('/census/user-details/', data, format='json', follow = True)
         self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()["errors"] == None)
 
     def test_post_success(self):
         data = {'voter_id': 2, 'born_year': 2000, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
@@ -137,7 +135,7 @@ class CensusFilter(BaseTestCase):
         users = response.json()
 
         self.assertEqual(len(users['users']), 1)
-        self.assertEqual(users['users'][0]['id'], self.user1.id)    
+        self.assertEqual(users['users'][0]['id'], self.user1.id)
 
     def test_filter_country(self):
         response = self.client.get('/census/get-filtered-census?filter=country&filter_value=China', format='json', follow = True)

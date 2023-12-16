@@ -60,7 +60,7 @@ class CreationUserDetailsForm(forms.Form):
 
     def save (self, commit = True):
 
-        user_data = super(Creationuser_dataForm, self).save(commit = False)
+        user_data = super(CreationUserDetailsForm, self).save(commit = False)
         user_data.voter_id= self.cleaned_data['voter_id']
         user_data.born_year= self.cleaned_data['born_year']
         user_data.gender= self.cleaned_data['gender']
