@@ -1,6 +1,7 @@
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.status import (
         HTTP_201_CREATED as ST_201,
@@ -12,9 +13,11 @@ from rest_framework.status import (
 
 from base.perms import UserIsStaff
 from django.shortcuts import render
-from .models import Census
+from .models import Census, UserData
 from django.views import View
-from .forms import CreationCensusForm
+from .forms import CreationUserDetailsForm
+from .serializers import UserDataSerializer
+from authentication.serializers import UserSerializer
 
 class CensusCreate(generics.ListCreateAPIView):
     permission_classes = (UserIsStaff,)
@@ -56,17 +59,18 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
 
-class CreateCensus(View):
-    def get(self, request):
-        form = CreationCensusForm()
-        return render(request, 'census_create.html', {'form': form})
+class UserDataCreate(generics.CreateAPIView):
+    serializer_class = UserDataSerializer
 
-    def post(self, request):
-        form = CreationCensusForm(request.POST)
+    def post(self, request, *args, **kwargs):
+        form = CreationUserDetailsForm(request.POST)
+        if not form["country"].data:
+            form = CreationUserDetailsForm(request.data)
+
         if form.is_valid():
-            try:
-                census = Census.objects.create(
-                    voting_id=form.cleaned_data['voting_id'],
+            user_data = UserData.objects.filter(voter_id = form["voter_id"].data)
+            if not user_data.exists():
+                user_data = UserData.objects.create(
                     voter_id=form.cleaned_data['voter_id'],
                     born_year=form.cleaned_data['born_year'],
                     gender=form.cleaned_data['gender'],
@@ -75,49 +79,83 @@ class CreateCensus(View):
                     country = form.cleaned_data['country'],
                     religion = form.cleaned_data['religion']
                 )
-                census.save()
-                return render(request, 'census_suceed.html', {'census': census})
-            except IntegrityError:
-                return render(request, 'census_create.html', {'form': form, "error": 'Census already exist'})
-        return render(request, 'census_create.html', {'form': form})
+                user_data.save()
+                return Response({}, status=status.HTTP_201_CREATED)
+            else:
+                user_data = user_data[0]
+                user_data.born_year=form.cleaned_data['born_year']
+                user_data.gender=form.cleaned_data['gender']
+                user_data.civil_state=form.cleaned_data['civil_state']
+                user_data.works=form.cleaned_data['works']
+                user_data.country = form.cleaned_data['country']
+                user_data.religion = form.cleaned_data['religion']
+               
+                user_data.save()
+                return Response({}, status=status.HTTP_201_CREATED)
+        return Response({"errors": str(form.errors.as_data)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class filterClass():
+class CensusFilter(generics.ListAPIView):
+    serializer_class = UserSerializer
 
-    def filterGender(self, request, *args, **kwargsView):
+    def list(self, request, *args, **kwargs):
+        filter = request.GET["filter"]
+        filter_value = request.GET["filter_value"]
+        filter_class = FilterClass()
+        return filter_class.get_users_filtered(filter, filter_value)
 
-        gender = request.GET.get('gender')
-        census = Census.objects.filter(gender=gender)
-        return Response ({'census': census})
 
-    def filterWorks(self, request,*args, **kwargsView):
+class FilterClass():
 
-        works = request.GET.get('works')
-        census = Census.objects.filter(works =works)
-        return Response ({'census': census})
+    def get_users_filtered(self, filter, filter_value):
+        user_ids = None
+        if filter == 'gender':
+            user_ids = self.filterGender(filter_value)
+        elif filter == 'works':
+            user_ids = self.filterWorks(filter_value)
+        elif filter == 'civil_state':
+            user_ids = self.filterCivilState(filter_value)
+        elif filter == 'born_year':
+            user_ids = self.filterBornYear(filter_value)
+        elif filter == 'country':
+            user_ids = self.filterCountry(filter_value)
+        elif filter == 'religion':
+            user_ids = self.filterReligion(filter_value)
 
-    def filterCivilState(self, request,*args, **kwargsView):
+        if not user_ids:
+            user_ids = []
+       
+        users = []
+        for voter_id in user_ids:
+            user = User.objects.filter(id = voter_id)
+            if user.exists():
+                users.append(user[0])
 
-        civil_state = request.GET.get('civil_state')
-        census = Census.objects.filter(civil_state=civil_state)
-        return Response ({'census': census})
+        users = UserSerializer(users, many = True)
+        return Response ({'users': users.data})
 
-    def filterBornYear(sef,request,*args,**kwargsView):
 
-        born_year = request.GET.get('born_year')
-        census = Census.objects.filter(born_year=born_year)
-        return Response ({'census': census})
+    def filterGender(self, filter_value):
+        user_ids = UserData.objects.filter(gender = filter_value).values_list('voter_id', flat=True)
+        return user_ids
 
-    def filterCountry(sef,request,*args,**kwargsView):
 
-        country = request.GET.get('country')
-        census = Census.objects.filter(country=country)
-        return Response ({'census': census})
+    def filterWorks(self, filter_value):
+        user_ids = UserData.objects.filter(works = filter_value).values_list('voter_id', flat=True)
+        return user_ids
 
-    def filterReligion(sef,request,*args,**kwargsView):
+    def filterCivilState(self, filter_value):
+        user_ids = UserData.objects.filter(civil_state = filter_value).values_list('voter_id', flat=True)
+        return user_ids
 
-        religion = request.GET.get('religion')
-        census = Census.objects.filter(religion=religion)
-        return Response ({'census': census})
+    def filterBornYear(self, filter_value):
+        user_ids = UserData.objects.filter(born_year = filter_value).values_list('voter_id', flat=True)
+        return user_ids
 
-            
+    def filterCountry(self, filter_value):
+        user_ids = UserData.objects.filter(country = filter_value).values_list('voter_id', flat=True)
+        return user_ids
+
+    def filterReligion(self, filter_value):
+        user_ids = UserData.objects.filter(religion = filter_value).values_list('voter_id', flat=True)
+        return user_ids

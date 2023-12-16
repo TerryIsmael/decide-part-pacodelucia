@@ -1,10 +1,9 @@
 from django import forms
-from .models import Census
+from .models import UserData
 from datetime import datetime
 
-class CreationCensusForm(forms.Form):
+class CreationUserDetailsForm(forms.Form):
 
-    voting_id = forms.IntegerField()
     voter_id = forms.IntegerField()
 
     GENDER = [
@@ -48,9 +47,8 @@ class CreationCensusForm(forms.Form):
     works = forms.ChoiceField(choices=WORKS)
     class Meta:
 
-        model = Census
+        model = UserData
         fields = (
-            'voting_id', 
             'voter_id',
             'born_year', 
             'gender', 
@@ -62,20 +60,19 @@ class CreationCensusForm(forms.Form):
 
     def save (self, commit = True):
 
-        census = super(CreationCensusForm, self).save(commit = False)
-        census.voting_id= self.cleaned_data['voting_id']
-        census.voter_id= self.cleaned_data['voter_id']
-        census.born_year= self.cleaned_data['born_year']
-        census.gender= self.cleaned_data['gender']
-        census.civil_state= self.cleaned_data['civil_state']
-        census.works= self.cleaned_data['works']
-        census.country = self.cleaned_data['country']
-        census.religion = self.cleaned_data['religion']
+        user_data = super(Creationuser_dataForm, self).save(commit = False)
+        user_data.voter_id= self.cleaned_data['voter_id']
+        user_data.born_year= self.cleaned_data['born_year']
+        user_data.gender= self.cleaned_data['gender']
+        user_data.civil_state= self.cleaned_data['civil_state']
+        user_data.works= self.cleaned_data['works']
+        user_data.country = self.cleaned_data['country']
+        user_data.religion = self.cleaned_data['religion']
 
         if commit:
-            census.save()
+            user_data.save()
         
-        return census
+        return user_data
 
  
 

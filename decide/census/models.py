@@ -4,6 +4,10 @@ class Census(models.Model):
 
     voting_id = models.PositiveIntegerField()
     voter_id = models.PositiveIntegerField()
+    class Meta:
+        unique_together = (('voting_id','voter_id'),)
+
+class UserData(models.Model):
 
     GENDER = [
         ("MA", "Male"),
@@ -35,6 +39,7 @@ class Census(models.Model):
         ("OT", "Other")
     ]
 
+    voter_id = models.PositiveIntegerField()
     born_year = models.PositiveIntegerField(null=True)
     country = models.CharField(max_length=50, null= True)
     religion = models.CharField(max_length=2, choices=RELIGION, null=True)
@@ -42,4 +47,4 @@ class Census(models.Model):
     civil_state = models.CharField(max_length=2, choices=CIVIL_STATE, null=True)
     works = models.CharField(max_length=2, choices=WORKS, null=True)
     class Meta:
-        unique_together = (('voting_id','voter_id','born_year','gender','civil_state','works'),)
+        unique_together = (('voter_id'),)
