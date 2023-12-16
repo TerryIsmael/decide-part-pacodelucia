@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
@@ -13,8 +14,8 @@ from rest_framework.status import (
 
 from base.perms import UserIsStaff
 from .models import Census,CensusPreference, CensusYesNo, UserData
-from .forms import CreationUserDetailsForm
-from .serializers import UserDataSerializer
+from .forms import CreationUserDetailsForm, ReuseCensusForm
+from .serializers import CensusReuseSerializer, UserDataSerializer
 from authentication.serializers import UserSerializer
 
 
@@ -230,3 +231,25 @@ class FilterClass():
     def filterReligion(self, filter_value):
         user_ids = UserData.objects.filter(religion = filter_value).values_list('voter_id', flat=True)
         return user_ids
+    
+class CensusReuse(generics.CreateAPIView):
+    serializer_class = CensusReuseSerializer
+    def post(self, request, *args, **kwargs):
+        source_voting_id = request.data.get('source_voting_id')
+        destination_voting_id = request.data.get('destination_voting_id')
+
+        if source_voting_id and destination_voting_id:
+            
+            for census in Census.objects.filter(voting_id=source_voting_id):
+                existing_census = Census.objects.filter(
+                    voting_id=destination_voting_id, voter_id=census.voter_id
+                )
+                if not existing_census.exists():
+
+                    new_census = Census(voter_id=census.voter_id, voting_id=destination_voting_id)
+                    new_census.save()
+
+            return Response('Censuses created', status=ST_201)
+        else:
+
+            return Response('Error: Invalid form. Make sure to enter both source and destination voting IDs.', status=ST_400)
