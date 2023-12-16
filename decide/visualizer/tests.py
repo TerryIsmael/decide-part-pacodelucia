@@ -5,7 +5,6 @@ from census.models import Census
 from store.models import Vote
 from visualizer.models import Stats
 from voting.models import *
-from selenium.webdriver.common.by import By
 from django.conf import settings
 
 

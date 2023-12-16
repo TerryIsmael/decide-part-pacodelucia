@@ -5,11 +5,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from base.models import Auth
-from django.conf import settings
-from django.utils import timezone
-from voting.models import Question, Voting, QuestionOption
-
 
 class AdminTestCase(StaticLiveServerTestCase):
 
