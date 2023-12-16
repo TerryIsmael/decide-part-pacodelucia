@@ -24,7 +24,6 @@ const routes = [
   { path: '/admin/voting', component: ListVoting },
 
   { path: '/admin/grafica', component: GraficaView },
-  { path: '/', component: HelloWorld },
   { path: '/admin/voting/stats', component: VotingStats },
 ];
 
