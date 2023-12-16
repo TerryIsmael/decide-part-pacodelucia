@@ -1,0 +1,12 @@
+FROM node:21-alpine
+RUN apk --no-cache add git
+
+WORKDIR /app
+
+RUN git clone --single-branch --branch develop https://github.com/TerryIsmael/decide-part-pacodelucia.git .
+
+WORKDIR /app/decide-frontend
+
+RUN npm install
+
+#CMD ["npm", "run", "dev", "--", "--host", "0"]

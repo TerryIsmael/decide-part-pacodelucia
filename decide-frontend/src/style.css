@@ -27,8 +27,7 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  width: 100vw;
   min-height: 100vh;
 }
 
@@ -42,126 +41,20 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-table {
-  width: 60%;
-  border-collapse: collapse;
-  margin: auto;
-  margin-bottom: 20px;
-}
-
-th,td,tr {
-  border: 1px solid black;
-  background-color: #008b8b;
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  width: 33%;
-  text-align: center;
-}
-
-th {
-  background-color: #024a4a;
-}
-
-.remarkable td {
-  background-color: rgba(178, 117, 87, 0.868);
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  text-align: center;
-  color: white;
-}
-
-input, textarea, select {
-  background-color: #3b3b3b;
-  height: 30px;
-  margin-bottom: 20px;
-  padding: 5px;
-  border-radius: 5px;
-  border: 2px solid grey;
-  width: 67%;
-}
-
-input {
-  height: 25px;
-  width: 65%;
-}
-
-textarea {
-  height: 60px;
-  width: 65%;
-}
-
-select option:checked {
-  background-color: #027d7d;
-}
-
-.form-div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.form-div>form {
-  width: 400px;
-  padding: 40px;
-  border-radius: 5px;
-  background-color: rgb(255, 255, 255);
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.little-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s;
-
-  background-color: rgb(0, 139, 86);
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  width: 30%;
-  margin: 5px;
-  margin-bottom: 10px;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s;
-
-  background-color: rgb(0, 139, 139);
-  color: rgb(255, 255, 255);
-  padding: 8px;
-  text-align: center;
-  border: none;
-  cursor: pointer;
   width: 100%;
-  margin-bottom: 10px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
 }
