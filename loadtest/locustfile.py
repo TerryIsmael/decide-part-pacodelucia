@@ -1,6 +1,7 @@
 import json
 
 from random import choice
+from django.conf import settings
 
 from locust import (
     HttpUser,
@@ -11,7 +12,7 @@ from locust import (
 )
 
 
-HOST = "http://localhost:8000"
+HOST =  settings.BASEURL
 VOTING = 2
 VOTING_YESNO = 11
 
@@ -22,11 +23,20 @@ class DefVisualizer(TaskSet):
     def index(self):
         self.client.get("/visualizer/{0}/".format(VOTING))
 
+
 class DefVisualizerYesNo(TaskSet):
 
     @task
     def index(self):
         self.client.get("/visualizer/yesno/{0}/".format(VOTING_YESNO))
+
+class VotingStatsTaskSet(TaskSet):
+    @task
+    def get_voting_stats(self):
+        voting_id = 2
+        self.client.get(f"/{voting_id}/stats")
+
+
 
 class DefVoters(SequentialTaskSet):
 
@@ -128,4 +138,12 @@ class VotersYesNo(HttpUser):
     tasks = [DefVotersYesNo]
     wait_time= between(3,5)
 
+class StatsFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [VotingStatsTaskSet]
+    wait_time = between(3, 5)
 
+class StatsBackend(HttpUser):
+    host = HOST
+    tasks = [VotingStatsTaskSet]
+    wait_time = between(3, 5)

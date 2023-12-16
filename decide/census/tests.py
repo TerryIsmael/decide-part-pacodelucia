@@ -1,6 +1,5 @@
 import random
 from django.contrib.auth.models import User
-from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -10,11 +9,156 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from .models import Census
+from .models import Census, UserData
 from base import mods
 from base.tests import BaseTestCase
-from datetime import datetime
 
+class CreateCensusTest(BaseTestCase):
+    
+    def setUp(self):
+        self.user1 = User(username='user1', is_staff=True)
+        self.user1.set_password('qwerty')
+        self.user1.save()
+
+        self.user2 = User(username='user2', is_staff=True)
+        self.user2.set_password('qwerty')
+        self.user2.save()
+
+        self.user_data = UserData.objects.create(
+            voter_id= 1,
+            born_year = 2002,
+            gender = "MA",
+            civil_state = "SI",
+            works = "ST",
+            country = "Spain",
+            religion = "CH"
+        )
+        self.user_data.save()
+        super().setUp()
+
+    def tearDown(self):
+        self.user_data = None
+        super().tearDown()
+
+    def test_censo_create(self):
+        created_user_data = UserData.objects.filter(id = self.user_data.id)
+
+        self.assertNotEqual(created_user_data, None)
+        self.assertEqual(self.user_data.voter_id,1)
+        self.assertEqual(self.user_data.born_year,2002)
+        self.assertEqual(self.user_data.gender,"MA")
+        self.assertEqual(self.user_data.civil_state,"SI")
+        self.assertEqual(self.user_data.works,"ST")
+
+    def test_post_fail_year(self):
+        data = {'voter_id': 2, 'born_year': 1000, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
+        response = self.client.post('/census/user-details/', data, format='json', follow = True)
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_success(self):
+        data = {'voter_id': 2, 'born_year': 2000, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
+        response = self.client.post('/census/user-details/', data, format='json', follow = True)
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_success(self):
+        data = {'voter_id': 2, 'born_year': 2000, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
+        response = self.client.post('/census/user-details/', data, format='json', follow = True)
+        data = {'voter_id': 2, 'born_year': 2002, 'gender': 'MA', 'civil_state': 'SI', 'works': 'ST', 'country': 'Spain', 'religion': 'CH'}
+        response = self.client.post('/census/user-details/', data, format='json', follow = True)
+        self.assertEqual(response.status_code, 201)
+
+class CensusFilter(BaseTestCase):
+    def setUp(self):
+        self.user1 = User(username='user1', is_staff=True)
+        self.user1.set_password('qwerty')
+        self.user1.save()
+
+        self.user2 = User(username='user2', is_staff=True)
+        self.user2.set_password('qwerty')
+        self.user2.save()
+
+        self.user_data1 = UserData.objects.create(
+        voter_id= self.user1.id,
+        born_year = 2002,
+        gender = "MA",
+        civil_state = "SI",
+        works = "ST",
+        country = "Spain",
+        religion = "CH"
+        )
+        self.user_data1.save()
+
+        self.user_data2 = UserData.objects.create(
+        voter_id= self.user2.id,
+        born_year = 2000,
+        gender = "FE",
+        civil_state = "MA",
+        works = "WO",
+        country = "China",
+        religion = "BU"
+        )
+        self.user_data2.save()
+        super().setUp()
+
+    def tearDown(self):
+        self.user_data1 = None
+        self.user_data2 = None
+        super().tearDown()
+
+    def test_filter_works(self):
+        response = self.client.get('/census/get-filtered-census?filter=works&filter_value=ST', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user1.id)
+
+    def test_filter_gender(self):
+        response = self.client.get('/census/get-filtered-census?filter=gender&filter_value=FE', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user2.id)
+
+    def test_filter_civil_state(self):
+        response = self.client.get('/census/get-filtered-census?filter=civil_state&filter_value=SI', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user1.id)
+
+    def test_filter_born_year(self):
+        response = self.client.get('/census/get-filtered-census?filter=born_year&filter_value=2002', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user1.id)
+
+    def test_filter_country(self):
+        response = self.client.get('/census/get-filtered-census?filter=country&filter_value=China', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user2.id)
+
+    def test_religion(self):
+        response = self.client.get('/census/get-filtered-census?filter=religion&filter_value=BU', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 1)
+        self.assertEqual(users['users'][0]['id'], self.user2.id)
+
+    def test_no_one_was_found(self):
+        response = self.client.get('/census/get-filtered-census?filter=religion&filter_value=AT', format='json', follow = True)
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+
+        self.assertEqual(len(users['users']), 0)
 
 class CensusTestCase(BaseTestCase):
 
