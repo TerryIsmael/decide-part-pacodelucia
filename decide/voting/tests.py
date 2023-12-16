@@ -19,10 +19,8 @@ from base.tests import BaseTestCase
 from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
-from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption, Auth
 from datetime import datetime
-
 
 class VotingModelTestCase(BaseTestCase):
     def setUp(self):
@@ -282,7 +280,99 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
         self.assertEquals(response.status_code, 405)
 
+class VotingFrontTestCase(BaseTestCase):
+
+    def setUp(self):
+        self.q = Question(desc='Descripcion')
+        self.q.save()
+        
+        opt1 = QuestionOption(question=self.q, option='opcion 1')
+        opt1.save()
+        opt1 = QuestionOption(question=self.q, option='opcion 2')
+        opt1.save()
+
+        self.a = Auth.objects.create(url=settings.BASEURL, me=True, name='test auth')
+        self.a.save()
+
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def login(self, user='admin', password='qwerty'):
+        data = {'username': user, 'password': password}
+        response = mods.post('authentication/login', json=data, response=True)
+        response2 = mods.post('authentication/login-auth', json=data, response=True)
+        self.assertEqual(response.status_code, 200)
+        self.token = response.json().get('token')
+        self.assertTrue(self.token)
+        csrf_token = response2.cookies.get('csrftoken')
+        auth_token = response2.cookies.get('auth_token')
+        self.client.cookies['csrftoken'] = csrf_token
+        self.client.cookies['auth-token'] = auth_token
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        
+    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+
+    def create_voting(self):
+        q = Question(desc='test question')
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(question=q, option='option {}'.format(i+1))
+            opt.save()
+        v = Voting(name='test voting', question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        v.auths.add(a)
+
+        return v
+  
+    def create_voters(self, v):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u.is_active = True
+            u.save()
+            c = Census(voter_id=u.id, voting_id=v.id)
+            c.save()
+
+    def get_or_create_user(self, pk):
+        user, _ = User.objects.get_or_create(pk=pk)
+        user.username = 'user{}'.format(pk)
+        user.set_password('qwerty')
+        user.save()
+        return user
+
+    def store_votes(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for opt in v.question.options.all():
+            clear[opt.number] = 0
+            for i in range(random.randint(0, 5)):
+                a, b = self.encrypt_msg(opt.number, v)
+                data = {
+                    'voting': v.id,
+                    'voter': voter.voter_id,
+                    'vote': { 'a': a, 'b': b },
+                }
+                clear[opt.number] += 1
+                user = self.get_or_create_user(voter.voter_id)
+                self.login(user=user.username)
+                voter = voters.pop()
+                mods.post('store', json=data)
+        return clear
+    
     def test_update_voting_front(self):
+
         voting = self.create_voting()
 
         # login with user admin
@@ -387,7 +477,7 @@ class VotingTestCase(BaseTestCase):
     def test_create_voting_front_400(self):
         data = {'name': 'Example'}
         
-        data2 = {
+        data_good = {
             'name': 'example name',
             'desc': 'example description',
             'question': self.q.id,
@@ -402,7 +492,7 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/voting/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
-        response = self.client.post('/voting/voting/', data2, format='json')
+        response = self.client.post('/voting/voting/', data_good, format='json')
         self.assertEqual(response.status_code, 403)
 
         # login with user admin
@@ -430,11 +520,149 @@ class VotingTestCase(BaseTestCase):
         response = self.client.delete('/voting/voting/', data, format='json')
         self.assertEqual(response.status_code, 403)
 
+        #Post without data
         self.login()
-
         response = self.client.delete('/voting/voting/')
         self.assertEqual(response.status_code, 404)
+
+class QuestionFrontTestCase(BaseTestCase):
+    
+    def setUp(self):
+        self.q = Question(desc='Descripcion')
+        self.q.save()
         
+        opt1 = QuestionOption(question=self.q, option='opcion 1')
+        opt1.save()
+        opt1 = QuestionOption(question=self.q, option='opcion 2')
+        opt1.save()
+
+        self.a = Auth.objects.create(url=settings.BASEURL, me=True, name='test auth')
+        self.a.save()
+
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def login(self, user='admin', password='qwerty'):
+        data = {'username': user, 'password': password}
+        response = mods.post('authentication/login', json=data, response=True)
+        response2 = mods.post('authentication/login-auth', json=data, response=True)
+        self.assertEqual(response.status_code, 200)
+        self.token = response.json().get('token')
+        self.assertTrue(self.token)
+        csrf_token = response2.cookies.get('csrftoken')
+        auth_token = response2.cookies.get('auth_token')
+        self.client.cookies['csrftoken'] = csrf_token
+        self.client.cookies['auth-token'] = auth_token
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
+    def test_get_all_questions(self):
+        self.login()
+        response = self.client.get('/voting/all-questions/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_all_questions_400(self):
+        response = self.client.get('/voting/all-questions/')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.get('/voting/all-questions/')
+        self.assertEqual(response.status_code, 403)
+        
+    def test_create_question_front(self):  
+        self.login()
+        data = {
+            "desc": "example description",
+            "options": [
+                {
+                    "number": 1,
+                    "option": "Option 1"
+                },
+                {
+                    "number": 2,
+                    "option": "Option 2"
+                }
+            ]
+        }
+        
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_question_front_400(self):
+        data = {"desc": "example description"}
+        
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_question_front(self):
+        self.login()
+        
+        data = {
+            "id": self.q.id,
+            "desc": "example description edited",
+            "options": [
+                {
+                    "number": 1,
+                    "option": "Option 1 edited"
+                },
+                {
+                    "number": 2,
+                    "option": "Option 2 edited"
+                }
+            ]
+        }
+        
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_question_front_400(self):
+        data = {"desc": "example description"}
+        
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user='noadmin')
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = self.client.post('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_delete_question_front(self):
+        self.login()
+        data = {"id": self.q.id}
+        response = self.client.delete('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        
+    def test_delete_question_front_400(self):
+        data = {"id": self.q.id}
+        response = self.client.delete('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+        
+        self.login(user='noadmin')
+        response = self.client.delete('/voting/all-questions/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
+        #Post without data
+        self.login()
+        response = self.client.delete('/voting/all-questions/')
+        self.assertEqual(response.status_code, 404)
+
 class LogInSuccessTests(StaticLiveServerTestCase):
 
     def setUp(self):

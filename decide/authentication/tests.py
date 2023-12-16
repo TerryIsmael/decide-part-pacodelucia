@@ -5,17 +5,6 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-
-
-
-from base.tests import BaseTestCase
 from base import mods
 
 
