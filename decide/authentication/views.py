@@ -216,7 +216,7 @@ def isAdmin(request):
             'username': user.username if user.is_authenticated else None,
         }
         return JsonResponse({'user_data': user_data})
-    except Exception as e:
+    except Exception as _:
         return JsonResponse({'user_data': {'is_authenticated': False, 'is_staff': False, 'username': None}})
 
 class UserView(APIView):
