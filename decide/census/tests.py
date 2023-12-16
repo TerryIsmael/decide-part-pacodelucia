@@ -1,5 +1,6 @@
 import random
 from django.contrib.auth.models import User
+from voting.models import Question, QuestionOption, Voting
 from rest_framework.test import APIClient
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -610,3 +611,40 @@ class CensusYesNoTest(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/censusyesno/add")
+
+class ReuseCensusTest(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+        # Create a Question with options
+        q = Question(desc='Descripcion')
+        q.save()
+
+        opt1 = QuestionOption(question=q, option='opcion 1')
+        opt1.save()
+        opt2 = QuestionOption(question=q, option='opcion 2')  # Corrected variable name
+        opt2.save()
+
+        # Create two Voting instances with the same question
+        self.v = Voting(name='Votacion', question=q)
+        self.v.save()
+        self.v2 = Voting(name='Votacion2', question=q)
+        self.v2.save()
+
+        # Create a Census object
+        self.census = Census(voting_id=self.v.id, voter_id=1)  # Use self.v.id instead of hardcoding ID
+        self.census.save()
+
+    def tearDown(self):
+        super().tearDown()
+        self.census = None  # Set self.census to None instead of self.v
+
+    def testExist(self):
+        v = Voting.objects.get(name='Votacion')
+        # Check if the number of options associated with the question is 2
+        self.assertEqual(len(v.question.options.all()), 2)
+
+    def test_post_success(self):
+        data = {'source_voting_id': self.v.id, 'destination_voting_id': self.v2.id}
+        response = self.client.post('/census/census-reuse/', data, format='json', follow=True)
+        self.assertEqual(response.status_code, 201)

@@ -20,5 +20,6 @@ urlpatterns = [
         name="census_yesno_detail",
     ),
     path('user-details/',views.UserDataCreate.as_view(),name='user_details_create'),
-    path('get-filtered-census',views.CensusFilter.as_view(),name='census_filter')
+    path('get-filtered-census',views.CensusFilter.as_view(),name='census_filter'),
+    path('census-reuse', views.CensusReuse.as_view(), name='census_reuse'),
 ]
