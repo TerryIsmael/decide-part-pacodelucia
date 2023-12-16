@@ -109,13 +109,13 @@ class CensusYesNoCreate(generics.ListCreateAPIView):
 
 class CensusYesNoDetail(generics.RetrieveDestroyAPIView):
 
-    def destroy(self, request, voting_id, *args, **kwargs):
+    def destroy(self, request, voting_yesno_id, *args, **kwargs):
         voters = request.data.get('voters')
         censusyesno = CensusYesNo.objects.filter(voting_yesno_id=voting_yesno_id, voter_id__in=voters)
         censusyesno.delete()
         return Response('Voters deleted from census', status=ST_204)
 
-    def retrieve(self, request, voting_id, *args, **kwargs):
+    def retrieve(self, request, voting_yesno_id, *args, **kwargs):
         voter = request.GET.get('voter_id')
         try:
             CensusYesNo.objects.get(voting_yesno_id=voting_yesno_id, voter_id=voter)

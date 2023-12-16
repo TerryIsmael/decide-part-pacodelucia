@@ -12,4 +12,11 @@ urlpatterns = [
         views.CensusPreferenceDetail.as_view(),
         name="census_preference_detail",
     ),
+    path("censusyesno/",views.CensusYesNoCreate.as_view(),
+    name="census_yesno_create",),
+    path(
+        "censusyesno/<int:voting_yesno_id>/",
+        views.CensusYesNoDetail.as_view(),
+        name="census_yesno_detail",
+    ),
 ]
