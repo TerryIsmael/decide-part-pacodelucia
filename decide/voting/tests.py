@@ -8,6 +8,8 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -333,7 +335,28 @@ class VotingTestCase(BaseTestCase):
         voting = Voting.objects.get(name='Example')
         self.assertEqual(voting.desc, 'Description example')
     
-        
+    
+    def test_check_name_length_limit(self):
+        name_over_200_chars = 'a' * 201  
+        voting = Voting(name=name_over_200_chars)
+        with self.assertRaises(ValidationError):
+            voting.full_clean()
+       
+    def test_check_name_length_limit_on_edit(self):
+        # Crear una votación con un nombre válido
+        voting = self.create_voting()
+        voting.name = 'a' * 200 # Cambiar el nombre a uno válido
+        voting.save()
+        voting.name = 'a' * 201
+        with self.assertRaises(ValidationError):
+            voting.full_clean()
+    
+    def test_voting_without_question(self):
+        # Intentar crear una votación sin una pregunta asociada
+        with self.assertRaises(IntegrityError):
+            voting = Voting(name='Test voting')
+            voting.save()  # Esto debería lanzar un IntegrityError porque no se ha establecido question_id
+
 
     def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
         pk = v.pub_key
@@ -525,8 +548,8 @@ class VotingTestCase(BaseTestCase):
         data = {} #El campo action es requerido en la request
         self.login()
         response = self.client.post('/voting/{}/'.format(v.pk), data, format= 'json')
-        self.assertEquals(response.status_code, 405)
-        
+        self.assertEquals(response.status_code, 405) 
+    
     def test_get_voting_string_keys(self):
         v = self.create_voting()
         v.create_pubkey()
@@ -950,7 +973,7 @@ class QuestionFrontTestCase(BaseTestCase):
         data = {"id": self.q.id}
         response = self.client.delete('/voting/all-questions/', data, format='json')
         self.assertEqual(response.status_code, 200)
-        
+
     def test_delete_question_front_400(self):
         data = {"id": self.q.id}
         response = self.client.delete('/voting/all-questions/', data, format='json')
@@ -996,6 +1019,7 @@ class LogInSuccessTests(StaticLiveServerTestCase):
 
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/")
+
 
 class LogInErrorTests(StaticLiveServerTestCase):
 
@@ -1352,4 +1376,3 @@ class VotingYesNoTestCase(BaseTestCase):
         response = self.client.put('/custom/votingyesno/{}/'.format(voting.pk), data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
-        

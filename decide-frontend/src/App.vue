@@ -5,5 +5,5 @@
   <div id="subApp">
     <router-view></router-view>
   </div>
-  </body>
+</body>
 </template>

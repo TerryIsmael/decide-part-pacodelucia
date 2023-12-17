@@ -2,12 +2,12 @@ import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from store.models import Vote 
 from rest_framework.authtoken.models import Token
 from .models import Question, QuestionOption, Voting, VotingByPreference, QuestionByPreference, QuestionOptionByPreference, QuestionYesNo,VotingYesNo
-from .serializers import SimpleVotingSerializer, VotingSerializer, QuestionSerializer, VotingByPreferenceSerializer, SimpleVotingByPreferenceSerializer, VotingYesNoSerializer,SimpleVotingYesNoSerializer
+from .serializers import AuthSerializer, SimpleVotingSerializer, VotingSerializer, QuestionSerializer, VotingByPreferenceSerializer, SimpleVotingByPreferenceSerializer, VotingYesNoSerializer,SimpleVotingYesNoSerializer
 from base.perms import UserIsStaff,UserIsAdminToken
 from base.models import Auth
 from django.http import JsonResponse
@@ -451,3 +451,13 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
+    
+class AllQuestionsView(generics.ListAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer 
+    permission_classes = [permissions.IsAdminUser]
+
+class AllAuthsAPIView(generics.ListAPIView):
+    queryset = Auth.objects.all()
+    serializer_class = AuthSerializer
+    permission_classes = [permissions.IsAdminUser]
