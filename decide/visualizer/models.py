@@ -7,3 +7,13 @@ class Stats(models.Model):
     votes= models.IntegerField(default=0)
     census= models.FloatField
 
+class StatsPreference(models.Model):
+    voting_preference_id = models.PositiveIntegerField()
+    votes= models.IntegerField(default=0)
+    census= models.FloatField
+
+
+class CensusYesNo(models.Model):
+    voting_yesno_id = models.PositiveIntegerField()
+    votes= models.IntegerField(default=0)
+    census= models.FloatField

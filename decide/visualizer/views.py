@@ -5,8 +5,8 @@ from base import mods
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from voting.models import Voting, VotingYesNo,VotingByPreference
-from census.models import Census
-from store.models import Vote
+from census.models import Census, CensusYesNo
+from store.models import Vote, VoteYesNo, VoteByPreference
 
 # views.py
 
@@ -21,6 +21,32 @@ def stats(request,voting_id):
 
     # Obtener el censo para la votación
     census_count = Census.objects.filter(voting_id=voting_id).count()
+
+    # Calcular el porcentaje de votantes
+    percentage_voters = (votes_count / census_count) * 100 if census_count > 0 else 0
+    percentage_voters=round(percentage_voters,2)
+
+
+    data = {
+        'voting': voting.id,
+        'votes': votes_count,
+        'census':percentage_voters,
+        'question':question,
+    }
+
+    return JsonResponse(data)
+
+def statsYesNo(request,voting_id):
+
+     # Obtener la votación específica
+    voting = get_object_or_404(VotingYesNo, id=voting_id)
+    question= voting.question.desc
+
+     # Obtener el número de votos para la votación
+    votes_count = VoteYesNo.objects.filter(voting_id=voting_id).count()
+
+    # Obtener el censo para la votación
+    census_count = CensusYesNo.objects.filter(voting_id=voting_id).count()
 
     # Calcular el porcentaje de votantes
     percentage_voters = (votes_count / census_count) * 100 if census_count > 0 else 0
