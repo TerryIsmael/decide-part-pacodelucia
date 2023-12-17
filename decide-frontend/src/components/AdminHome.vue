@@ -12,6 +12,7 @@
             <a href="/admin/auth"> <button>Autoridades</button> </a>
             <a href="/admin/census"> <button>Censos</button> </a>
             <a href="/admin/user"> <button>Usuarios</button> </a>
+            <a href="/admin/userdata"> <button>Datos de usuarios</button> </a>
             <a href="/admin/vote"> <button>Votos</button> </a>
             <a href="/admin/authtoken"> <button>Tokens de autorización</button> </a>
             <a href="/admin/mixnet" class="adjusted"> <button>Mixnet</button> </a>
