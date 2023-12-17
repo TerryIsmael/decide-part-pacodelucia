@@ -186,7 +186,7 @@ class CensusImportLDAP(generics.ListCreateAPIView):
                     except IntegrityError as e:
                         if not 'unique constraint' in str(e).lower():
                             return Response('Error trying to create census', status=ST_409)
-        except Exception as e:
+        except Exception:
             return Response('Error processing request', status=ST_500)
         return Response('Census created', status=ST_201)
 
