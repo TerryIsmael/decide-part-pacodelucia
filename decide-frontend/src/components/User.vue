@@ -151,7 +151,7 @@ export default {
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="nueva-cadena-de-integridad" crossorigin="anonymous">
-    <div>
+    <div class="principal_div">
         <h2>Listado de usuarios</h2>
         <ul>
             <button class="little-button adjusted" style="margin-bottom: 10px;"

@@ -163,14 +163,12 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="principal_div"> 
     <h2>Listado de preguntas</h2>
+    <button class="little-button" style="width: 40%;" @click="changeSelected(New); changeEditing(true)">
+      Nueva pregunta
+    </button>
     <ul>
-      <li>
-        <button class="little-button" @click="changeSelected(New); changeEditing(true)">
-          Nueva pregunta
-        </button>
-
         <div v-if="selectedQuestion == New && editing == true">
           <div>
             <div>
@@ -180,13 +178,14 @@ export default {
               <label class="questionDescLabel" for="desc">Descripción: </label>
               <textarea id="desc" rows="10" columns="90" v-model="newDesc"></textarea>
 
-              <div v-for="option in newOptions">
+              <div v-for="option in newOptions" style=" display:flex; flex-wrap: nowrap; align-items: baseline; justify-content: center;">
                 <label for="optionNumber">Id: </label>
                 <input type="number" id="optionNumber" v-model="option.number" required />
                 <label for="option">Opción: </label>
                 <input type="text" id="option" v-model="option.option" required />
+                <div style="flex:inline-block"></div>
                 <button type="button" class="button-inline little-button delete-button"
-                  @click="removeOption(option)">Eliminar</button>
+                  @click="removeOption(option)" style="flex:inline">Eliminar</button>
               </div>
 
               <p>Nueva opción</p>
@@ -210,7 +209,6 @@ export default {
             </form>
           </div>
         </div>
-      </li>
       <li v-for="question in questions" :key="question.id">
         <h3>
           <button @click="changeSelected(question.id); changeEditing(false);"> {{ question.desc }} </button>

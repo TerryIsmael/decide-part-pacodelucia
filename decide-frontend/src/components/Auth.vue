@@ -129,7 +129,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div class="principal_div">
         <h2>Listado de Autoridades</h2>
 
         <button class="little-button" @click="changeSelected(New); changeEditing(true)">

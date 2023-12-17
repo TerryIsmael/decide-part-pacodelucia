@@ -12,7 +12,7 @@ export default {
     const auths = ref([]);
     const newVoting = ref(new Voting());
     const loading = ref(false);
-    const errorMessage=ref("");
+    const errorMessage = ref("");
 
     const fetchVotings = async () => {
       try {
@@ -51,10 +51,10 @@ export default {
     };
 
     const changeEditing = async (newValue) => {
-      errorMessage.value="";
+      errorMessage.value = "";
       if (newValue == true) {
-        if (selectedVoting!="New"){
-          newVoting.value = {...votings.value.find((voting) => voting.id === selectedVoting.value)};
+        if (selectedVoting != "New") {
+          newVoting.value = { ...votings.value.find((voting) => voting.id === selectedVoting.value) };
         }
         try {
           const questionResponse = await fetch(
@@ -138,7 +138,7 @@ export default {
 
     const saveVoting = async () => {
       if (newVoting.value.name.trim() === "" || newVoting.value.name == undefined || newVoting.value.desc.trim() === "" || newVoting.value.desc == undefined) {
-        errorMessage.value="El nombre y la descripción no pueden estar vacíos";
+        errorMessage.value = "El nombre y la descripción no pueden estar vacíos";
         return;
       }
       const votingPost = {
@@ -159,7 +159,7 @@ export default {
           body: JSON.stringify(votingPost),
         });
         newVoting.value = new Voting();
-        errorMessage.value="";
+        errorMessage.value = "";
         editing.value = false;
       } catch (error) {
         console.error("Error:", response.status, error.json());
@@ -179,7 +179,7 @@ export default {
 
     const changeSelected = (id) => {
       selectedVoting.value = selectedVoting.value === id ? null : id;
-      errorMessage.value="";
+      errorMessage.value = "";
     };
 
     const dateFormat = (oldDate) => {
@@ -201,11 +201,11 @@ export default {
 
       return `${formattedDay}/${formattedMonth}/${year} ${formattedHours}:${formattedMinutes}`;
     };
-    
+
     onMounted(fetchVotings);
 
     const transformBigInt = (bigIntValue) => {
-      
+
       const chunkSize = 10;
       const chunks = [];
 
@@ -214,7 +214,7 @@ export default {
         chunks.push(bigIntValue.slice(i, i + chunkSize));
       }
 
-      const transformedNumber =  chunks.join("");
+      const transformedNumber = chunks.join("");
       return transformedNumber;
     }
 
@@ -247,7 +247,7 @@ export default {
 <template>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     integrity="nueva-cadena-de-integridad" crossorigin="anonymous">
-  <div>
+  <div class="principal_div">
     <h2>Listado de votaciones</h2>
     <ul>
       <button class="little-button" @click="changeSelected(New), changeEditing(true)"> Nueva votación </button>
@@ -255,7 +255,7 @@ export default {
       <div v-if="selectedVoting == 'New' && editing == true">
         <form @submit.prevent="saveVoting(newVoting)">
           <div>
-            <p class="bold" style="color:rgb(211, 91, 91)">{{errorMessage}}</p>
+            <p class="bold" style="color:rgb(211, 91, 91)">{{ errorMessage }}</p>
           </div>
           <div>
             <label for="name">Nombre: </label>
@@ -310,93 +310,99 @@ export default {
             <p class="bold" v-if="loading">Cargando...</p>
 
             <p><span class="bold">Id:</span> {{ voting.id }}</p>
-              <p><span class="bold">Descripción: </span>{{ voting.desc }}</p>
-              <p>
-                <span class="bold">Pregunta: </span> {{ voting.question.desc }}
-              </p>
-              <p>
-                <span class="bold">Opción ganadora: </span>
-                {{ voting.tally ? voting.tally.toString() : "No hay recuento" }}
-              </p>
+            <p><span class="bold">Descripción: </span>{{ voting.desc }}</p>
+            <p>
+              <span class="bold">Pregunta: </span> {{ voting.question.desc }}
+            </p>
+            <p>
+              <span class="bold">Opción ganadora: </span>
+              {{ voting.tally ? voting.tally.toString() : "No hay recuento" }}
+            </p>
+            <h4 v-if="voting.postproc == null">No finalizada</h4>
+            <table v-if="voting.postproc == null">
+              <tr>
+                <th>Número opción</th>
+                <th>Opción</th>
+              </tr>
 
-              <table v-if="voting.postproc == null">
-                <tr>
-                  <th>Número opción</th>
-                  <th>Opción</th>
-                </tr>
+              <tr v-for="option in voting.question.options">
+                <td>{{ option.number }}</td>
+                <td>{{ option.option }}</td>
+              </tr>
+            </table>
 
-                <tr v-for="option in voting.question.options">
+            <table v-else>
+              <tr>
+                <th>Número opción</th>
+                <th>Opción</th>
+                <th>Votos</th>
+              </tr>
+              <tbody>
+                <tr v-for="option in voting.postproc" :key="option.number"
+                  :class="{ remarkable: isNumberInTally(voting, option.number), }">
                   <td>{{ option.number }}</td>
                   <td>{{ option.option }}</td>
+                  <td>{{ option.votes }}</td>
                 </tr>
-              </table>
-
-              <table v-else>
-                <tr>
-                  <th>Número opción</th>
-                  <th>Opción</th>
-                  <th>Votos</th>
-                </tr>
-                <tbody>
-                  <tr v-for="option in voting.postproc" :key="option.number"
-                    :class="{ remarkable: isNumberInTally(voting, option.number), }">
-                    <td>{{ option.number }}</td>
-                    <td>{{ option.option }}</td>
-                    <td>{{ option.votes }}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <table>
-                <tr>
-                  <th>Nombre de la auth</th>
-                  <th>URL</th>
-                  <th>Yo</th>
-                </tr>
-                <tr v-for="auth in voting.auths">
-                  <td>{{ auth.name }}</td>
-                  <td>{{ auth.url }}</td>
-                  <td>{{ auth.me }}</td>
-                </tr>
-              </table>
+              </tbody>
+            </table>
+            <table>
+              <tr>
+                <th>Nombre de la auth</th>
+                <th>URL</th>
+                <th>Yo</th>
+              </tr>
+              <tr v-for="auth in voting.auths">
+                <td>{{ auth.name }}</td>
+                <td>{{ auth.url }}</td>
+                <td>{{ auth.me }}</td>
+              </tr>
+            </table>
             <button v-if="voting.start_date == null" class="little-button" @click="changeEditing(true)"> Editar </button>
             <button class="little-button deleteButton" @click="deleteVoting(voting.id)"> Eliminar </button>
           </div>
-        <div v-else>
-          <form @submit.prevent="saveVoting" >
-            <div>
-              <p class="bold" style="color:rgb(211, 91, 91)">{{errorMessage}}</p>
+          <div v-else>
+            <form @submit.prevent="saveVoting">
+
+              <div>
+                <p class="bold" style="color:rgb(211, 91, 91)">{{ errorMessage }}</p>
+              </div>
+              <div>
+                <label for="name">Nombre: </label>
+                <input type="text" id="name" v-model="newVoting.name" required />
+              </div>
+              <div>
+                <label for="desc">Descripción: </label>
+                <textarea id="desc" rows="10" columns="90" v-model="newVoting.desc" required></textarea>
+              </div>
+              <div>
+                <label for="question">Pregunta: </label>
+                <select id="question" v-model="newVoting.question">
+                  <option v-for="question in questions" :key="question.id" :value="question">
+                    {{ question.desc }}
+                  </option>
+                </select>
+                <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')">
+                  Nueva...</button>
+                <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
+              </div>
+              <label for="auths">Auths: </label>
+              <div style="display:flex; align-items: center;justify-content: center;">
+                <select style="height: 60%;" id="auths" v-model="newVoting.auths" multiple>
+                  <option v-for="auth in auths" :key="auth.id" :value="auth">
+                    {{ auth.name }}
+                  </option>
+                </select>
+                <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')">
+                  Nueva...</button>
+                <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
+              </div>
+              <div v-if="editing">
+                <button class="little-button" @click="changeEditing(false)"> Cancelar </button>
+                <button class="little-button" type="submit"> Guardar </button>
+              </div>
+            </form>
             </div>
-            <div>
-              <label for="name">Nombre: </label>
-              <input type="text" id="name" v-model="newVoting.name" required />
-            </div>
-            <div>
-              <label for="desc">Descripción: </label>
-              <textarea id="desc" rows="10" columns="90" v-model="newVoting.desc" required></textarea>
-            </div>
-            <div>
-              <label for="question">Pregunta: </label>
-              <select id="question" v-model="newVoting.question">
-                <option v-for="question in questions" :key="question.id" :value="question">
-                  {{ question.desc }}
-                </option>
-              </select>
-              <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
-              <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
-            </div>
-            <label for="auths">Auths: </label>
-            <div style="display:flex; align-items: center;justify-content: center;">
-              <select style="height: 60%;" id="auths" v-model="newVoting.auths" multiple>
-                <option v-for="auth in auths" :key="auth.id" :value="auth">
-                  {{ auth.name }}
-                </option>
-              </select>
-              <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')">
-                Nueva...</button>
-              <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
-            </div>
-          </form>
-        </div>
             <p v-if="voting.start_date != null">
               <span class="bold">Fecha de inicio: </span>
               {{ dateFormat(voting.start_date) }}
@@ -405,26 +411,38 @@ export default {
               <span class="bold">Fecha de fin: </span>
               {{ dateFormat(voting.end_date) }}
             </p>
-            <h4 v-if="voting.postproc == null">No finalizada</h4>
             <div v-if="voting.start_date != null">
               <h4>- PUB_KEY -</h4>
-              
-              <p><span class="bold">P:</span> {{ BigInt.fromBigInt(voting.pub_key.p)}}</p>
-              <p><span class="bold">G:</span> {{ BigInt.fromBigInt(voting.pub_key.g)}}</p>
-              <p><span class="bold">Y:</span> {{ BigInt.fromBigInt(voting.pub_key.y)}}</p>
-              
-            </div>
-            <div v-if="editing">
-            <button class="little-button" @click="changeEditing(false)"> Cancelar </button>
-            <button class="little-button" type="submit"> Guardar </button>
-            </div>
+
+              <p><span class="bold">P:</span> {{ BigInt.fromBigInt(voting.pub_key.p) }}</p>
+              <p><span class="bold">G:</span> {{ BigInt.fromBigInt(voting.pub_key.g) }}</p>
+              <p><span class="bold">Y:</span> {{ BigInt.fromBigInt(voting.pub_key.y) }}</p>
           </div>
+        </div>    
       </li>
     </ul>
   </div>
 </template>
 
 <style scoped>
+#auths {
+  background-color: #3b3b3b;
+  height: 60px;
+  margin-bottom: 20px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 2px solid grey;
+  width: 67%;
+}
+
+.deleteButton {
+  background-color: rgb(211, 91, 91);
+}
+
+button:disabled {
+  background-color: grey;
+}
+
 #auths {
   background-color: #3b3b3b;
   height: 60px;

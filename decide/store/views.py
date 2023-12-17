@@ -94,6 +94,12 @@ class StoreFrontView(generics.ListAPIView):
     def get(self, request):
         self.check_permissions(request)
         return super().get(request)
+    
+    def delete(self, request):
+        voteId = request.data.get('id')
+        vote = get_object_or_404(Vote, pk=voteId) 
+        vote.delete()
+        return Response({"Eliminado correctamente"})
 
 class StoreByPreferenceView(generics.ListAPIView):
     queryset = VoteByPreference.objects.all()

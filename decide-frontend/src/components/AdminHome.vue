@@ -4,7 +4,7 @@
 
 <template>
     <NavbarAdmin/>
-    <div class="container">
+    <div class="principal_div" >
         <h2>Inicio de administrador</h2>
         <div class="adjusted">
             <a href="/admin/voting"> <button>Votaciones</button> </a>

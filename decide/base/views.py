@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db.utils import IntegrityError
 from base.perms import UserIsAdminToken
 from base.models import Auth
+from voting.models import VotingByPreference, VotingYesNo
 from base.serializers import AuthSerializer
 from rest_framework import generics
 import django_filters.rest_framework
@@ -46,6 +47,14 @@ class AllAuthsAPIView(generics.ListAPIView):
 
         try:
             auth = Auth.objects.get(id=auth_id)
+            votings = VotingByPreference.objects.filter(auths=auth)
+            for voting in votings:
+                voting.auths.remove(auth)
+                voting.save()
+            votings = VotingYesNo.objects.filter(auths_yesno=auth)
+            for voting in votings:
+                voting.auths_yesno.remove(auth)
+                voting.save()
             auth.delete()
         except Auth.DoesNotExist:
             return Response('Auth does not exist', status=ST_400)

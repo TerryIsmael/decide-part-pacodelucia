@@ -97,7 +97,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div style=" min-width: 50%;">
         <h2>Listado de votos</h2>
         <ul>
             <li class="big-container" v-for="votingVote in votingVotes" :key="votingVote">

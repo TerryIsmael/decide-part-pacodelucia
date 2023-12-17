@@ -53,7 +53,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div style=" min-width: 50%;">
     <h2>Listado de Mixnets</h2>
     <ul>
       <li class="big-container" v-for="mixnet in mixnets" :key="mixnet.id">
