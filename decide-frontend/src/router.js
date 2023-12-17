@@ -17,6 +17,7 @@ import Register from './components/Register.vue';
 import EmailAuthentication from './components/EmailAuthentication.vue';
 import PageNotFound from './components/PageNotFound.vue';
 import UserData from './components/UserData.vue';
+import GraphView from './components/GraficaView.vue';
 
 const routes = [
   { path: '/admin/voting', component: Voting },
@@ -37,6 +38,7 @@ const routes = [
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
   { path: '/:pathMatch(.*)*', component: PageNotFound },
+  { path: '/admin/graph', component: GraphView },
 ];
 
 const router = createRouter({
