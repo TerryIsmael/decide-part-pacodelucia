@@ -9,7 +9,7 @@ class VoteSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Vote
-        fields = ('voting_id', 'voter_id', 'a', 'b')
+        fields = ('id','voting_id', 'voter_id', 'a', 'b')
 
 
 class VoteByPreferenceSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,4 +29,3 @@ class VoteYesNoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = VoteYesNo
         fields = ('voting_yesno_id', 'voter_yesno_id', 'a', 'b')
-

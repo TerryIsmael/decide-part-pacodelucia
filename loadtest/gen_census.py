@@ -6,6 +6,7 @@ HOST = "http://localhost:8000"
 USER = "admin"
 PASS = "admin"
 VOTING = 2
+VOTING_YESNO = 11
 
 
 def create_voters(filename):
@@ -48,4 +49,5 @@ def add_census(voters_pk, voting_pk):
 
 voters, invalids = create_voters('voters.json')
 add_census(voters, VOTING)
+add_census(voters, VOTING_YESNO)
 print("Create voters with pk={0} \nInvalid usernames={1}".format(voters, invalids))

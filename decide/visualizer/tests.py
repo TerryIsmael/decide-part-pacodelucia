@@ -73,6 +73,7 @@ class StatsViewTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['census'], 50.0)
 
+
     def test_stats_with_no_votes_or_census(self):
         self.vote1.delete()
         self.vote2.delete()
