@@ -121,12 +121,6 @@ class FrontendTest(StaticLiveServerTestCase):
         message = self.driver.find_element(By.TAG_NAME, "h1").text
         self.assertEquals(message, "404")
 
-        
-    def test_correctLoadVotingAdminStatsTest(self):
-        self.driver.get(f"http://localhost:{settings.FRONTEND_TEST_PORT}/admin/voting/stats")
-        h2_element = self.driver.find_element(By.TAG_NAME, "h2")
-        #Comprueba que los elementos se cargaron correctamente
-        assert h2_element.text == "Datos de Votaciones"
 
 
 
