@@ -24,6 +24,7 @@ export default {
         const filterTypes = ref(["born_year", "country", "religion", "gender", "civil_state", "works"])
         const filterValues = ref([]);
         const filterValue = ref("");
+        const file = ref(null);
 
         const init = async () => {
             while (!navBarLoaded.value) {
@@ -274,6 +275,36 @@ export default {
             }
         }
 
+        const handleFileChange = (event) => {
+            file.value = event.target.files[0];
+        }
+
+        const submitImportForm = async () => {
+            console.log('Submitting form...');
+            if (!file.value) {
+                alert('Please select a file.');
+                console.log('No file selected');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file.value);
+
+                // Send the file to the backend endpoint using fetch API
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/import/", {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Handle the response from the server as needed
+                const responseData = await response.json();
+                console.log('Server response:', responseData);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        }
+
         return {
             censuss,
             votings,
@@ -293,6 +324,7 @@ export default {
             filterTypes,
             filterValues,
             filterValue,
+            file,
             fetchCensuss,
             changeSelectedVoting,
             saveCensus,
@@ -302,6 +334,8 @@ export default {
             applyFilter,
             parseFilter,
             parseFilterValue,
+            handleFileChange,
+            submitImportForm,
         };
     },
 };
@@ -315,13 +349,17 @@ export default {
         <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">
             Nuevo censo
         </button>
-
+        <form @submit.prevent="submitForm">
+            <input type="file" @change="handleFileChange" />
+            <button type="submit">Confirmar</button>
+        </form>
         <div v-if="selectedVoting == New && editing == true">
             <p v-if="newCensusError != null" class="error">{{ newCensusError }}</p>
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
                 <label for="newVotingId">Id de la votación</label>
                 <select required id="newVotingId" v-model="newVotingId">
-                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name }}
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name
+                    }}
                     </option>
                 </select>
                 <div>
@@ -331,14 +369,15 @@ export default {
                         <option v-for="filterType in filterTypes" :key="filterType" :value="filterType"> {{
                             parseFilter(filterType) }}</option>
                     </select>
-                    <select v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
+                    <select
+                        v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
                         id="filterValue" v-model="filterValue" @change="applyFilter">
                         <option value=""> Ninguno </option>
                         <option v-for="filterValue in filterValues" :key="filterValue" :value="filterValue">
                             {{ parseFilterValue(filterValue) }} </option>
                     </select>
-                    <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue" @change="applyFilter"
-                        :placeholder="'País...'">
+                    <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue"
+                        @change="applyFilter" :placeholder="'País...'">
                     <input type="number" v-if="filter == 'born_year'" id="filterValue" v-model="filterValue"
                         @change="applyFilter" :placeholder="'Año de nacimiento...'">
                 </div>
@@ -477,4 +516,5 @@ ul>li {
 .waiting_container {
     margin-top: 0;
     margin-bottom: 15px;
-}</style>
+}
+</style>
