@@ -14,8 +14,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from voting.models import Question, Voting
-
 from .models import Census, UserData, CensusPreference, CensusYesNo
 from base import mods
 from base.tests import BaseTestCase

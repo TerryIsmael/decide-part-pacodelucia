@@ -17,7 +17,7 @@ from rest_framework.status import (
 from base.perms import UserIsStaff, UserIsAdminToken
 from .models import Census, UserData, CensusPreference, CensusYesNo
 from .forms import CreationUserDetailsForm
-from .serializers import CensusSerializer, UserDataSerializer, CensusReuseSerializer
+from .serializers import CensusSerializer, UserDataSerializer, CensusReuseSerializer, StringListSerializer
 from authentication.serializers import UserSerializer
 import django_filters.rest_framework
 
@@ -26,7 +26,6 @@ from io import BytesIO
 from pandas import read_excel, DataFrame
 from ldap3 import Connection, Server, ALL_ATTRIBUTES, SUBTREE
 from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BIND_PASSWORD
-from .serializers import UserDataSerializer, StringListSerializer, CensusSerializer
 
 
 class CensusCreate(generics.ListCreateAPIView):
@@ -116,7 +115,7 @@ class CensusImport(generics.ListCreateAPIView):
                 except IntegrityError as e:
                     if not 'unique constraint' in str(e).lower():
                         return Response('Error trying to create census', status=ST_409)
-        except Exception as e:
+        except Exception:
             return Response('Error processing Excel file', status=ST_500)
         return Response('Census created', status=ST_201)
 
@@ -154,10 +153,10 @@ class CensusImportLDAP(generics.ListCreateAPIView):
                             user=AUTH_LDAP_BIND_DN, 
                             password=AUTH_LDAP_BIND_PASSWORD, 
                             auto_bind=True) as conn:
-                users = conn.search(search_base='dc=decide,dc=org',
-                                    search_filter='(&(objectClass=inetOrgPerson)(!(cn=decidesuperuser)))',
-                                    search_scope=SUBTREE,
-                                    attributes=ALL_ATTRIBUTES)
+                conn.search(search_base='dc=decide,dc=org',
+                            search_filter='(&(objectClass=inetOrgPerson)(!(cn=decidesuperuser)))',
+                            search_scope=SUBTREE,
+                            attributes=ALL_ATTRIBUTES)
                 ldap_response = conn.response
             
             voters = []
@@ -176,10 +175,10 @@ class CensusImportLDAP(generics.ListCreateAPIView):
 
             with Connection(server, user=AUTH_LDAP_BIND_DN, password=AUTH_LDAP_BIND_PASSWORD, auto_bind=True) as conn:
                 for cn in voters:
-                    result = conn.search(search_base='dc=decide,dc=org',
-                                        search_filter=f'(&(objectClass=inetOrgPerson)(cn={cn})(!(cn=decidesuperuser)))',
-                                        search_scope=SUBTREE,
-                                        attributes=ALL_ATTRIBUTES)
+                    conn.search(search_base='dc=decide,dc=org',
+                                search_filter=f'(&(objectClass=inetOrgPerson)(cn={cn})(!(cn=decidesuperuser)))',
+                                search_scope=SUBTREE,
+                                attributes=ALL_ATTRIBUTES)
                     voter_id = conn.response[0]["attributes"]["uid"][0]
                     try:
                         census = Census(voting_id = voting_id, voter_id = voter_id)
