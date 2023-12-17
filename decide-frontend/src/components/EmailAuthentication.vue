@@ -73,6 +73,9 @@ export default {
             // Manejar la respuesta como sea necesario
             this.success = "Creación de Cuenta Confirmada!";
             console.log(data);
+            setTimeout(() => {
+                    this.$router.push('/login');
+                }, 1250);
         } catch (error) {
             // Manejar errores de red u otros errores
             this.error = `Error: ${error.message}`;
