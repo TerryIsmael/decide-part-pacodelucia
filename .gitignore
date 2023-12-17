@@ -104,3 +104,6 @@ ENV/
 
 # nohup output
 nohup.out
+
+# VScode project settings
+.vscode/
