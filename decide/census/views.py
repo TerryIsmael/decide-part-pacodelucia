@@ -137,7 +137,7 @@ class CensusExport(generics.RetrieveAPIView):
             excel_stream.seek(0)
             response.write(excel_stream.read())
                
-        except Exception as e:
+        except Exception:
             return Response('Error processing request', status=ST_500)
         return response
 
