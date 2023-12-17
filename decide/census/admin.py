@@ -35,7 +35,7 @@ class CensusAdmin(admin.ModelAdmin):
     reuse_census.short_description = "Reuse Census"
 
     actions = [reuse_census]
-    action_form = ReuseCensusForm  
+    action_form = ReuseCensusForm
 
 
 class CensusPreferenceAdmin(admin.ModelAdmin):
@@ -58,6 +58,7 @@ class UserDataAdmin(admin.ModelAdmin):
 
 
     search_fields = ('voter_id', )
+
 
 admin.site.register(Census, CensusAdmin)
 admin.site.register(CensusPreference, CensusPreferenceAdmin)
