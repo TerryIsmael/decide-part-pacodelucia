@@ -1,5 +1,19 @@
 ALLOWED_HOSTS = ["*"]
 
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CSRF_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ALLOW_METHODS = ('DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT')
+CORS_ALLOW_HEADERS = ('authorization', 'content-type')
+CORS_ALLOW_CREDENTIALS = True
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.common.CommonMiddleware',
+]
+
 # Modules in use, commented modules that you won't use
 MODULES = [
     'authentication',
@@ -25,7 +39,8 @@ APIS = {
     'voting': BASEURL,
 }
 
-
+BACKEND_TEST_PORT = 8000
+FRONTEND_TEST_PORT = 5173
 
 DATABASES = {
     'default': {

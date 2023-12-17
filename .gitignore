@@ -101,3 +101,9 @@ ENV/
 .mypy_cache/
 
 .vagrant
+
+# nohup output
+nohup.out
+
+# VScode project settings
+.vscode/
