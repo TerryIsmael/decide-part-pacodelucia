@@ -11,16 +11,17 @@ from rest_framework.status import (
         HTTP_409_CONFLICT as ST_409
 )
 
-from base.perms import UserIsStaff
-from .models import Census,CensusPreference, CensusYesNo, UserData
+from base.perms import UserIsStaff, UserIsAdminToken
+from .models import Census, UserData, CensusPreference, CensusYesNo
 from .forms import CreationUserDetailsForm
-from .serializers import CensusReuseSerializer, UserDataSerializer
+from .serializers import CensusSerializer, UserDataSerializer, CensusReuseSerializer
 from authentication.serializers import UserSerializer
+import django_filters.rest_framework
 
 
 class CensusCreate(generics.ListCreateAPIView):
     permission_classes = (UserIsStaff,)
-
+        
     def create(self, request, *args, **kwargs):
         voting_id = request.data.get('voting_id')
         voters = request.data.get('voters')
@@ -57,6 +58,31 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+    
+class CensusFront(generics.ListAPIView):
+    
+    permission_classes = (UserIsAdminToken,)
+    serializer_class = CensusSerializer
+    queryset = Census.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+
+    def post(self, request, *args, **kwargs):
+        voting_id = request.data.get('voting_id')
+        voters = request.data.get('voters')
+        try:
+            for voter in voters:
+                census = Census(voting_id=voting_id, voter_id=voter)
+                census.save()
+        except IntegrityError:
+            return Response('Error try to create census', status=ST_409)
+        return Response('Census created', status=ST_201)
+    
+    def delete(self, request, *args, **kwargs):
+        voting_id = request.data.get('voting_id')
+        voters = request.data.get('voters')
+        census = Census.objects.filter(voting_id=voting_id, voter_id__in=voters)
+        census.delete()
+        return Response('Voters deleted from census', status=ST_204)
 
       
 class CensusPreferenceCreate(generics.ListCreateAPIView):

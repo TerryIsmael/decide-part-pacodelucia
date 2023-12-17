@@ -1,6 +1,10 @@
 from rest_framework import serializers
+from .models import Census, UserData
 
-from .models import UserData
+class CensusSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Census
+        fields = ('id','voting_id', 'voter_id')
 
 class UserDataSerializer(serializers.HyperlinkedModelSerializer):
 

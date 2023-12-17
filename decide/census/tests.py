@@ -311,6 +311,76 @@ class CensusTest(StaticLiveServerTestCase):
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/census/add")
 
+class CensusFrontTestCase(BaseTestCase):
+    
+    def setUp(self):
+        super().setUp()
+        self.census = Census(voting_id=1, voter_id=1)
+        self.census.save()
+    
+    def tearDown(self):
+        super().tearDown()
+        self.census = None
+
+    def login(self, user='admin', password='qwerty'):
+        data = {'username': user, 'password': password}
+        response = mods.post('authentication/login', json=data, response=True)
+        response2 = mods.post('authentication/login-auth', json=data, response=True)
+        self.assertEqual(response.status_code, 200)
+        self.token = response.json().get('token')
+        self.assertTrue(self.token)
+        csrf_token = response2.cookies.get('csrftoken')
+        auth_token = response2.cookies.get('auth_token')
+        self.client.cookies['csrftoken'] = csrf_token
+        self.client.cookies['auth-token'] = auth_token
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
+    def test_list_census(self):
+        self.login()
+        response = self.client.get('/census/front/', format='json')
+        self.assertEqual(response.status_code, 200)
+            
+    def test_list_census_400(self):
+        response = self.client.get('/census/front/', format='json')
+        self.assertEqual(response.status_code, 401)
+            
+        self.login(user='noadmin')
+        response = self.client.get('/census/front/', format='json')
+        self.assertEqual(response.status_code, 403)
+    
+    def test_create_census(self):
+        self.login()
+        data = {'voting_id': 2, 'voters': [1,2,3,4]}
+            
+        response = self.client.post('/census/front/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_census_400(self):
+        data = {'voting_id': 2, 'voters': [1,2,3,4]}
+            
+        response = self.client.post('/census/front/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+            
+        self.login(user='noadmin')
+        response = self.client.post('/census/front/', {}, format='json')
+        self.assertEqual(response.status_code, 403)
+        
+    def test_delete_census(self):
+        self.login()
+        data = {'voting_id':1, 'voters': [1]}
+        response = self.client.delete('/census/front/',data, format='json')
+        self.assertEqual(response.status_code, 204)
+        
+    def test_delete_census_400(self):
+        data = {'voting_id':1, 'voters': [1]}
+            
+        response = self.client.delete('/census/front/', data, format='json')
+        self.assertEqual(response.status_code, 401)
+            
+        self.login(user='noadmin')
+        response = self.client.delete('/census/front/', data, format='json')
+        self.assertEqual(response.status_code, 403)
+
 class CensusPreferenceTestCase(BaseTestCase):
 
     def setUp(self):
@@ -654,3 +724,4 @@ class ReuseCensusTest(BaseTestCase):
         data = {}
         response = self.client.post('/census/census-reuse', data, format='json', follow=True)
         self.assertEqual(response.status_code, 400)
+
