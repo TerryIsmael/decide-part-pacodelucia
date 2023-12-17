@@ -9,7 +9,7 @@ urlpatterns = [
     path('import/', views.CensusImport.as_view(), name='census import'),
     path('import/ldap/', views.CensusImportLDAP.as_view(), name='census import ldap'),
     path('export/<int:voting_id>', views.CensusExport.as_view(), name="census export"),
-    path('export/', views.CensusExport.as_view(), name="census export")
+    path('export/', views.CensusExport.as_view(), name="census export"),
     path("censuspreference/",views.CensusPreferenceCreate.as_view(),
     name="census_preference_create",),
     path(
