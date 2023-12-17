@@ -27,6 +27,7 @@ const routes = [
   { path: '/admin/question', component: Question },
   { path: '/admin/mixnet', component: Mixnet },
   { path: '/admin/user', component: User },
+  { path: '/admin/userdata', component: UserData },
   { path: '/admin/auth', component: Auth },
   { path: '/admin/census', component: Census },
   { path: '/admin', component: AdminHome},
@@ -35,7 +36,6 @@ const routes = [
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
-  { path: '/admin/userData', component: UserData },
   { path: '/:pathMatch(.*)*', component: PageNotFound },
 ];
 
