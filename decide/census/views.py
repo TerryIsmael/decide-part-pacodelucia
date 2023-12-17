@@ -265,7 +265,14 @@ class CensusYesNoDetail(generics.RetrieveDestroyAPIView):
    
 class UserDataCreate(generics.CreateAPIView):
     serializer_class = UserDataSerializer
+    queryset = UserData.objects.all()
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
 
+    def get(self, request, *args, **kwargs):
+        queryset = UserData.objects.all()
+        serializer = UserDataSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
     def post(self, request, *args, **kwargs):
         form = CreationUserDetailsForm(request.POST)
         if not form["country"].data:
