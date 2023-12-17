@@ -452,12 +452,7 @@ class VotingYesNoUpdate(generics.RetrieveUpdateDestroyAPIView):
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
     
-class AllQuestionsView(generics.ListAPIView):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer 
-    permission_classes = [permissions.IsAdminUser]
-
 class AllAuthsAPIView(generics.ListAPIView):
     queryset = Auth.objects.all()
     serializer_class = AuthSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = (UserIsAdminToken,)
