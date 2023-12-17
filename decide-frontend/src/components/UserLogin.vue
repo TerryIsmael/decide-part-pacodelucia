@@ -172,6 +172,9 @@ export default {
                 <input type="password" id="password" v-model="password" required>
             </div>
             <button class="login-button"  type="submit">INICIAR SESIÓN</button>
+            <router-link to="/register">
+                <button class="register-button">¿Aún no está registrado?</button>
+            </router-link>
         </form>
     </div>
     <div v-else>
@@ -244,6 +247,20 @@ input {
 
 .login-button {
     background-color: #2196F3;
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    /* Añade una sombra al botón */
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 50%;
+    align-self: center;
+    margin-top: 30px;
+}
+
+.register-button{
+    background-color: #34dd4b;
     color: rgb(255, 255, 255);
     border-radius: 5px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
