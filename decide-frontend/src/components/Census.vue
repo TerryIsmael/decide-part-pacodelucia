@@ -164,8 +164,8 @@ export default {
         };
 
 
-        const parseFilter = (f)=> {
-            switch(f){
+        const parseFilter = (f) => {
+            switch (f) {
                 case "born_year":
                     return "Año de nacimiento";
                 case "country":
@@ -321,20 +321,26 @@ export default {
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
                 <label for="newVotingId">Id de la votación</label>
                 <select required id="newVotingId" v-model="newVotingId">
-                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name}} </option>
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name }}
+                    </option>
                 </select>
                 <div>
                     <label for="filter"> Filtrar por: </label>
                     <select id="filter" v-model="filter" @change="valuesForFilter">
                         <option value=""> Ninguno </option>
-                        <option v-for="filterType in filterTypes" :key="filterType" :value="filterType"> {{ parseFilter(filterType) }}</option>
+                        <option v-for="filterType in filterTypes" :key="filterType" :value="filterType"> {{
+                            parseFilter(filterType) }}</option>
                     </select>
-                    <select v-if="filter=='religion' || filter=='gender' || filter=='civil_state' || filter=='works'" id="filterValue" v-model="filterValue" @change="applyFilter">
+                    <select v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
+                        id="filterValue" v-model="filterValue" @change="applyFilter">
                         <option value=""> Ninguno </option>
-                        <option v-for="filterValue in filterValues" :key="filterValue" :value="filterValue"> {{parseFilterValue(filterValue) }} </option>
+                        <option v-for="filterValue in filterValues" :key="filterValue" :value="filterValue">
+                            {{ parseFilterValue(filterValue) }} </option>
                     </select>
-                    <input type="text" v-if="filter=='country'" id="filterValue" v-model="filterValue" @change="applyFilter" :placeholder="'País...'">
-                    <input type="number" v-if="filter=='born_year'" id="filterValue" v-model="filterValue" @change="applyFilter" :placeholder="'Año de nacimiento...'">
+                    <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue" @change="applyFilter"
+                        :placeholder="'País...'">
+                    <input type="number" v-if="filter == 'born_year'" id="filterValue" v-model="filterValue"
+                        @change="applyFilter" :placeholder="'Año de nacimiento...'">
                 </div>
                 <label for="newVoterId">Añadir usuario</label>
                 <select required id="newVoterId" v-model="newVoterId">
@@ -356,10 +362,30 @@ export default {
                     <li v-if="voting == selectedVoting">
                         {{ newCensusError }}
                         <form @submit.prevent="saveCensus">
+                            <div>
+                                <label for="filter"> Filtrar por: </label>
+                                <select id="filter" v-model="filter" @change="valuesForFilter">
+                                    <option value=""> Ninguno </option>
+                                    <option v-for="filterType in filterTypes" :key="filterType" :value="filterType"> {{
+                                        parseFilter(filterType) }}</option>
+                                </select>
+                                <select
+                                    v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
+                                    id="filterValue" v-model="filterValue" @change="applyFilter">
+                                    <option value=""> Ninguno </option>
+                                    <option v-for="filterValue in filterValues" :key="filterValue" :value="filterValue">
+                                        {{ parseFilterValue(filterValue) }} </option>
+                                </select>
+                                <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue"
+                                    @change="applyFilter" :placeholder="'País...'">
+                                <input type="number" v-if="filter == 'born_year'" id="filterValue" v-model="filterValue"
+                                    @change="applyFilter" :placeholder="'Año de nacimiento...'">
+                            </div>
                             <label for="newVoterId">Añadir usuario</label>
                             <select required id="newVoterId" v-model="newVoterId">
-                                <option v-for="user in users" :key="user.id" :value="user.id"> {{ user.id }}. {{
-                                    user.username }} </option>
+                                <option v-for="user in usersSubList" :key="user.id" :value="user.id"> {{ user.id }}. {{
+                                    user.username }}
+                                </option>
                             </select>
                             <button class="little-button" type="submit">Añadir</button>
                         </form>
