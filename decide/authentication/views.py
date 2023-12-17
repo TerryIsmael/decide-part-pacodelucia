@@ -107,7 +107,8 @@ class AuthView(APIView):
             if user.check_password(desencriptar(clave)):
                 user.is_active = True
                 user.save()
-            
+            else:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
         except IntegrityError:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         

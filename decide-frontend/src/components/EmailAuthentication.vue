@@ -30,9 +30,7 @@
 </template>
 
 <script>
-
 export default {
-
     name: 'Register',
     data() {
         return {
@@ -43,50 +41,48 @@ export default {
         };
     },
     methods: {
-    async register() {
-        try {
-            const response = await fetch(import.meta.env.VITE_API_URL+'/authentication/authEmail/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: this.username,
-                    clave: this.clave,
-                }),
-            });
+        async register() {
+            try {
+                const response = await fetch(import.meta.env.VITE_API_URL+'/authentication/authEmail/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: this.username,
+                        clave: this.clave,
+                    }),
+                });
 
-            if (!response.ok) {
-                if (response.status === 400) {
-                    const errorData = await response.json();
-                    // Manejar los errores de validación y presentar mensajes al usuario
-                    console.error('Error 400:', errorData);
-                } else {
-                    // Manejar otros errores HTTP
-                    console.error('Error:', response.status, response.statusText);
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        const errorData = await response.json();
+                        this.error = `Error de validación, compruebe si sus datos intoducidos fueron correctos`;
+                    } else {
+                        this.error = 'Se ha producido un error al procesar su solicitud. Por favor, inténtelo de nuevo más tarde.';
+                        console.error('Error:', response.status, response.statusText);
+                    }
+                    return;
                 }
-                return;
-            }
 
-            const data = await response.json();
+                const data = await response.json();
 
-            // Manejar la respuesta como sea necesario
-            this.success = "Creación de Cuenta Confirmada!";
-            console.log(data);
-            setTimeout(() => {
+                // Manejar la respuesta como sea necesario
+                this.success = "Creación de Cuenta Confirmada!";
+                console.log(data);
+                setTimeout(() => {
                     this.$router.push('/login');
                 }, 1250);
-        } catch (error) {
-            // Manejar errores de red u otros errores
-            this.error = `Error: ${error.message}`;
-            console.error('Error:', error);
-        }
+            } catch (error) {
+                // Manejar errores de red u otros errores
+                this.error = 'Se ha producido un error al procesar su solicitud. Por favor, inténtelo de nuevo más tarde.';
+                console.error('Error:', error);
+            }
+        },
     },
-},
-
-    
 };
 </script>
+
 
 <style scoped>
     h1{
