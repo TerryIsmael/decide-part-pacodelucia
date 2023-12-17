@@ -162,17 +162,12 @@ def getVoteStringKeys(req, **kwargs):
 
 def getVotingsByUser(request):
     decideid = request.COOKIES.get('decide')
-    print(f"decideid: {decideid}")
     context = {}
     try:
         token = Token.objects.get(key=decideid)
-        print(f"token: {token}")
         user_id = token.user.id
-        print(f"userid: {user_id}")
         census = Census.objects.filter(voter_id=user_id)
-        print(f"census: {census}")
         votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
-        print(f"votings: {votings}")
         context['votings'] = VotingSerializer(votings, many=True).data
         context['Access-Control-Allow-Credentials'] = 'true'
         return JsonResponse(context)
