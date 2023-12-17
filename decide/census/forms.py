@@ -1,6 +1,12 @@
 from django import forms
 from .models import UserData
 from datetime import datetime
+from django.contrib.admin.helpers import ActionForm
+
+
+class ReuseCensusForm(ActionForm):
+    selected_voting_id = forms.IntegerField(required=False)
+    
 
 class CreationUserDetailsForm(forms.Form):
 
@@ -75,4 +81,3 @@ class CreationUserDetailsForm(forms.Form):
         return user_data
 
  
-
