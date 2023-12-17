@@ -110,12 +110,12 @@ class CensusImport(generics.ListCreateAPIView):
                 raise Exception("Uploaded file is not an excel file")
 
             for _, row in df.iloc[0:].iterrows():
-                census = Census(voting_id=row['voting_id'], voter_id=row['voter_id'])
-                census.save()
-               
-        except IntegrityError as e:
-            if not 'unique constraint' in str(e).lower():
-                return Response('Error trying to create census', status=ST_409)
+                try:
+                    census = Census(voting_id=row['voting_id'], voter_id=row['voter_id'])
+                    census.save()
+                except IntegrityError as e:
+                    if not 'unique constraint' in str(e).lower():
+                        return Response('Error trying to create census', status=ST_409)
         except Exception as e:
             return Response('Error processing Excel file', status=ST_500)
         return Response('Census created', status=ST_201)
@@ -181,12 +181,12 @@ class CensusImportLDAP(generics.ListCreateAPIView):
                                         search_scope=SUBTREE,
                                         attributes=ALL_ATTRIBUTES)
                     voter_id = conn.response[0]["attributes"]["uid"][0]
-                    census = Census(voting_id = voting_id, voter_id = voter_id)
-                    census.save()
-               
-        except IntegrityError as e:
-            if not 'unique constraint' in str(e).lower():
-                return Response('Error trying to create census', status=ST_409)
+                    try:
+                        census = Census(voting_id = voting_id, voter_id = voter_id)
+                        census.save()
+                    except IntegrityError as e:
+                        if not 'unique constraint' in str(e).lower():
+                            return Response('Error trying to create census', status=ST_409)
         except Exception as e:
             return Response('Error processing request', status=ST_500)
         return Response('Census created', status=ST_201)
