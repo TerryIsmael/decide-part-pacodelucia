@@ -68,4 +68,4 @@ KEYBITS = 256
 # LDAP server settings, 
 AUTH_LDAP_SERVER_URI = "ldap://localhost:1389" 
 AUTH_LDAP_BIND_DN = "cn=admin,dc=decide,dc=org" # dc=decide,dc=org must exist, change only the root directory cn
-# AUTH_LDAP_BIND_PASSWORD = string with the password
+AUTH_LDAP_BIND_PASSWORD = config('AUTH_LDAP_BIND_PASSWORD')
