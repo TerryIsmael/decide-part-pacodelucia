@@ -779,13 +779,13 @@ class ReuseCensusTest(BaseTestCase):
 
     def test_post_success(self):
         data = {'source_voting_id': self.v.id, 'destination_voting_id': self.v2.id}
-        response = self.client.post('/census/census-reuse', data, format='json', follow=True)
+        response = self.client.post('/census/census-reuse/', data, format='json', follow=True)
         self.assertEqual(response.status_code, 201)
         censuses = Census.objects.filter(voting_id = self.v2.id, voter_id=self.census.voter_id)
         self.assertEqual(len(censuses),1)
 
     def test_post_fail(self):
         data = {}
-        response = self.client.post('/census/census-reuse', data, format='json', follow=True)
+        response = self.client.post('/census/census-reuse/', data, format='json', follow=True)
         self.assertEqual(response.status_code, 400)
 
