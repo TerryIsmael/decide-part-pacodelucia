@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
@@ -14,7 +13,7 @@ from rest_framework.status import (
 
 from base.perms import UserIsStaff
 from .models import Census,CensusPreference, CensusYesNo, UserData
-from .forms import CreationUserDetailsForm, ReuseCensusForm
+from .forms import CreationUserDetailsForm
 from .serializers import CensusReuseSerializer, UserDataSerializer
 from authentication.serializers import UserSerializer
 
@@ -130,7 +129,9 @@ class CensusYesNoDetail(generics.RetrieveDestroyAPIView):
             CensusYesNo.objects.get(voting_yesno_id=voting_yesno_id, voter_id=voter)
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
-        return Response('Valid voter')      
+        return Response('Valid voter')
+
+   
 class UserDataCreate(generics.CreateAPIView):
     serializer_class = UserDataSerializer
 

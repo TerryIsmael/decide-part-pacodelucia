@@ -622,7 +622,7 @@ class ReuseCensusTest(BaseTestCase):
 
         opt1 = QuestionOption(question=q, option='opcion 1')
         opt1.save()
-        opt2 = QuestionOption(question=q, option='opcion 2')  
+        opt2 = QuestionOption(question=q, option='opcion 2')
         opt2.save()
 
         
@@ -632,12 +632,12 @@ class ReuseCensusTest(BaseTestCase):
         self.v2.save()
 
         
-        self.census = Census(voting_id=self.v.id, voter_id=1)  
+        self.census = Census(voting_id=self.v.id, voter_id=1)
         self.census.save()
 
     def tearDown(self):
         super().tearDown()
-        self.census = None  
+        self.census = None
 
     def testExist(self):
         v = Voting.objects.get(name='Votacion')
