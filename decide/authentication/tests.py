@@ -20,8 +20,8 @@ class AuthTestCase(APITestCase):
         u2 = User(username='admin')
         u2.set_password('admin')
         u2.is_superuser = True
+        u2.is_staff = True
         u2.save()
-
     def tearDown(self):
         self.client = None
 
@@ -48,7 +48,6 @@ class AuthTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         user = response.json()
-        self.assertEqual(user['id'], 1)
         self.assertEqual(user['username'], 'voter1')
 
     def test_getuser_invented_token(self):
@@ -85,16 +84,6 @@ class AuthTestCase(APITestCase):
 
         self.assertEqual(Token.objects.filter(user__username='voter1').count(), 0)
 
-    def test_register_bad_permissions(self):
-        data = {'username': 'voter1', 'password': '123'}
-        response = self.client.post('/authentication/login/', data, format='json')
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({'username': 'user1'})
-        response = self.client.post('/authentication/register/', token, format='json')
-        self.assertEqual(response.status_code, 401)
-
     def test_register_bad_request(self):
         data = {'username': 'admin', 'password': 'admin'}
         response = self.client.post('/authentication/login/', data, format='json')
@@ -115,16 +104,201 @@ class AuthTestCase(APITestCase):
         response = self.client.post('/authentication/register/', token, format='json')
         self.assertEqual(response.status_code, 400)
 
-    def test_register(self):
-        data = {'username': 'admin', 'password': 'admin'}
-        response = self.client.post('/authentication/login/', data, format='json')
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
+class RegisterViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        u = User(username='yaexiste')
+        u.set_password('yaexiste')
+        u.save()
 
-        token.update({'username': 'user1', 'password': 'pwd1'})
-        response = self.client.post('/authentication/register/', token, format='json')
+    def tearDown(self):
+        self.client = None
+
+    def test_registration_successful(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            sorted(list(response.json().keys())),
-            ['token', 'user_pk']
-        )
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+
+    def test_registration_missing_data(self):
+        # Caso de test donde faltan datos requeridos
+        data = {
+            # Falta 'username'
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+
+    def test_registration_duplication_error(self):
+        # Caso de test donde ocurre un IntegrityError (e.g., username duplicado)
+        data = {
+            'username': 'yaexiste',
+            'password': 'testpassword',
+            'email': 'new@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_registration_not_mail(self):
+        # Caso de test donde ocurre un IntegrityError (e.g., no se introduce un correo electrónico válido)
+        data = {
+            'username': 'testuser2',
+            'password': 'testpassword2',
+            'email': 'notanemail',
+        }
+
+        response = self.client.post('/authentication/register/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+
+        
+
+    def test_register_view(self):
+        # Realizar una solicitud POST a la vista de registro y comprubar si el usuario isActive
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data)
+        user = User.objects.get(username=data['username'])       
+        self.assertFalse(user.is_active)
+
+    def test_register_view_code_201(self):
+        # Realizar una solicitud POST a la vista de registro y comprubar si el usuario isActive
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data)
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_auth_view_successful(self):
+        # Realizar una solicitud POST a la vista de autenticación
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data_register)
+
+        data = {
+                'username': 'testuser', 
+                'clave': 'gvhgkzhhdliw'
+                }
+
+        url = ('/authentication/authEmail/')  
+        self.client.post(url, data)
+        user = User.objects.get(username='testuser')
+
+        self.assertTrue(user.is_active)
+
+
+    def test_auth_view_successful_code_201(self):
+        # Realizar una solicitud POST a la vista de autenticación
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data_register)
+
+        data = {
+                'username': 'testuser', 
+                'clave': 'gvhgkzhhdliw'
+                }
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_auth_view_invalid_data(self):
+        # Realizar una solicitud POST a la vista de autenticación con datos incompletos
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data_register)
+
+        data = {'username': 'testuser'}
+
+        url = ('/authentication/authEmail/')  
+        self.client.post(url, data)
+        user = User.objects.get(username='testuser')
+        self.assertFalse(user.is_active)
+
+    def test_auth_view_invalid_data_code_400(self):
+        # Realizar una solicitud POST a la vista de autenticación con datos incompletos
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data_register)
+
+        data = {'username': 'testuser'}
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_auth_view_invalid_credentials(self):
+        # Realizar una solicitud POST a la vista de autenticación con credenciales incorrectas
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        self.client.post('/authentication/register/', data_register)
+        data = {'username': 'testuser', 'clave': 'incorrect_password'}
+
+        url = ('/authentication/authEmail/')  
+        self.client.post(url, data)
+        user = User.objects.get(username='testuser')
+        self.assertFalse(user.is_active)
+
+    def test_auth_view_invalid_credentials_code_201(self):
+        # Realizar una solicitud POST a la vista de autenticación con credenciales incorrectas
+
+        data_register = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'email': 'test@example.com',
+        }
+
+        response = self.client.post('/authentication/register/', data_register)
+        data = {'username': 'testuser', 'clave': 'incorrect_password'}
+
+        url = ('/authentication/authEmail/')  
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 201)

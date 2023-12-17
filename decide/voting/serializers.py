@@ -6,7 +6,7 @@ from base.serializers import KeySerializer, AuthSerializer
 class QuestionOptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = QuestionOption
-        fields = ('number', 'option')
+        fields = ('id','number', 'option')
 
 class QuestionOptionByPreferenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -23,7 +23,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     options = QuestionOptionSerializer(many=True)
     class Meta:
         model = Question
-        fields = ('desc', 'options')
+        fields = ('id','desc', 'options')
 
 class QuestionYesNoSerializer(serializers.HyperlinkedModelSerializer):
 

@@ -1,8 +1,6 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-
 from base.tests import BaseTestCase
 import time
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -28,9 +26,7 @@ class AdminTestCase(StaticLiveServerTestCase):
         self.base.tearDown()
     
     def test_simpleCorrectLogin(self):      
-       #Abre la ruta del navegador             
         self.driver.get(f'{self.live_server_url}/admin/')
-       #Busca los elementos y “escribe”
         self.driver.find_element(By.ID,'id_username').send_keys("admin")
         self.driver.find_element(By.ID,'id_password').send_keys("qwerty",Keys.ENTER)
         
@@ -47,3 +43,5 @@ class AdminTestCase(StaticLiveServerTestCase):
        #Si no, aparece este error
         self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME,'errornote'))==1)
         time.sleep(5)
+        
+
