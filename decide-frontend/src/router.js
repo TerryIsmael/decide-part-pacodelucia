@@ -39,9 +39,9 @@ const routes = [
   { path: '/booth/:id', component: Booth },
   { path: '/login', component: UserLogin },
   { path: '/:id/stats', component: Stats },
-  { path: '/:pathMatch(.*)*', component: PageNotFound },
   { path: '/admin/voting/stats', component: VotingStats },
   { path: '/admin/graph', component: GraphView },
+  { path: '/:pathMatch(.*)*', component: PageNotFound },
 ];
 
 const router = createRouter({
