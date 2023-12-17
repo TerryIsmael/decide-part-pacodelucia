@@ -63,3 +63,9 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
+
+
+# LDAP server settings, 
+AUTH_LDAP_SERVER_URI = "ldap://localhost:1389" 
+AUTH_LDAP_BIND_DN = "cn=admin,dc=decide,dc=org" # dc=decide,dc=org must exist, change only the root directory cn
+AUTH_LDAP_BIND_PASSWORD = "adminpassword"
