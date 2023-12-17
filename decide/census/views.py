@@ -25,7 +25,14 @@ import django_filters.rest_framework
 from io import BytesIO
 from pandas import read_excel, DataFrame
 from ldap3 import Connection, Server, ALL_ATTRIBUTES, SUBTREE
-from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BIND_PASSWORD
+
+try:
+    from local_settings import AUTH_LDAP_SERVER_URI, AUTH_LDAP_BIND_DN, AUTH_LDAP_BIND_PASSWORD
+except ImportError:
+    AUTH_LDAP_SERVER_URI = ""
+    AUTH_LDAP_BIND_DN = ""
+    AUTH_LDAP_BIND_PASSWORD = ""
+    print("LDAP configuracion not setup correctly. Functionality won't work properly.")
 
 
 class CensusCreate(generics.ListCreateAPIView):
