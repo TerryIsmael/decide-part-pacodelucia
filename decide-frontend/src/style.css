@@ -35,7 +35,7 @@ h1 {
   padding: 2em;
 }
 
-#subApp{
+#subApp {
   margin: 0 auto;
   text-align: center;
   align-content: center;
@@ -50,6 +50,7 @@ h1 {
   width: 80vw;
   min-height: 80vh;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
@@ -62,7 +63,9 @@ table {
   margin-bottom: 20px;
 }
 
-th,td,tr {
+th,
+td,
+tr {
   border: 1px solid black;
   background-color: #008b8b;
   color: rgb(255, 255, 255);
@@ -86,7 +89,9 @@ label {
   color: white;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   background-color: #3b3b3b;
   height: 30px;
   margin-bottom: 20px;
@@ -175,21 +180,24 @@ button {
   font-weight: bold;
   color: #ffffff;
 
-#app {
-  margin: 0 auto;
-  text-align: center;
-  width: 100%;
-}
+  #app {
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+  }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  @media (prefers-color-scheme: light) {
+    :root {
+      color: #213547;
+      background-color: #ffffff;
+    }
+
+    a:hover {
+      color: #747bff;
+    }
+
+    button {
+      background-color: #f9f9f9;
+    }
   }
 }
