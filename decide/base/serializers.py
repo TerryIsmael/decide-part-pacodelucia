@@ -6,7 +6,7 @@ from .models import Auth, Key
 class AuthSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Auth
-        fields = ('name', 'url', 'me')
+        fields = ('id','name', 'url', 'me')
 
 
 class KeySerializer(serializers.HyperlinkedModelSerializer):

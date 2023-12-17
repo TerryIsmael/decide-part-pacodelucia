@@ -2,7 +2,7 @@
     <div v-if="successVote">
         <h1 style="color:lightgreen">¡Voto realizado con éxito!</h1>
         <h2>Usted ha votado: {{ selectedDescription }}</h2>
-        <button @click="$router.push('/')">Página Principal</button>
+        <button @click="redirectToHomePage">Página Principal</button>
     </div>
     <div class="voting-container" v-if="voting && user && !errorMessage && !successVote">
         <h1 class="voting-name">{{ voting.name }}</h1>
@@ -22,7 +22,7 @@
             {{ errorMessage }}
         </div>
         <div v-if="goHomeButton">
-            <button @click="$router.push('/')">Página Principal</button>
+            <button @click="redirectToHomePage">Página Principal</button>
         </div>
     </div>
     <div style="padding-top: 50%;" v-if="(!voting || !user) && !errorMessage">
@@ -69,6 +69,10 @@ export default {
         }
     },
     methods: {
+        redirectToHomePage() {
+            window.location.href = '/';
+        },
+
         getUser() {
             fetch(import.meta.env.VITE_API_URL+'/gateway/authentication/getuser/', {
             method: 'POST',

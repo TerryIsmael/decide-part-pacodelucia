@@ -90,7 +90,10 @@ class Voting(models.Model):
             "voting": self.id,
             "auths": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
         }
-        key = mods.post('mixnet', baseurl=auth.url, json=data)
+        try:
+            key = mods.post('mixnet', baseurl=auth.url, json=data)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -126,17 +129,22 @@ class Voting(models.Model):
 
         # first, we do the shuffle
         data = { "msgs": votes }
-        response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
 
         # then, we can decrypt that
         data = {"msgs": response.json()}
-        response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -193,7 +201,10 @@ class VotingByPreference(models.Model):
             "voting": self.id,
             "auths": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
         }
-        key = mods.post('mixnet', baseurl=auth.url, json=data)
+        try:
+            key = mods.post('mixnet', baseurl=auth.url, json=data)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -238,17 +249,22 @@ class VotingByPreference(models.Model):
 
         # first, we do the shuffle
         data = { "msgs": votes }
-        response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
 
         # then, we can decrypt that
         data = {"msgs": response.json()}
-        response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
@@ -318,7 +334,10 @@ class VotingYesNo(models.Model):
             "auths": [ {"name": a.name, "url": a.url} for a in self.auths_yesno.all() ],
 
         }
-        key = mods.post('mixnet', baseurl=auth.url, json=data)
+        try:
+            key = mods.post('mixnet', baseurl=auth.url, json=data)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
@@ -361,17 +380,22 @@ class VotingYesNo(models.Model):
 
         # first, we do the shuffle
         data = { "msgs": votes }
-        response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass
 
         # then, we can decrypt that
         data = {"msgs": response.json()}
-        response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
+        try:
+            response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
-
+        except Exception as e:
+            raise Exception("No se ha podido conectar con el servidor de mezcla") from e
         if response.status_code != 200:
             # TODO: manage error
             pass

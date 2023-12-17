@@ -9,6 +9,7 @@
 // generally being a nice JavaScript object.
 
 // why not?
+var OldBigInt = BigInt;
 var BigInt = BigInteger;
 // ZERO AND ONE are already taken care of
 BigInt.TWO = new BigInt("2", 10);
@@ -28,6 +29,10 @@ BigInt.fromJSONObject = function(s) {
 
 BigInt.fromInt = function(i) {
     return BigInt.fromJSONObject("" + i);
+};
+
+BigInt.fromBigInt = function(i) {
+    return OldBigInt(i);
 };
 
 BigInt.use_applet = false;
