@@ -32,6 +32,7 @@ class FrontendTest(StaticLiveServerTestCase):
 
         #Crear votaciones y censos
         user = User.objects.get(username='noadmin')
+        userAdmin = User.objects.get(username='admin')
 
         # crear una votación abierta, próxima y cerrada
         q = Question(desc='Descripcion')
@@ -121,6 +122,18 @@ class FrontendTest(StaticLiveServerTestCase):
         message = self.driver.find_element(By.TAG_NAME, "h1").text
         self.assertEquals(message, "404")
 
+        
+    def test_correctLoadVotingAdminStatsTest(self):
+        self.driver.get(f"http://localhost:{settings.FRONTEND_TEST_PORT}/admin/login")
+        self.driver.find_element(By.ID, "username").click()
+        self.driver.find_element(By.ID, "username").send_keys("admin")
+        self.driver.find_element(By.ID, "password").send_keys("qwerty")
+        self.driver.find_element(By.CSS_SELECTOR, ".login-button").click()
+        WebDriverWait(self.driver, 3)
+        self.driver.get(f"http://localhost:{settings.FRONTEND_TEST_PORT}/admin/voting/stats")
+        h2_element = self.driver.find_element(By.ID, "loaded")
+        #Comprueba que los elementos se cargaron correctamente
+        assert h2_element.text == "Datos de Votaciones"
 
 
 
