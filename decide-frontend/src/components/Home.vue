@@ -76,12 +76,16 @@ export default {
   <p class="voting-p" v-if="logged">Votaciones abiertas</p>
   <div class="voting-container" v-if="dataLoaded && logged">
     <div class="voting-card" v-for="voting in openVotings" :key="voting.id">
-      <div class="voting-title">
-        {{ voting.name }}
-      </div>
-      <div class="voting-body">
-        <div>
-          <p class="descripcion">{{ voting.desc }} </p>
+        <div class="voting-title">
+            {{ voting.name }}
+        </div>
+        <div class="voting-body">
+          <div>
+            <p class="descripcion">{{ voting.desc }} </p>
+          </div>
+          <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
+          <button class="btn" @click="$router.push('/booth/' + voting.id)">Votar</button>
+          <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
         </div>
         <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
         <button class="btn" @click="$router.push('/booth/' + voting.id)">Votar</button>
@@ -107,12 +111,17 @@ export default {
   <p class="voting-p" v-if="logged">Votaciones finalizadas</p>
   <div class="voting-container" v-if="dataLoaded && logged">
     <div class="voting-card" v-for="voting in finishedVotings" :key="voting.id">
-      <div class="voting-title">
-        {{ voting.name }}
-      </div>
-      <div class="voting-body">
-        <div>
-          <p class="descripcion">{{ voting.desc }} </p>
+        <div class="voting-title">
+            {{ voting.name }}
+        </div>
+        <div class="voting-body">
+          <div>
+            <p class="descripcion">{{ voting.desc }} </p>
+          </div>
+          <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
+          <p class="fecha">Fin: {{ formatDate(voting.end_date) }} </p>
+          <button class="btn" @click="$router.push('/visualizer/' + voting.id)">Resultados</button>
+          <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
         </div>
         <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
         <p class="fecha">Fin: {{ formatDate(voting.end_date) }} </p>
