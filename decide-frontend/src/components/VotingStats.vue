@@ -186,7 +186,6 @@ export default {
         </tr>
       </tbody>
     </table>
-    <NavbarAdmin/>
     <div class="principal_div">
         <div class="adjusted">
             <a href="/admin/graph"> <button>Gráfica</button> </a>
