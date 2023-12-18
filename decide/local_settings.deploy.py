@@ -71,8 +71,8 @@ CORS_ALLOWED_ORIGINS.append(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME'))
 CORS_ALLOW_CREDENTIALS = True
 ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
 ALLOWED_ORIGINS.append(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME'))
-# CSRF_COOKIE_SECURE = True 
-# CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True 
+CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS.copy()
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Imprime el correo por consola en vez de enviarse
