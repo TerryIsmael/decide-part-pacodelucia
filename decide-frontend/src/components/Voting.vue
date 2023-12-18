@@ -58,7 +58,7 @@ export default {
         }
         try {
           const questionResponse = await fetch(
-            "http://localhost:8000/voting/all-questions/",
+            import.meta.env.VITE_API_URL + "/voting/all-questions/",
             {
               method: "GET",
               credentials: "include",
@@ -68,7 +68,7 @@ export default {
           const questionData = await questionResponse.json();
           questions.value = questionData;
           const authResponse = await fetch(
-            "http://localhost:8000/base/auth/",
+            import.meta.env.VITE_API_URL + "/base/auth/",
             {
               method: "GET",
               credentials: "include",
