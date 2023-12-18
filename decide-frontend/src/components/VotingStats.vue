@@ -19,11 +19,11 @@ export default {
 
     const fetchVotaciones = async () => {
       try {
-        const response = await fetch('http://localhost:8000/voting/');
+        const response = await fetch(import.meta.env.VITE_API_URL + '/voting/');
         const data = await response.json();
         votaciones.value = data;
         // Aquí se realiza la obtención de all-auths y all-questions
-        const questionResponse = await fetch('http://localhost:8000/voting/all-questions/', {
+        const questionResponse = await fetch(import.meta.env.VITE_API_URL + '/voting/all-questions/', {
           method: 'GET',
           credentials: 'include'
         });
@@ -33,7 +33,7 @@ export default {
         totalDistinctQuestions.value = countDistinctQuestions(questionData);
         
 
-        const authResponse = await fetch('http://localhost:8000/voting/all-auths/', {
+        const authResponse = await fetch(import.meta.env.VITE_API_URL + '/voting/all-auths/', {
           method: 'GET',
           credentials: 'include'
         });
