@@ -84,8 +84,11 @@ export default {
             <p class="descripcion">{{ voting.desc }} </p>
           </div>
           <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
-          <button class="btn" @click="$router.push('/booth/' + voting.id)">Votar</button>
-          <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
+          <div class="button-container">
+            <button class="btn" @click="$router.push('/booth/' + voting.id)">Votar</button>
+            <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
+          </div>
+        </div>
     </div>
   </div>
   <p class="voting-p" v-if="logged">Votaciones próximas</p>
@@ -115,13 +118,14 @@ export default {
           </div>
           <p class="fecha">Inicio: {{ formatDate(voting.start_date) }} </p>
           <p class="fecha">Fin: {{ formatDate(voting.end_date) }} </p>
-          <button class="btn" @click="$router.push('/visualizer/' + voting.id)">Resultados</button>
-          <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
+          <div class="button-container">
+            <button class="btn" @click="$router.push('/visualizer/' + voting.id)">Resultados</button>
+            <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
+          </div>
         </div>
-      </div>
-
     </div>
   </div>
+  
   <p class="voting-p" v-if="!logged">Inicia sesión para ver tus votaciones</p>
 </template>
 
@@ -212,5 +216,10 @@ export default {
 .btn:disabled {
   background-color: #c7c7c7;
   cursor: not-allowed;
+}
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
 }
 </style>

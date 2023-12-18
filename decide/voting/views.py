@@ -13,7 +13,7 @@ from base.models import Auth
 from django.http import JsonResponse
 import json
 from base import mods
-from census.models import Census
+from census.models import Census,CensusPreference,CensusYesNo
 
 class VotingYesNoView(generics.ListCreateAPIView):
     queryset = VotingYesNo.objects.all()
@@ -256,8 +256,12 @@ class VotingFrontView(generics.ListCreateAPIView):
             else: 
                 token = request.COOKIES.get('auth-token', '')
                 if Vote.objects.filter(voting_id=voting.id).exists():
-                    voting.tally_votes(token)
-                    msg = 'Voting tallied'
+                    try:
+                        voting.tally_votes(token)
+                        msg = 'Voting tallied'
+                    except Exception as _:
+                        voting.tally_votes(request.COOKIES.get('decide', ''))
+                        msg = 'Voting tallied'
                 else:
                     voting.postproc = []
                     for option in voting.question.options.all():
@@ -308,6 +312,34 @@ def getVotingsByUser(request):
         census = Census.objects.filter(voter_id=user_id)
         votings = [Voting.objects.get(id=voting) for voting in census.values_list('voting_id', flat=True)]
         context['votings'] = VotingSerializer(votings, many=True).data
+        context['Access-Control-Allow-Credentials'] = 'true'
+        return JsonResponse(context)
+    except Exception as _:
+        return JsonResponse({}, status=401)
+    
+def getVotingsByPreferenceUser(request):
+    decideid = request.COOKIES.get('decide')
+    context = {}
+    try:
+        token = Token.objects.get(key=decideid)
+        user_id = token.user.id
+        census = CensusPreference.objects.filter(voter_id=user_id)
+        votings = [VotingByPreference.objects.get(id=voting) for voting in census.values_list('voting_preference_id', flat=True)]
+        context['votings'] = VotingByPreferenceSerializer(votings, many=True).data
+        context['Access-Control-Allow-Credentials'] = 'true'
+        return JsonResponse(context)
+    except Exception as _:
+        return JsonResponse({}, status=401)
+
+def getVotingsYesNoUser(request):
+    decideid = request.COOKIES.get('decide')
+    context = {}
+    try:
+        token = Token.objects.get(key=decideid)
+        user_id = token.user.id
+        census = CensusYesNo.objects.filter(voter_id=user_id)
+        votings = [VotingYesNo.objects.get(id=voting) for voting in census.values_list('voting_yesno_id', flat=True)]
+        context['votings'] = VotingYesNoSerializer(votings, many=True).data
         context['Access-Control-Allow-Credentials'] = 'true'
         return JsonResponse(context)
     except Exception as _:

@@ -6,7 +6,7 @@ HOST = "http://localhost:8000"
 USER = "admin"
 PASS = "admin"
 VOTING = 2
-VOTING_YESNO = 11
+VOTING_YESNO = 4
 
 
 def create_voters(filename):
@@ -32,7 +32,6 @@ def create_voters(filename):
             invalid_voters.append(username)
     return voters_pk, invalid_voters
 
-
 def add_census(voters_pk, voting_pk):
     """
     Add to census all voters_pk in the voting_pk.
@@ -45,9 +44,19 @@ def add_census(voters_pk, voting_pk):
     auth = {'Authorization': 'Token ' + token.get('token')}
     response = requests.post(HOST + '/census/', json=data2, headers=auth)
 
+def add_census_yesno(voters_pk, voting_pk):
+
+    data = {'username': USER, 'password': PASS}
+    response = requests.post(HOST + '/authentication/login/', data=data)
+    token = response.json()
+
+    data2 = {'voters': voters_pk, 'voting_id': voting_pk}
+    auth = {'Authorization': 'Token ' + token.get('token')}
+    response = requests.post(HOST + '/custom/census/censusyesno/', json=data2, headers=auth)
+
 
 
 voters, invalids = create_voters('voters.json')
 add_census(voters, VOTING)
-add_census(voters, VOTING_YESNO)
+add_census_yesno(voters, VOTING_YESNO)
 print("Create voters with pk={0} \nInvalid usernames={1}".format(voters, invalids))

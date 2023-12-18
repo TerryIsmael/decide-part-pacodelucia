@@ -119,7 +119,7 @@ export default {
                 .then((data) => {
                     if (data.user_data.is_staff) {
                         setTimeout(() => {
-                            this.$router.push('/admin');
+                            window.location.href="/admin";
                         }, 2000); 
                     } else {
                         this.form = true;
