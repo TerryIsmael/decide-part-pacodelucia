@@ -270,16 +270,16 @@ export default {
             <select required id="question" v-model="newVoting.question">
               <option v-for="question in questions" :key="question.id" :value="question"> {{ question.desc }} </option>
             </select>
-            <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
-            <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
+            <button class="little-button adjusted" type="button" onclick="window.open('/admin/question', '_blank')"> Nueva...</button>
+            <button class="little-button adjusted" type="button" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
           </div>
           <label for="auths">Auths: </label>
           <div style="display:flex; align-items: center;justify-content: center;">
             <select style="height: 60%;" required id="auths" v-model="newVoting.auths" multiple>
               <option v-for="auth in auths" :key="auth.id" :value="auth"> {{ auth.name }} </option>
             </select>
-            <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')"> Nueva...</button>
-            <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
+            <button class="little-button auth_adjusted" type="button" onclick="window.open('/admin/auth', '_blank')"> Nueva...</button>
+            <button class="little-button auth_adjusted" type="button" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
           </div>
           <div>
             <button class="little-button" @click="changeEditing(false)"> Cancelar </button>
@@ -382,9 +382,9 @@ export default {
                     {{ question.desc }}
                   </option>
                 </select>
-                <button class="little-button adjusted" onclick="window.open('/admin/question', '_blank')">
+                <button class="little-button adjusted" type="button" onclick="window.open('/admin/question', '_blank')">
                   Nueva...</button>
-                <button class="little-button adjusted" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
+                <button class="little-button adjusted" type="button" @click="fetchQuestions"><i class="fas fa-sync-alt"></i></button>
               </div>
               <label for="auths">Auths: </label>
               <div style="display:flex; align-items: center;justify-content: center;">
@@ -393,9 +393,9 @@ export default {
                     {{ auth.name }}
                   </option>
                 </select>
-                <button class="little-button auth_adjusted" onclick="window.open('/admin/auth', '_blank')">
+                <button class="little-button auth_adjusted" type="button" onclick="window.open('/admin/auth', '_blank')">
                   Nueva...</button>
-                <button class="little-button auth_adjusted" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
+                <button class="little-button auth_adjusted" type="button" @click="fetchAuths"><i class="fas fa-sync-alt"></i></button>
               </div>
               <div v-if="editing">
                 <button class="little-button" @click="changeEditing(false)"> Cancelar </button>

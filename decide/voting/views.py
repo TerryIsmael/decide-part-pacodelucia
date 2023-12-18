@@ -256,8 +256,12 @@ class VotingFrontView(generics.ListCreateAPIView):
             else: 
                 token = request.COOKIES.get('auth-token', '')
                 if Vote.objects.filter(voting_id=voting.id).exists():
-                    voting.tally_votes(token)
-                    msg = 'Voting tallied'
+                    try:
+                        voting.tally_votes(token)
+                        msg = 'Voting tallied'
+                    except Exception as _:
+                        voting.tally_votes(request.COOKIES.get('decide', ''))
+                        msg = 'Voting tallied'
                 else:
                     voting.postproc = []
                     for option in voting.question.options.all():
