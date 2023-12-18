@@ -25,6 +25,9 @@ export default {
         const filterValues = ref([]);
         const filterValue = ref("");
         const file = ref(null);
+        const fileInputRef = ref(null);
+        const fileErrorMessage = ref(false);
+        const correctImportMessage = ref(false);
 
         const init = async () => {
             while (!navBarLoaded.value) {
@@ -33,7 +36,7 @@ export default {
             navBarLoaded.value = false;
             if (logged.value) {
                 //Init functions
-                fetchCensuss();
+                await fetchCensuss();
             }
         }
 
@@ -109,6 +112,9 @@ export default {
 
             else
                 newCensusError.value = null;
+                fileErrorMessage.value = null;
+                correctImportMessage.value = null;
+                
 
             editing.value = false;
 
@@ -132,6 +138,8 @@ export default {
             newVoterId.value = "";
             newVotingId.value = "";
             newCensusError.value = null;
+            fileErrorMessage.value = null;
+            correctImportMessage.value = null;
             await fetchCensuss();
             censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
         };
@@ -140,6 +148,8 @@ export default {
             newVotingId.value = "";
             newVoterId.value = "";
             newCensusError.value = null;
+            fileErrorMessage.value = null;
+            correctImportMessage.value = null;
             editing.value = newValue;
         };
 
@@ -275,15 +285,19 @@ export default {
             }
         }
 
+        const triggerFileInput = () => {
+            fileInputRef.value.click();
+        };
+
         const handleFileChange = (event) => {
             file.value = event.target.files[0];
+            submitImportForm();
         }
 
         const submitImportForm = async () => {
-            console.log('Submitting form...');
             if (!file.value) {
-                alert('Please select a file.');
-                console.log('No file selected');
+                fileErrorMessage.value = true;
+                correctImportMessage.value = false;
                 return;
             }
 
@@ -291,17 +305,43 @@ export default {
                 const formData = new FormData();
                 formData.append('file', file.value);
 
-                // Send the file to the backend endpoint using fetch API
                 const response = await fetch(import.meta.env.VITE_API_URL + "/census/import/", {
                     method: 'POST',
                     body: formData,
                 });
-
-                // Handle the response from the server as needed
-                const responseData = await response.json();
-                console.log('Server response:', responseData);
+                if (!response.ok) {
+                    fileErrorMessage.value = true;
+                    correctImportMessage.value = false;
+                    return;
+                }
+                fileErrorMessage.value = false;
+                correctImportMessage.value = true;
+                fetchCensuss();
             } catch (error) {
-                console.error('Error uploading file:', error);
+                fileErrorMessage.value = true;
+                correctImportMessage.value = false;
+            }
+        }
+
+        const exportCensus = async () => {
+            try {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/export/", {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', 'census.csv');
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+            } catch (error) {
+                console.error("Error:", error);
             }
         }
 
@@ -325,6 +365,9 @@ export default {
             filterValues,
             filterValue,
             file,
+            fileInputRef,
+            fileErrorMessage,
+            correctImportMessage,
             fetchCensuss,
             changeSelectedVoting,
             saveCensus,
@@ -335,7 +378,9 @@ export default {
             parseFilter,
             parseFilterValue,
             handleFileChange,
+            triggerFileInput,
             submitImportForm,
+            exportCensus,
         };
     },
 };
@@ -345,14 +390,17 @@ export default {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <div>
         <h2>Listado de censos</h2>
-
-        <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">
-            Nuevo censo
-        </button>
-        <form @submit.prevent="submitForm">
-            <input type="file" @change="handleFileChange" />
-            <button type="submit">Confirmar</button>
-        </form>
+        <p>Importar/exportar censo:</p>
+        <div style="display:flex">
+        <input type="file" ref="fileInputRef" style="display: none" @change="handleFileChange"/>
+        <button @click="triggerFileInput">  <i class="fas fa-arrow-up"></i>&nbsp;<i class="fas fa-file"></i></button>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+        <button @click="exportCensus">  <i class="fas fa-arrow-down"></i>&nbsp;<i class="fas fa-file"></i></button>
+    </div>
+    <br>
+    <p v-if="fileErrorMessage" class="bold" style="color:rgb(211, 91, 91)">Error al importar el archivo</p>
+    <p v-if="correctImportMessage" class="bold" style="color:rgb(28, 140, 41)">Archivo importado correctamente</p>
+    <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">Nuevo censo</button>
         <div v-if="selectedVoting == New && editing == true">
             <p v-if="newCensusError != null" class="error">{{ newCensusError }}</p>
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
