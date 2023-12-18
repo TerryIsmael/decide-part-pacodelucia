@@ -66,14 +66,18 @@ DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
 
+ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
+ALLOWED_ORIGINS.append(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME'))
+
 CORS_ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
 CORS_ALLOWED_ORIGINS.append(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME'))
 CORS_ALLOW_CREDENTIALS = True
-ALLOWED_ORIGINS = ['https://{}'.format(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))]
-ALLOWED_ORIGINS.append(os.environ.get('RENDER_FRONT_EXTERNAL_HOSTNAME'))
+
 CSRF_COOKIE_SECURE = True 
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS.copy()
+
+SESSION_COOKIE_SAMESITE = 'None'
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Imprime el correo por consola en vez de enviarse
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

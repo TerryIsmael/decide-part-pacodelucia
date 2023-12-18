@@ -24,7 +24,6 @@ from django.middleware.csrf import get_token
 from .serializers import UserSerializer
 from base.perms import UserIsStaff, UserIsAdminToken
 import django_filters.rest_framework
-from django.conf import settings
 
 class GetUserView(APIView):
     def post(self, request):
@@ -194,8 +193,8 @@ def adminLogin(request):
                 csrf_token = get_token(request)
                 tk=Token.objects.get_or_create(user=user)
                 response = JsonResponse({'message': 'Login exitoso', 'sessionid': request.session.session_key})
-                response.set_cookie('csrftoken', csrf_token, samesite="None", secure=True)
-                response.set_cookie('auth-token', tk[0].key, samesite=settings.CSRF_COOKIE_SAMESITE, secure=True)
+                response.set_cookie('csrftoken', csrf_token, samesite='Lax')
+                response.set_cookie('auth-token', tk[0].key, samesite='None')
                 
                 return response
             else:
