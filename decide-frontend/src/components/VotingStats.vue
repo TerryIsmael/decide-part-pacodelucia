@@ -105,7 +105,7 @@ export default {
 
 <template>
   <div>
-    <h2>Datos de Votaciones</h2>
+    <h2 id="loaded">Datos de Votaciones</h2>
     <table>
       <thead>
         <tr>
