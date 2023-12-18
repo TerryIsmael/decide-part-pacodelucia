@@ -94,7 +94,6 @@ export default {
             const data = await response.json();
             // Manejar la respuesta como sea necesario
             this.success = 'Cuenta creada!';
-            console.log(data);
             this.$router.push('/authEmail');
         } catch (error) {
             // Manejar errores de red u otros errores
