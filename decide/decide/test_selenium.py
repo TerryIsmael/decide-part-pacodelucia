@@ -32,7 +32,6 @@ class FrontendTest(StaticLiveServerTestCase):
 
         #Crear votaciones y censos
         user = User.objects.get(username='noadmin')
-        userAdmin = User.objects.get(username='admin')
 
         # crear una votación abierta, próxima y cerrada
         q = Question(desc='Descripcion')
