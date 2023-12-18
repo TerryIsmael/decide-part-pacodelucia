@@ -88,6 +88,7 @@ export default {
             <button class="btn" @click="$router.push('/booth/' + voting.id)">Votar</button>
             <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
           </div>
+        </div>
     </div>
   </div>
   <p class="voting-p" v-if="logged">Votaciones próximas</p>
@@ -122,10 +123,9 @@ export default {
             <button class="btn" @click="$router.push('/' + voting.id + '/stats')">Estadisticas</button>
           </div>
         </div>
-      </div>
-
     </div>
   </div>
+  
   <p class="voting-p" v-if="!logged">Inicia sesión para ver tus votaciones</p>
 </template>
 
