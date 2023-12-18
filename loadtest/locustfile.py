@@ -1,7 +1,6 @@
 import json
 
 from random import choice
-from django.conf import settings
 
 from locust import (
     HttpUser,
@@ -12,9 +11,9 @@ from locust import (
 )
 
 
-HOST =  settings.BASEURL
+HOST =  "http://localhost:8000"
 VOTING = 2
-VOTING_YESNO = 11
+VOTING_YESNO = 4
 
 
 class DefVisualizer(TaskSet):

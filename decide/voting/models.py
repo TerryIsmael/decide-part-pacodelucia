@@ -5,7 +5,11 @@ from django.dispatch import receiver
 from base import mods
 from base.models import Auth, Key
 from store.models import VoteByPreference,VoteYesNo
+from django.db.models import Max
 
+from django.db import models
+
+import uuid
 
 class Question(models.Model):
     desc = models.TextField()
@@ -80,6 +84,23 @@ class Voting(models.Model):
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
+
+    
+
+    def save(self, *args, **kwargs):
+        def max_id():
+            max_voting_bp_id = VotingByPreference.objects.all().aggregate(Max('id'))['id__max']
+            max_voting_id = Voting.objects.all().aggregate(Max('id'))['id__max']
+            max_votingyesno_id = VotingYesNo.objects.all().aggregate(Max('id'))['id__max']
+           
+            if max_voting_bp_id is None and max_voting_id is None and max_votingyesno_id is None:
+                return 0
+            else:
+                return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
+        if(self.id is None):
+            id = max_id()
+            self.id = (id + 1)
+        super().save(*args, **kwargs)
 
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
@@ -191,6 +212,23 @@ class VotingByPreference(models.Model):
     
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        def max_id():
+            max_voting_bp_id = VotingByPreference.objects.all().aggregate(Max('id'))['id__max']
+            max_voting_id = Voting.objects.all().aggregate(Max('id'))['id__max']
+            max_votingyesno_id = VotingYesNo.objects.all().aggregate(Max('id'))['id__max']
+           
+            if max_voting_bp_id is None and max_voting_id is None and max_votingyesno_id is None:
+                return 0
+            else:
+                return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
+        if(self.id is None):
+            id = max_id()
+            self.id = (id + 1)
+        super().save(*args, **kwargs)
+    
+    
 
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
@@ -323,6 +361,21 @@ class VotingYesNo(models.Model):
     auths_yesno = models.ManyToManyField(Auth, related_name='votingsyesno')
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        def max_id():
+            max_voting_bp_id = VotingByPreference.objects.all().aggregate(Max('id'))['id__max']
+            max_voting_id = Voting.objects.all().aggregate(Max('id'))['id__max']
+            max_votingyesno_id = VotingYesNo.objects.all().aggregate(Max('id'))['id__max']
+           
+            if max_voting_bp_id is None and max_voting_id is None and max_votingyesno_id is None:
+                return 0
+            else:
+                return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
+        if(self.id is None):
+            id = max_id()
+            self.id = (id + 1)
+        super().save(*args, **kwargs)
 
     def create_pubkey(self):
         if self.pub_key or not self.auths_yesno.count():
