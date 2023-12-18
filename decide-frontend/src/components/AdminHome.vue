@@ -16,6 +16,7 @@
             <a href="/admin/vote"> <button>Votos</button> </a>
             <a href="/admin/authtoken"> <button>Tokens de autorización</button> </a>
             <a href="/admin/mixnet" class="adjusted"> <button>Mixnet</button> </a>
+            <a href="/admin/voting/stats" class="adjusted"> <button>Estadísticas de votaciones</button> </a>
         </div>
     </div>
 </template>
