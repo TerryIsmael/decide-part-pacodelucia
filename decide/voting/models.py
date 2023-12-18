@@ -7,9 +7,6 @@ from base.models import Auth, Key
 from store.models import VoteByPreference,VoteYesNo
 from django.db.models import Max
 
-from django.db import models
-
-import uuid
 
 class Question(models.Model):
     desc = models.TextField()
@@ -98,8 +95,7 @@ class Voting(models.Model):
             else:
                 return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
         if(self.id is None):
-            id = max_id()
-            self.id = (id + 1)
+            self.id = (max_id() + 1)
         super().save(*args, **kwargs)
 
     def create_pubkey(self):
@@ -224,8 +220,7 @@ class VotingByPreference(models.Model):
             else:
                 return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
         if(self.id is None):
-            id = max_id()
-            self.id = (id + 1)
+            self.id = (max_id() + 1)
         super().save(*args, **kwargs)
     
     
@@ -373,8 +368,7 @@ class VotingYesNo(models.Model):
             else:
                 return max(max_voting_bp_id or 0, max_voting_id or 0, max_votingyesno_id or 0)
         if(self.id is None):
-            id = max_id()
-            self.id = (id + 1)
+            self.id = (max_id() + 1)
         super().save(*args, **kwargs)
 
     def create_pubkey(self):
