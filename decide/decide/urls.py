@@ -29,6 +29,7 @@ urlpatterns = [
     path('<int:voting_id>/stats',stats),
     path('custom/', include('voting.urls')),
     path('custom/store/', include('store.urls')),
+    path('custom/census/', include('census.urls')),
 ]
 
 for module in settings.MODULES:

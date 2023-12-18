@@ -19,7 +19,7 @@ from selenium.webdriver.common.keys import Keys
 
 from base import mods
 from base.tests import BaseTestCase
-from census.models import Census,CensusPreference
+from census.models import Census,CensusPreference, CensusYesNo
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from voting.models import Voting, Question, QuestionOption, Auth, QuestionByPreference, QuestionOptionByPreference,VotingByPreference, QuestionYesNo, VotingYesNo
@@ -1209,7 +1209,7 @@ class VotingYesNoTestCase(BaseTestCase):
             u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
             u.is_active = True
             u.save()
-            c = Census(voter_id=u.id, voting_id=v.id)
+            c = CensusYesNo(voter_id=u.id, voting_yesno_id=v.id)
             c.save()
 
     def get_or_create_user(self, pk):
@@ -1220,7 +1220,7 @@ class VotingYesNoTestCase(BaseTestCase):
         return user
 
     def store_votes(self, v):
-        voters = list(Census.objects.filter(voting_id=v.id))
+        voters = list(CensusYesNo.objects.filter(voting_yesno_id=v.id))
         voter = voters.pop()
 
         clear = {}
