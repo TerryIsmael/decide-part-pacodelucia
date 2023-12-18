@@ -194,7 +194,7 @@ def adminLogin(request):
                 tk=Token.objects.get_or_create(user=user)
                 response = JsonResponse({'message': 'Login exitoso', 'sessionid': request.session.session_key})
                 response.set_cookie('csrftoken', csrf_token, samesite='Lax')
-                response.set_cookie('auth-token', tk[0].key, samesite='None')
+                response.set_cookie('auth-token', tk[0].key, samesite='None', secure=True)
                 
                 return response
             else:

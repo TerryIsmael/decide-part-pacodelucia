@@ -78,6 +78,7 @@ CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS.copy()
 
 SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Imprime el correo por consola en vez de enviarse
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
