@@ -28,7 +28,6 @@ export default {
           credentials: 'include'
         });
         const questionData = await questionResponse.json();
-        console.log('Fetched questions:', questionData);
         questions.value = questionData;
         totalDistinctQuestions.value = countDistinctQuestions(questionData);
         
@@ -73,16 +72,6 @@ export default {
       });
       return distinctQuestions.size;
     };
-
-
-    
-
-
-  
-
-
-
- 
 
     onMounted(fetchVotaciones);
     
