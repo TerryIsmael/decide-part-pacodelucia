@@ -186,14 +186,13 @@ export default {
         </tr>
       </tbody>
     </table>
+    <div class="principal_div">
+        <div class="adjusted">
+            <a href="/admin/graph"> <button>Gráfica</button> </a>
+        </div>
+    </div>
   </div>
 </template>
-
-
-
-
-
-
 <style scoped>
 
 .bold{
