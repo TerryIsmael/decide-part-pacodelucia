@@ -24,6 +24,10 @@ export default {
         const filterTypes = ref(["born_year", "country", "religion", "gender", "civil_state", "works"])
         const filterValues = ref([]);
         const filterValue = ref("");
+        const file = ref(null);
+        const fileInputRef = ref(null);
+        const fileErrorMessage = ref(false);
+        const correctImportMessage = ref(false);
 
         const init = async () => {
             while (!navBarLoaded.value) {
@@ -32,7 +36,7 @@ export default {
             navBarLoaded.value = false;
             if (logged.value) {
                 //Init functions
-                fetchCensuss();
+                await fetchCensuss();
             }
         }
 
@@ -108,6 +112,9 @@ export default {
 
             else
                 newCensusError.value = null;
+                fileErrorMessage.value = null;
+                correctImportMessage.value = null;
+                
 
             editing.value = false;
 
@@ -131,6 +138,8 @@ export default {
             newVoterId.value = "";
             newVotingId.value = "";
             newCensusError.value = null;
+            fileErrorMessage.value = null;
+            correctImportMessage.value = null;
             await fetchCensuss();
             censusSubList.value = await censuss.value.filter((census) => census.voting_id == selectedVoting.value);
         };
@@ -139,6 +148,8 @@ export default {
             newVotingId.value = "";
             newVoterId.value = "";
             newCensusError.value = null;
+            fileErrorMessage.value = null;
+            correctImportMessage.value = null;
             editing.value = newValue;
         };
 
@@ -274,6 +285,66 @@ export default {
             }
         }
 
+        const triggerFileInput = () => {
+            fileInputRef.value.click();
+        };
+
+        const handleFileChange = (event) => {
+            file.value = event.target.files[0];
+            submitImportForm();
+        }
+
+        const submitImportForm = async () => {
+            if (!file.value) {
+                fileErrorMessage.value = true;
+                correctImportMessage.value = false;
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file.value);
+
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/import/", {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) {
+                    fileErrorMessage.value = true;
+                    correctImportMessage.value = false;
+                    return;
+                }
+                fileErrorMessage.value = false;
+                correctImportMessage.value = true;
+                fetchCensuss();
+            } catch (error) {
+                fileErrorMessage.value = true;
+                correctImportMessage.value = false;
+            }
+        }
+
+        const exportCensus = async () => {
+            try {
+                const response = await fetch(import.meta.env.VITE_API_URL + "/census/export/", {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', 'census.csv');
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
         return {
             censuss,
             votings,
@@ -293,6 +364,10 @@ export default {
             filterTypes,
             filterValues,
             filterValue,
+            file,
+            fileInputRef,
+            fileErrorMessage,
+            correctImportMessage,
             fetchCensuss,
             changeSelectedVoting,
             saveCensus,
@@ -302,6 +377,10 @@ export default {
             applyFilter,
             parseFilter,
             parseFilterValue,
+            handleFileChange,
+            triggerFileInput,
+            submitImportForm,
+            exportCensus,
         };
     },
 };
@@ -311,17 +390,24 @@ export default {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <div>
         <h2>Listado de censos</h2>
-
-        <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">
-            Nuevo censo
-        </button>
-
+        <p>Importar/exportar censo:</p>
+        <div style="display:flex">
+        <input type="file" ref="fileInputRef" style="display: none" @change="handleFileChange"/>
+        <button @click="triggerFileInput">  <i class="fas fa-arrow-up"></i>&nbsp;<i class="fas fa-file"></i></button>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+        <button @click="exportCensus">  <i class="fas fa-arrow-down"></i>&nbsp;<i class="fas fa-file"></i></button>
+    </div>
+    <br>
+    <p v-if="fileErrorMessage" class="bold" style="color:rgb(211, 91, 91)">Error al importar el archivo</p>
+    <p v-if="correctImportMessage" class="bold" style="color:rgb(28, 140, 41)">Archivo importado correctamente</p>
+    <button class="little-button" @click="changeSelectedVoting(New); changeEditing(true)">Nuevo censo</button>
         <div v-if="selectedVoting == New && editing == true">
             <p v-if="newCensusError != null" class="error">{{ newCensusError }}</p>
             <form @submit.prevent="saveCensus(newVotingId, newVoterId)">
                 <label for="newVotingId">Id de la votación</label>
                 <select required id="newVotingId" v-model="newVotingId">
-                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name }}
+                    <option v-for="voting in allVotings" :key="voting" :value="voting.id"> {{ voting.id }}. {{ voting.name
+                    }}
                     </option>
                 </select>
                 <div>
@@ -331,14 +417,15 @@ export default {
                         <option v-for="filterType in filterTypes" :key="filterType" :value="filterType"> {{
                             parseFilter(filterType) }}</option>
                     </select>
-                    <select v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
+                    <select
+                        v-if="filter == 'religion' || filter == 'gender' || filter == 'civil_state' || filter == 'works'"
                         id="filterValue" v-model="filterValue" @change="applyFilter">
                         <option value=""> Ninguno </option>
                         <option v-for="filterValue in filterValues" :key="filterValue" :value="filterValue">
                             {{ parseFilterValue(filterValue) }} </option>
                     </select>
-                    <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue" @change="applyFilter"
-                        :placeholder="'País...'">
+                    <input type="text" v-if="filter == 'country'" id="filterValue" v-model="filterValue"
+                        @change="applyFilter" :placeholder="'País...'">
                     <input type="number" v-if="filter == 'born_year'" id="filterValue" v-model="filterValue"
                         @change="applyFilter" :placeholder="'Año de nacimiento...'">
                 </div>
@@ -477,4 +564,5 @@ ul>li {
 .waiting_container {
     margin-top: 0;
     margin-bottom: 15px;
-}</style>
+}
+</style>

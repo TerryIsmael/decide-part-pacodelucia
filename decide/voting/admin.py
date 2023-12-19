@@ -62,6 +62,16 @@ class VotingByPreferenceAdmin(admin.ModelAdmin):
 
     actions = [ start, stop, tally ]
 
+class VotingYesNoAdmin(admin.ModelAdmin):
+    list_display = ('name', 'start_date', 'end_date')
+    readonly_fields = ('start_date', 'end_date', 'pub_key',
+                       'tally', 'postproc')
+    date_hierarchy = 'start_date'
+    list_filter = (StartedFilter,)
+    search_fields = ('name', )
+
+    actions = [ start, stop, tally ]
+
 class QuestionOptionByPreferenceInline(admin.TabularInline):
     model = QuestionOptionByPreference
 
@@ -73,5 +83,5 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(VotingByPreference, VotingByPreferenceAdmin)
 admin.site.register(QuestionByPreference, QuestionByPreferenceAdmin)
 admin.site.register(QuestionYesNo, QuestionYesNoAdmin)
-admin.site.register(VotingYesNo, VotingAdmin)
+admin.site.register(VotingYesNo, VotingYesNoAdmin)
 

@@ -54,6 +54,7 @@ export default {
 
     const logout = () => {
       document.cookie = 'sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       fetch(import.meta.env.VITE_API_URL + '/admin/logout/', {
         method: 'GET',
         credentials: 'include',

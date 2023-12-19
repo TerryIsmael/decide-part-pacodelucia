@@ -51,7 +51,7 @@ export default {
                     id: id
                 }
                 const response = await fetch(
-                    `http://localhost:8000/base/auth/`,
+                    import.meta.env.VITE_API_URL + '/base/auth/',
                     {
                         method: "DELETE",
                         credentials: "include",
