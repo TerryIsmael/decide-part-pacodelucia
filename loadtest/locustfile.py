@@ -40,6 +40,31 @@ class AdminVotingStats(TaskSet):
     def get_admin_voting_stats(self):
         self.client.get("/admin/voting/stats")
 
+class AdminVoting(TaskSet):
+    @task
+    def get_admin_voting(self):
+        self.client.get("/admin/voting")
+        
+class AdminQuestion(TaskSet):
+    @task
+    def get_admin_question(self):
+        self.client.get("/admin/question")
+
+class AdminUser(TaskSet):
+    @task
+    def get_admin_user(self):
+        self.client.get("/admin/user")
+
+class AdminUserData(TaskSet):
+    @task
+    def get_admin_user_data(self):
+        self.client.get("/admin/userdata")
+
+class AdminAuthToken(TaskSet):
+    @task
+    def get_admin_auth_token(self):
+        self.client.get("/admin/authtoken")
+
 
 class GraficaStatsTaskSet(TaskSet):
     @task
@@ -170,3 +195,27 @@ class StatsGrafica(HttpUser):
     tasks = [GraficaStatsTaskSet]
     wait_time = between(3, 5)
 
+class AdminVotingFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminVoting]
+    wait_time = between(3, 5)
+
+class AdminQuestionFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminQuestion]
+    wait_time = between(3, 5)
+
+class AdminUserFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminUser]
+    wait_time = between(3, 5)
+
+class AdminUserDataFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminUserData]
+    wait_time = between(3, 5)
+    
+class AdminAuthTokenFrontend(HttpUser):
+    host = 'http://localhost:5173'
+    tasks = [AdminAuthToken]
+    wait_time = between(3, 5)
