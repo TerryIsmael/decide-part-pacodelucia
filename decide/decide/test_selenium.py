@@ -120,9 +120,9 @@ class FrontendTest(StaticLiveServerTestCase):
         self.driver.get(f"http://localhost:{settings.FRONTEND_TEST_PORT}/asdfgasdf")
         message = self.driver.find_element(By.TAG_NAME, "h1").text
         self.assertEquals(message, "404")
-
         
-
+    
+    
 
 
 
