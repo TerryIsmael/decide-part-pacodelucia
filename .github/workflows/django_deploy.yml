@@ -36,6 +36,14 @@ jobs:
         pip install -r requirements.txt
         pip install codacy-coverage
         cp decide/local_settings.gactions.py decide/local_settings.py
+    - name: Set up node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '21'
+    - name: Install node dependencies
+      run: |
+        cd decide-frontend
+        npm install
     - name: Run migrations (unnecessary)
       run: |
         cd decide
