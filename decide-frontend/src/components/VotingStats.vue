@@ -19,21 +19,20 @@ export default {
 
     const fetchVotaciones = async () => {
       try {
-        const response = await fetch('http://localhost:8000/voting/');
+        const response = await fetch(import.meta.env.VITE_API_URL + '/voting/');
         const data = await response.json();
         votaciones.value = data;
         // Aquí se realiza la obtención de all-auths y all-questions
-        const questionResponse = await fetch('http://localhost:8000/voting/all-questions/', {
+        const questionResponse = await fetch(import.meta.env.VITE_API_URL + '/voting/all-questions/', {
           method: 'GET',
           credentials: 'include'
         });
         const questionData = await questionResponse.json();
-        console.log('Fetched questions:', questionData);
         questions.value = questionData;
         totalDistinctQuestions.value = countDistinctQuestions(questionData);
         
 
-        const authResponse = await fetch('http://localhost:8000/voting/all-auths/', {
+        const authResponse = await fetch(import.meta.env.VITE_API_URL + '/voting/all-auths/', {
           method: 'GET',
           credentials: 'include'
         });
@@ -74,16 +73,6 @@ export default {
       return distinctQuestions.size;
     };
 
-
-    
-
-
-  
-
-
-
- 
-
     onMounted(fetchVotaciones);
     
     return {
@@ -105,7 +94,7 @@ export default {
 
 <template>
   <div>
-    <h2>Datos de Votaciones</h2>
+    <h2 id="loaded">Datos de Votaciones</h2>
     <table>
       <thead>
         <tr>
@@ -197,14 +186,13 @@ export default {
         </tr>
       </tbody>
     </table>
+    <div class="principal_div">
+        <div class="adjusted">
+            <a href="/admin/graph"> <button>Gráfica</button> </a>
+        </div>
+    </div>
   </div>
 </template>
-
-
-
-
-
-
 <style scoped>
 
 .bold{

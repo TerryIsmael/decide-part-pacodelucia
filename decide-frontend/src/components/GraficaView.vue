@@ -9,7 +9,7 @@
         <canvas ref="myChart" style="width: 100%; height: 400px;"></canvas>
       </div>
       <div v-if="selectedVoting">
-        <h2>{{ selectedVoting.name }} Details</h2>
+        <h2>Detalles: {{ selectedVoting.name }}</h2>
         <ul>
           <li v-for="(tally, questionIndex) in selectedVoting.tally" :key="questionIndex">
             {{ getOptionName(questionIndex) }}: {{ [tally].length || 0 }} votes
@@ -17,7 +17,7 @@
         </ul>
         <!-- Nueva sección para la gráfica de detalles -->
         <div>
-            <canvas ref="detailChartCanvas" style="width: 50%; height: 300px;"></canvas>        
+            <canvas ref="detailChartCanvas" style="width: 30%; height: 200px;"></canvas>        
         </div>
       </div>
     </div>
@@ -45,7 +45,7 @@
     },
 
      fetchData() {
-       axios.get('http://localhost:8000/voting/')
+       axios.get(import.meta.env.VITE_API_URL + '/voting/')
          .then(response => {
            this.votings = response.data;
            this.createChart();
@@ -61,7 +61,7 @@
          data: {
            labels: this.votings.map(voting => voting.name),
            datasets: [{
-             label: 'Total Votes',
+             label: 'Votos totales',
              data: this.votings.map(voting => voting.tally.length || 0),
              backgroundColor: this.colors,
              borderWidth: 1,

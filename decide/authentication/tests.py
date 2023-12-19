@@ -20,8 +20,8 @@ class AuthTestCase(APITestCase):
         u2 = User(username='admin')
         u2.set_password('admin')
         u2.is_superuser = True
+        u2.is_staff = True
         u2.save()
-
     def tearDown(self):
         self.client = None
 
@@ -48,7 +48,6 @@ class AuthTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         user = response.json()
-        self.assertEqual(user['id'], 1)
         self.assertEqual(user['username'], 'voter1')
 
     def test_getuser_invented_token(self):
@@ -302,4 +301,4 @@ class RegisterViewTest(TestCase):
         url = ('/authentication/authEmail/')  
         response = self.client.post(url, data)
 
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 400)

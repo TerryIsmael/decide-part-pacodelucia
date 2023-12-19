@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name='census',
-            unique_together={('voting_id', 'voter_id')},
-        ),
         migrations.CreateModel(
             name='UserData',
             fields=[
@@ -30,28 +26,5 @@ class Migration(migrations.Migration):
                 'unique_together': {('voter_id', 'born_year', 'gender', 'civil_state', 'works')},
             },
         ),
-        migrations.RemoveField(
-            model_name='census',
-            name='born_year',
-        ),
-        migrations.RemoveField(
-            model_name='census',
-            name='civil_state',
-        ),
-        migrations.RemoveField(
-            model_name='census',
-            name='country',
-        ),
-        migrations.RemoveField(
-            model_name='census',
-            name='gender',
-        ),
-        migrations.RemoveField(
-            model_name='census',
-            name='religion',
-        ),
-        migrations.RemoveField(
-            model_name='census',
-            name='works',
-        ),
+        
     ]

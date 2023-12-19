@@ -104,3 +104,14 @@ ENV/
 
 # nohup output
 nohup.out
+
+# VScode project settings
+.vscode/
+
+# package-lock.json and package.json oustide of decide-frontend
+/package-lock.json
+/package.json
+/decide/package-lock.json
+/decide/package.json
+/decide/*/package-lock.json
+/decide/*/package.json
