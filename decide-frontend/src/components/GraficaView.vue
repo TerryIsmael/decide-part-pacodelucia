@@ -31,7 +31,7 @@
      return {
        votings: [],
        selectedVoting: null,
-       colors: generateRandomColors(10),
+       colors: 'blue',
        detailChart: null,
      };
    },
